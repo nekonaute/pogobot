@@ -1,0 +1,29 @@
+
+// Hardware
+*.FCStd1
+*.fcstd1
+*-bak
+gerber/
+_autosave*
+*-backups
+
+// Software
+.idea
+__pycache__
+*.d
+*.o
+*.a
+firmware.bin
+firmware.elf
+*~
+build*
+tmp
+*.buildtree*/
+README.html
+csr.csv
+*.swp
+*.bin
+*.vcd
+*.json
+
+dependencies/

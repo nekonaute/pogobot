@@ -1,0 +1,308 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 3 16
+Title "Infrared Receiver"
+Date "2019-09-17"
+Rev "1.0"
+Comp "ISIR"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Device:D_Photo D?
+U 1 1 5D810985
+P 4750 3450
+AR Path="/5D810985" Ref="D?"  Part="1" 
+AR Path="/5D810824/5D810985" Ref="D?"  Part="1" 
+AR Path="/5D817E4F/5D810985" Ref="D?"  Part="1" 
+AR Path="/5D8184E0/5D810985" Ref="D?"  Part="1" 
+AR Path="/5D818519/5D810985" Ref="D?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/5D810985" Ref="D?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/5D810985" Ref="D?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/5D810985" Ref="D?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/5D810985" Ref="D?"  Part="1" 
+AR Path="/5E5C05A4/5D810985" Ref="D4"  Part="1" 
+AR Path="/5E5C05B1/5D810985" Ref="D11"  Part="1" 
+AR Path="/5E5C05B5/5D810985" Ref="D12"  Part="1" 
+AR Path="/5E5C05B9/5D810985" Ref="D13"  Part="1" 
+F 0 "D4" H 4700 3625 60  0000 C CNN
+F 1 "VEMD10940F" H 4750 3300 60  0001 C CNN
+F 2 "MyFootprints:VEMD10940FX01" H 4950 3650 60  0001 L CNN
+F 3 "https://www.vishay.com/docs/84171/vemd10940f.pdf" H 4950 3750 60  0001 L CNN
+F 4 "SENSOR PHOTODIODE 940NM" H 4950 4450 60  0001 L CNN "Description"
+F 5 "Vishay" H 4950 4550 60  0001 L CNN "Manufacturer"
+F 6 "VEMD10940F" H 4750 3450 50  0001 C CNN "MPN"
+	1    4750 3450
+	-1   0    0    -1  
+$EndComp
+$Comp
+L TS4321:TS4231 TS?
+U 1 1 5D810A5F
+P 6000 3550
+AR Path="/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5D810824/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5D817E4F/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5D8184E0/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5D818519/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/5D810A5F" Ref="TS?"  Part="1" 
+AR Path="/5E5C05A4/5D810A5F" Ref="TS1"  Part="1" 
+AR Path="/5E5C05B1/5D810A5F" Ref="TS2"  Part="1" 
+AR Path="/5E5C05B5/5D810A5F" Ref="TS3"  Part="1" 
+AR Path="/5E5C05B9/5D810A5F" Ref="TS4"  Part="1" 
+F 0 "TS1" H 5775 3900 60  0000 C CNN
+F 1 "TS4231" H 6475 3800 60  0000 C CNN
+F 2 "Package_BGA:BGA-9_1.6x1.6mm_Layout3x3_P0.5mm" H 6000 3550 60  0001 C CNN
+F 3 "https://www.triadsemi.com/wp-content/uploads/2019/09/TS4231-Datasheet.pdf" H 6000 3550 60  0001 C CNN
+F 4 "Triad Semiconductor" H 6000 3550 50  0001 C CNN "Manufacturer"
+F 5 "https://item.taobao.com/item.htm?spm=a21wu.10013406.0.0.41d97635essoP9&id=598709767439" H 6000 3550 50  0001 C CNN "Link"
+	1    6000 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+3V3 #PWR?
+U 1 1 5D810ABF
+P 6550 2725
+AR Path="/5D810824/5D810ABF" Ref="#PWR?"  Part="1" 
+AR Path="/5D817E4F/5D810ABF" Ref="#PWR?"  Part="1" 
+AR Path="/5D8184E0/5D810ABF" Ref="#PWR?"  Part="1" 
+AR Path="/5D818519/5D810ABF" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/5D810ABF" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/5D810ABF" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/5D810ABF" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/5D810ABF" Ref="#PWR?"  Part="1" 
+AR Path="/5E5C05A4/5D810ABF" Ref="#PWR031"  Part="1" 
+AR Path="/5E5C05B1/5D810ABF" Ref="#PWR052"  Part="1" 
+AR Path="/5E5C05B5/5D810ABF" Ref="#PWR058"  Part="1" 
+AR Path="/5E5C05B9/5D810ABF" Ref="#PWR064"  Part="1" 
+F 0 "#PWR064" H 6550 2575 50  0001 C CNN
+F 1 "+3V3" H 6565 2898 50  0000 C CNN
+F 2 "" H 6550 2725 50  0001 C CNN
+F 3 "" H 6550 2725 50  0001 C CNN
+	1    6550 2725
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R?
+U 1 1 5D810C11
+P 5050 3800
+AR Path="/5D810824/5D810C11" Ref="R?"  Part="1" 
+AR Path="/5D817E4F/5D810C11" Ref="R?"  Part="1" 
+AR Path="/5D8184E0/5D810C11" Ref="R?"  Part="1" 
+AR Path="/5D818519/5D810C11" Ref="R?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/5D810C11" Ref="R?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/5D810C11" Ref="R?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/5D810C11" Ref="R?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/5D810C11" Ref="R?"  Part="1" 
+AR Path="/5E5C05A4/5D810C11" Ref="R6"  Part="1" 
+AR Path="/5E5C05B1/5D810C11" Ref="R19"  Part="1" 
+AR Path="/5E5C05B5/5D810C11" Ref="R20"  Part="1" 
+AR Path="/5E5C05B9/5D810C11" Ref="R21"  Part="1" 
+F 0 "R6" V 5125 3800 50  0000 C CNN
+F 1 "15K" V 4934 3800 50  0000 C CNN
+F 2 "Resistor_SMD:R_0603_1608Metric" V 4980 3800 50  0001 C CNN
+F 3 "~" H 5050 3800 50  0001 C CNN
+F 4 "1%" V 5050 3800 50  0001 C CNN "Type"
+	1    5050 3800
+	-1   0    0    1   
+$EndComp
+Text HLabel 6500 3625 2    50   BiDi ~ 0
+D
+Text HLabel 6500 3525 2    50   BiDi ~ 0
+E
+$Comp
+L Device:C C?
+U 1 1 5D8113CF
+P 5525 2875
+AR Path="/5D810824/5D8113CF" Ref="C?"  Part="1" 
+AR Path="/5D817E4F/5D8113CF" Ref="C?"  Part="1" 
+AR Path="/5D8184E0/5D8113CF" Ref="C?"  Part="1" 
+AR Path="/5D818519/5D8113CF" Ref="C?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/5D8113CF" Ref="C?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/5D8113CF" Ref="C?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/5D8113CF" Ref="C?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/5D8113CF" Ref="C?"  Part="1" 
+AR Path="/5E5C05A4/5D8113CF" Ref="C2"  Part="1" 
+AR Path="/5E5C05B1/5D8113CF" Ref="C4"  Part="1" 
+AR Path="/5E5C05B5/5D8113CF" Ref="C6"  Part="1" 
+AR Path="/5E5C05B9/5D8113CF" Ref="C8"  Part="1" 
+F 0 "C2" H 5640 2921 50  0000 L CNN
+F 1 "1uF" H 5640 2830 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 5563 2725 50  0001 C CNN
+F 3 "~" H 5525 2875 50  0001 C CNN
+	1    5525 2875
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 5D81147B
+P 6550 2875
+AR Path="/5D810824/5D81147B" Ref="C?"  Part="1" 
+AR Path="/5D817E4F/5D81147B" Ref="C?"  Part="1" 
+AR Path="/5D8184E0/5D81147B" Ref="C?"  Part="1" 
+AR Path="/5D818519/5D81147B" Ref="C?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/5D81147B" Ref="C?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/5D81147B" Ref="C?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/5D81147B" Ref="C?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/5D81147B" Ref="C?"  Part="1" 
+AR Path="/5E5C05A4/5D81147B" Ref="C3"  Part="1" 
+AR Path="/5E5C05B1/5D81147B" Ref="C5"  Part="1" 
+AR Path="/5E5C05B5/5D81147B" Ref="C7"  Part="1" 
+AR Path="/5E5C05B9/5D81147B" Ref="C9"  Part="1" 
+F 0 "C3" H 6665 2921 50  0000 L CNN
+F 1 "100nF" H 6665 2830 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric" H 6588 2725 50  0001 C CNN
+F 3 "~" H 6550 2875 50  0001 C CNN
+	1    6550 2875
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5D9BDE30
+P 6000 4050
+AR Path="/5D810824/5D9BDE30" Ref="#PWR?"  Part="1" 
+AR Path="/5D817E4F/5D9BDE30" Ref="#PWR?"  Part="1" 
+AR Path="/5D8184E0/5D9BDE30" Ref="#PWR?"  Part="1" 
+AR Path="/5D818519/5D9BDE30" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/5D9BDE30" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/5D9BDE30" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/5D9BDE30" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/5D9BDE30" Ref="#PWR?"  Part="1" 
+AR Path="/5E5C05A4/5D9BDE30" Ref="#PWR029"  Part="1" 
+AR Path="/5E5C05B1/5D9BDE30" Ref="#PWR050"  Part="1" 
+AR Path="/5E5C05B5/5D9BDE30" Ref="#PWR056"  Part="1" 
+AR Path="/5E5C05B9/5D9BDE30" Ref="#PWR062"  Part="1" 
+F 0 "#PWR062" H 6000 3800 50  0001 C CNN
+F 1 "GND" H 6005 3877 50  0000 C CNN
+F 2 "" H 6000 4050 50  0001 C CNN
+F 3 "" H 6000 4050 50  0001 C CNN
+	1    6000 4050
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 60FB7BF2
+P 5050 3950
+AR Path="/5D810824/60FB7BF2" Ref="#PWR?"  Part="1" 
+AR Path="/5D817E4F/60FB7BF2" Ref="#PWR?"  Part="1" 
+AR Path="/5D8184E0/60FB7BF2" Ref="#PWR?"  Part="1" 
+AR Path="/5D818519/60FB7BF2" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/60FB7BF2" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/60FB7BF2" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/60FB7BF2" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/60FB7BF2" Ref="#PWR?"  Part="1" 
+AR Path="/5E5C05A4/60FB7BF2" Ref="#PWR027"  Part="1" 
+AR Path="/5E5C05B1/60FB7BF2" Ref="#PWR048"  Part="1" 
+AR Path="/5E5C05B5/60FB7BF2" Ref="#PWR054"  Part="1" 
+AR Path="/5E5C05B9/60FB7BF2" Ref="#PWR060"  Part="1" 
+F 0 "#PWR060" H 5050 3700 50  0001 C CNN
+F 1 "GND" H 5055 3777 50  0000 C CNN
+F 2 "" H 5050 3950 50  0001 C CNN
+F 3 "" H 5050 3950 50  0001 C CNN
+	1    5050 3950
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5050 3650 5500 3650
+$Comp
+L power:GND #PWR?
+U 1 1 60FC1F11
+P 5525 3025
+AR Path="/5D810824/60FC1F11" Ref="#PWR?"  Part="1" 
+AR Path="/5D817E4F/60FC1F11" Ref="#PWR?"  Part="1" 
+AR Path="/5D8184E0/60FC1F11" Ref="#PWR?"  Part="1" 
+AR Path="/5D818519/60FC1F11" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/60FC1F11" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/60FC1F11" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/60FC1F11" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/60FC1F11" Ref="#PWR?"  Part="1" 
+AR Path="/5E5C05A4/60FC1F11" Ref="#PWR028"  Part="1" 
+AR Path="/5E5C05B1/60FC1F11" Ref="#PWR049"  Part="1" 
+AR Path="/5E5C05B5/60FC1F11" Ref="#PWR055"  Part="1" 
+AR Path="/5E5C05B9/60FC1F11" Ref="#PWR061"  Part="1" 
+F 0 "#PWR061" H 5525 2775 50  0001 C CNN
+F 1 "GND" H 5530 2852 50  0000 C CNN
+F 2 "" H 5525 3025 50  0001 C CNN
+F 3 "" H 5525 3025 50  0001 C CNN
+	1    5525 3025
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5525 2725 5950 2725
+Wire Wire Line
+	5950 2725 5950 3050
+Wire Wire Line
+	6175 3050 6175 2725
+Wire Wire Line
+	6175 2725 6550 2725
+$Comp
+L power:GND #PWR?
+U 1 1 60FC7D7A
+P 6550 3025
+AR Path="/5D810824/60FC7D7A" Ref="#PWR?"  Part="1" 
+AR Path="/5D817E4F/60FC7D7A" Ref="#PWR?"  Part="1" 
+AR Path="/5D8184E0/60FC7D7A" Ref="#PWR?"  Part="1" 
+AR Path="/5D818519/60FC7D7A" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/60FC7D7A" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/60FC7D7A" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/60FC7D7A" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/60FC7D7A" Ref="#PWR?"  Part="1" 
+AR Path="/5E5C05A4/60FC7D7A" Ref="#PWR032"  Part="1" 
+AR Path="/5E5C05B1/60FC7D7A" Ref="#PWR053"  Part="1" 
+AR Path="/5E5C05B5/60FC7D7A" Ref="#PWR059"  Part="1" 
+AR Path="/5E5C05B9/60FC7D7A" Ref="#PWR065"  Part="1" 
+F 0 "#PWR065" H 6550 2775 50  0001 C CNN
+F 1 "GND" H 6555 2852 50  0000 C CNN
+F 2 "" H 6550 3025 50  0001 C CNN
+F 3 "" H 6550 3025 50  0001 C CNN
+	1    6550 3025
+	1    0    0    -1  
+$EndComp
+Connection ~ 6550 2725
+$Comp
+L power:GND #PWR?
+U 1 1 60FCCC07
+P 6150 4050
+AR Path="/5D810824/60FCCC07" Ref="#PWR?"  Part="1" 
+AR Path="/5D817E4F/60FCCC07" Ref="#PWR?"  Part="1" 
+AR Path="/5D8184E0/60FCCC07" Ref="#PWR?"  Part="1" 
+AR Path="/5D818519/60FCCC07" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D810824/60FCCC07" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D817E4F/60FCCC07" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D8184E0/60FCCC07" Ref="#PWR?"  Part="1" 
+AR Path="/5E5BFDA3/5D818519/60FCCC07" Ref="#PWR?"  Part="1" 
+AR Path="/5E5C05A4/60FCCC07" Ref="#PWR030"  Part="1" 
+AR Path="/5E5C05B1/60FCCC07" Ref="#PWR051"  Part="1" 
+AR Path="/5E5C05B5/60FCCC07" Ref="#PWR057"  Part="1" 
+AR Path="/5E5C05B9/60FCCC07" Ref="#PWR063"  Part="1" 
+F 0 "#PWR063" H 6150 3800 50  0001 C CNN
+F 1 "GND" H 6155 3877 50  0000 C CNN
+F 2 "" H 6150 4050 50  0001 C CNN
+F 3 "" H 6150 4050 50  0001 C CNN
+	1    6150 4050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4650 3550 4650 3450
+Wire Wire Line
+	4650 3550 5500 3550
+Wire Wire Line
+	4950 3450 5500 3450
+Text Label 5125 3550 0    50   ~ 0
+IIN+
+Text Label 5125 3450 0    50   ~ 0
+IIN-
+Text Label 5675 2725 0    50   ~ 0
+AVDD
+Text Label 5200 3650 0    50   ~ 0
+RBIAS
+Text Label 6225 2725 0    50   ~ 0
+DVDD
+$EndSCHEMATC

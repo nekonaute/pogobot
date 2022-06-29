@@ -1,0 +1,11 @@
+(sym_lib_table
+  (lib (name "2328702-6")(type "Legacy")(uri "/home/fabien/prog/SuperbotKicad/Symbols/2328702-6.lib")(options "")(descr ""))
+  (lib (name "2328702-8")(type "Legacy")(uri "/home/fabien/prog/SuperbotKicad/Symbols/2328702-8.lib")(options "")(descr ""))
+  (lib (name "10132797-015100LF")(type "Legacy")(uri "/home/fabien/prog/SuperbotKicad/Symbols/10132797-015100LF.lib")(options "")(descr ""))
+  (lib (name "10132797-035100LF")(type "Legacy")(uri "/home/fabien/prog/SuperbotKicad/Symbols/10132797-035100LF.lib")(options "")(descr ""))
+  (lib (name "IN-PI22TAT5R5G5B")(type "Legacy")(uri "/home/fabien/prog/SuperbotKicad/Symbols/IN-PI22TAT5R5G5B.lib")(options "")(descr ""))
+  (lib (name "IN-PI42TASPRPGPB")(type "Legacy")(uri "/home/fabien/prog/SuperbotKicad/Symbols/IN-PI42TASPRPGPB.lib")(options "")(descr ""))
+  (lib (name "MCP73123-22SI_MF")(type "Legacy")(uri "/home/fabien/prog/SuperbotKicad/Symbols/MCP73123-22SI_MF.lib")(options "")(descr ""))
+  (lib (name "on_semi")(type "KiCad")(uri "/home/fabien/prog/SuperbotKicad/Symbols/on_semi.kicad_sym")(options "")(descr ""))
+  (lib (name "MSK12C02")(type "KiCad")(uri "/home/fabien/prog/SuperbotKicad/Symbols/MSK12C02.kicad_sym")(options "")(descr ""))
+)
