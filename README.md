@@ -275,9 +275,8 @@ The next command uploads the new gateware and flash the pogobios as an applicati
 
     You have to change X for the correct number 
 
-If you want or need change the bootloader
-:warning: This command can break your pogobot
-Do it if you know what you are doing.
+If you want or need to change the bootloader, you need to execute the folowing commands.<br>
+:warning: These commands can break your pogobot
 
     ./pogosoc.py --target=pogobotv2_1 --cpu-variant=lite --build --bootloader
     ./litex_term.py --serial-boot --images images.json --safe /dev/ttyUSBX
@@ -287,9 +286,9 @@ Do it if you know what you are doing.
 ### Compile the SDK (Has to be done ones too :smile:)
 
 It is possible to extract only a software sdk that will work with the gateware from the user space already in the robot.
-The software compile with a lot of file produice with the gateware so the SDK is gateware version dependant.
-:warning: If no gateware is available, the robot will not run the code successfuly.
-:warning: If the gateware is not compatible, the robot can have some random behavior.
+The software compile with a lot of file produice with the gateware so the SDK is gateware version dependant.<br>
+:warning: If no gateware is available, the robot will not run the code successfuly.<br>
+:warning: If the gateware is not compatible, the robot can have some random behavior.<br>
 
     cd sdk
     make
@@ -298,7 +297,7 @@ All the files needed are available in the folder 'build_sdk' and can be moved wh
 
 ### Compile and test "HelloWorld"
 
-:warning: All the examples use the SDK in order to compile. Don't forget to compile the SDK before. 
+:warning: All the examples use the SDK in order to compile. Don't forget to compile the SDK before. <br>
 The error below is typical of this oversight.
 
     Makefile:9: ../../sdk/build_sdk/tools/common.mak: Aucun fichier ou dossier de ce type
@@ -323,13 +322,13 @@ To connect using the debugging cable
 
 ### Compile and upload your application 
 
-The easiest way to create a new application is to duplicate "helloworld" where is pleased you.
+The easiest way to create a new application is to duplicate "helloworld" where is pleased you.<br>
 Do not forget to change the PATH to the builded SDK inside the Makefile.
 
 ## Tools
 
 ### version_creation_litex.sh
-This script is used to identify the state of all folders from litex.
+This script is used to identify the state of all folders from litex.<br>
 You have to execute the script inside the 'litex' folder to generate a file.
 
 ## Kwown Issues
