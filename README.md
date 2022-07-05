@@ -12,6 +12,7 @@
     - [3d printed parts](#3d-printed-parts)
       - [Printing info](#printing-info)
       - [Assembly](#assembly)
+    - [Programming the robot (hardware part)](#programming-the-robot-hardware-part)
   - [Software](#software)
     - [Repository clone](#repository-clone)
     - [Install all the dependency](#install-all-the-dependency)
@@ -87,6 +88,15 @@ After printed the capsule, you have to set free the tabs by gently cut under.
 - Finally, place the robot+capsule inside the skirt.
 
 <img src="Images/assembly.jpg" alt="assembly" width="400"/>
+
+### Programming the robot (hardware part)
+In order to program the robot, you need a USB to UART device connected between your computor and the FFC/FPC connector on the head. 
+The folder 'Hardware/usb-uart-progboard' contains the Kicad files to produce a small board to program the robot. 
+You also need :
+- UMFT234XF board (https://www.mouser.fr/ProductDetail/FTDI/UMFT234XF?qs=NVftvxkm2thPJLzIkoAhbA%3D%3D)
+- a FFC/FPC connector (8 pins, 0.5 mm, SMD/SMT, Right Angle, Dual Contact) like https://www.mouser.fr/ProductDetail/571-2328702-8
+- a FFC/FPC cable (8 pins, 0.5 mm) like https://www.mouser.fr/ProductDetail/538-15166-0087
+- a USB micro => USB cable
 
 ## Software
 

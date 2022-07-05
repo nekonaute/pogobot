@@ -1,0 +1,47 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# 2328702-8_2328702-8
+#
+DEF 2328702-8_2328702-8 J 0 30 Y Y 1 F N
+F0 "J" 750 300 50 H V L CNN
+F1 "2328702-8_2328702-8" 750 200 50 H V L CNN
+F2 "23287028" 750 100 50 H I L CNN
+F3 "https://www.te.com/commerce/DocumentDelivery/DDEController?Action=showdoc&DocId=Customer+Drawing%7F2328702%7F5%7Fpdf%7FEnglish%7FENG_CD_2328702_5.pdf%7F2328702-8" 750 0 50 H I L CNN
+F4 "AMP - TE CONNECTIVITY - 2328702-8 - CONNECTOR, FPC, R/A, 8POS, 1ROW, 0.5MM" 750 -100 50 H I L CNN "Description"
+F5 "1.05" 750 -200 50 H I L CNN "Height"
+F6 "TE Connectivity" 750 -300 50 H I L CNN "Manufacturer_Name"
+F7 "2328702-8" 750 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "571-2328702-8" 750 -500 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.co.uk/ProductDetail/TE-Connectivity/2328702-8?qs=w%2Fv1CP2dgqphyFkupQxKkA%3D%3D" 750 -600 50 H I L CNN "Mouser Price/Stock"
+F10 "2328702-8" 750 -700 50 H I L CNN "Arrow Part Number"
+F11 "https://www.arrow.com/en/products/2328702-8/te-connectivity" 750 -800 50 H I L CNN "Arrow Price/Stock"
+DRAW
+P 5 0 1 6 200 100 700 100 700 -800 200 -800 200 100 N
+X 1 1 900 -700 200 L 50 50 0 0 P
+X 2 2 900 -600 200 L 50 50 0 0 P
+X 3 3 900 -500 200 L 50 50 0 0 P
+X 4 4 900 -400 200 L 50 50 0 0 P
+X 5 5 900 -300 200 L 50 50 0 0 P
+X 6 6 900 -200 200 L 50 50 0 0 P
+X 7 7 900 -100 200 L 50 50 0 0 P
+X 8 8 900 0 200 L 50 50 0 0 P
+X MP1 MP1 0 -100 200 R 50 50 0 0 P
+X MP2 MP2 0 0 200 R 50 50 0 0 P
+ENDDRAW
+ENDDEF
+#
+# power_GND
+#
+DEF power_GND #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -250 50 H I C CNN
+F1 "power_GND" 0 -150 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 6 0 1 0 0 0 0 -50 50 -50 0 -100 -50 -50 0 -50 N
+X GND 1 0 0 0 D 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+#End Library
