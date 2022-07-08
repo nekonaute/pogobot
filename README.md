@@ -6,6 +6,7 @@
   - [Table of contents](#table-of-contents)
   - [Overview](#overview)
     - [Git description](#git-description)
+    - [Softawre API](#softawre-api)
     - [Hardware schematic](#hardware-schematic)
   - [Hardware](#hardware)
     - [Motor information](#motor-information)
@@ -54,6 +55,10 @@ It exists 2 softwares inside the robot.
 - The user space is called by a command inside the bootloader. It contains your code and a gateware.
   
 Tools corresponds to the differents tools used around the robot.
+
+### Softawre API
+The robot API is described inside [pogodocs.md](pogodocs.md). <br> 
+Most of the information is contained inside pogolib/pogobot.h but if you want to go deeper, the best is to browse pogolib and pogobios. 
 
 ### Hardware schematic
 Here you can find the global view of the hardware.
