@@ -1,18 +1,19 @@
 
 TARGET?=pogobotv2_1
 
-bootloader: build/$(TARGET)/gateware/$(TARGET).bin
+bootloader:
 	@( ./pogosoc.py --cpu-variant=lite --target=$(TARGET) --bootloader --build )
 
-remocon: build/$(TARGET)/gateware/$(TARGET).bin
+remocon:
 	@( ./pogosoc.py --cpu-variant=lite --target=$(TARGET) --bootloader --remocon --build )
 
-gateware: build/$(TARGET)/gateware/$(TARGET).bin
+gateware:
 	@( ./pogosoc.py --cpu-variant=lite --target=$(TARGET) --build )
 
-software: build/$(TARGET)/software/pogobios/pogobios.bin
+software: 
 	@( ./pogosoc.py --cpu-variant=lite --target=$(TARGET) )
 
+all: gateware 
 
 .PHONY: bootloader remocon gateware
 
