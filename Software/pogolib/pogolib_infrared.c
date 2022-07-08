@@ -198,7 +198,7 @@ pogobot_infrared_sendMessageAllDirection( uint16_t receiver_id,
 }
 
 uint32_t
-pogobot_infrared_sendMessageALLDirectionWithId( uint16_t receiver_id,
+pogobot_infrared_sendMessageAllDirectionWithId( uint16_t receiver_id,
                                                 uint8_t *message,
                                                 uint16_t message_size )
 {
