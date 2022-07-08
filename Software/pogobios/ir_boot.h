@@ -6,10 +6,11 @@
  * Please refer to file LICENCE for details.
 **/
 
+#include <sfl.h>
 
 #define IR_MAGIC_REQ    "ir2PoG042ISIR"
 #define FLASH_IS_OK     "FlashIsOK"
 
-int ir_boot_loop();
-uint8_t check_crc(struct sfl_frame*);
-void print_frame(struct sfl_frame*);
+int ir_boot_loop(void);
+uint8_t check_crc(struct sfl_frame* frame);
+void print_frame(struct sfl_frame* frame);

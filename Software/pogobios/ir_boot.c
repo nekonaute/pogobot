@@ -114,7 +114,7 @@ static unsigned int exec_frame_cmd(struct sfl_frame* frame)
     return(0);
 }
 
-int ir_boot_loop() {
+int ir_boot_loop(void) {
 // Function called when IR_MAGIC_REQ is received on one of the ir_uarts
 // inspired by boot.c's serialboot()
 // Since there are more than one IR receiver, ptr and success_addr are static.
@@ -187,5 +187,7 @@ int ir_boot_loop() {
 	}
     rgb_blink_set_time(5, 995);
     rgb_blink_set_color(50, 0, 0);
+
+    return 1;
 }
 

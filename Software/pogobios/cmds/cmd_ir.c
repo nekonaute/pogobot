@@ -513,6 +513,7 @@ ir_read_handler( int nb_params, char **params )
 }
 define_command( ir_read, ir_read_handler, "Read IR message", POGO_CMDS );
 
+#ifdef REMOCON
 /**
  * Command "ir_flash"
  *
@@ -527,6 +528,7 @@ ir_flash_handler( int nb_params, char **params )
 
 define_command( ir_flash, ir_flash_handler,
                 "Write to flash from infrared (with CRC)", POGO_CMDS );
+#endif
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
 #define BYTE_TO_BINARY( byte )                                                 \
