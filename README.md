@@ -22,9 +22,9 @@
     - [Compile and test "HelloWorld"](#compile-and-test-helloworld)
     - [Compile and upload your application](#compile-and-upload-your-application)
     - [Upload a empty or faulty robot [WIP]](#upload-a-empty-or-faulty-robot-wip)
-    - [Doc generation [WIP]](#doc-generation-wip)
   - [Tools](#tools)
     - [version_creation_litex.sh](#version_creation_litexsh)
+    - [Doc generation](#doc-generation)
   - [Kwown Issues](#kwown-issues)
     - [yosys-abc](#yosys-abc)
     - [nextpnr](#nextpnr)
@@ -357,18 +357,35 @@ Prog SPI flash with FTDI (from Breakout board) :
 
     iceprog -o 0x40000 build/pogobotv2/image.bin
 
-### Doc generation [WIP]
-
-TODO : 
-
-- descibes the process and tools
-
-
 ## Tools
 
 ### version_creation_litex.sh
 This script is used to identify the state of all folders from litex.<br>
 You have to execute the script inside the 'litex' folder to generate a file.
+
+### Doc generation
+
+To generate the docs, we used a opensource project that transform .h to .md. <br>
+(Requires node.js and npm to be installed on computer.)
+
+    git https://github.com/ah01/h2md
+    npm install
+    cd h2md
+
+Copy the custom pattern pogobot/tools/pogobot.js inside h2md/lib/patterns/
+
+Add a return carrier to be understand by the tools
+    
+    awk '{printf "%s\r\n", $0}' /path/to/pogobot.h > pogobot.crlf
+
+Generate docs using our own pattern
+
+    node h2md.js pogobot.crlf -o /path/to/pogodocs.md -p pogobot -l
+
+Remove tempory file
+
+    rm  pogobot.crlf
+
 
 ## Kwown Issues
 This section descibes some isolated issues and the woraround used.
