@@ -20,6 +20,8 @@
     - [Compile the SDK (Has to be done ones too :smile:)](#compile-the-sdk-has-to-be-done-ones-too-smile)
     - [Compile and test "HelloWorld"](#compile-and-test-helloworld)
     - [Compile and upload your application](#compile-and-upload-your-application)
+    - [Upload a empty or faulty robot [WIP]](#upload-a-empty-or-faulty-robot-wip)
+    - [Doc generation [WIP]](#doc-generation-wip)
   - [Tools](#tools)
     - [version_creation_litex.sh](#version_creation_litexsh)
   - [Kwown Issues](#kwown-issues)
@@ -334,6 +336,28 @@ To connect using the debugging cable
 
 The easiest way to create a new application is to duplicate "helloworld" where is pleased you.<br>
 Do not forget to change the PATH to the builded SDK inside the Makefile.
+
+### Upload a empty or faulty robot [WIP]
+
+TODO :
+
+- list connection
+- adress 0x0 no Ox40000 to verify
+
+Prog SPI flash directly with bus-pirate :
+
+    ../flashrom/flashrom --p buspirate_spi:dev=/dev/ttyUSB0 -w build/pogobotv2/gateware/pogobotv2_flashrom.bin 
+
+Prog SPI flash with FTDI (from Breakout board) :
+
+    iceprog -o 0x40000 build/pogobotv2/image.bin
+
+### Doc generation [WIP]
+
+TODO : 
+
+- descibes the process and tools
+
 
 ## Tools
 
