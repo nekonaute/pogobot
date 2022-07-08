@@ -1,0 +1,4 @@
+Run this command to generate the CPU used for the pogobot,
+in folder litex/pythondata-cpu-vexriscv/pythondata_cpu_vexriscv/verilog/ :
+
+sbt compile "runMain vexriscv.GenCoreDefault --iCacheSize 2048 --dCacheSize 0 --mulDiv true --singleCycleShift false --singleCycleMulDiv true  --bypass false --prediction none --outputFile VexRiscv_Lite"
