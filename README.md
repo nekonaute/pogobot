@@ -6,7 +6,7 @@
   - [Table of contents](#table-of-contents)
   - [Overview](#overview)
     - [Git description](#git-description)
-    - [Softawre API](#softawre-api)
+    - [Software API](#software-api)
     - [Hardware schematic](#hardware-schematic)
   - [Hardware](#hardware)
     - [Motor information](#motor-information)
@@ -33,7 +33,7 @@
 
 ## Overview 
 The pogobot is a little robot design to evoluate in swarn. 
-The robot is composed of a head (above) with a iCE40LP8K FPGA chip including a softcore processor, IMU, IR communication and a LED.
+The robot is composed of a head (above) with a iCE40UP5K FPGA chip including a softcore processor, IMU, IR communication and a LED.
 The head is plugged on a belly (under) composed of more LEDs, motor controler, battery and battery regulation.
 
 ### Git description
@@ -56,7 +56,7 @@ It exists 2 softwares inside the robot.
   
 Tools corresponds to the differents tools used around the robot.
 
-### Softawre API
+### Software API
 The robot API is described inside [pogodocs.md](pogodocs.md). <br> 
 Most of the information is contained inside pogolib/pogobot.h but if you want to go deeper, the best is to browse pogolib and pogobios. 
 
@@ -141,7 +141,7 @@ From https://github.com/enjoy-digital/litex
     chmod +x litex_setup.py
     ./litex_setup.py init 
 
-    cat ../litex_version.txt | awk '{ if(!system("test -d " $1)) {system("git -C " $1 " checkout " $3)}}'
+    cat ../../litex_version.txt | awk '{ if(!system("test -d " $1)) {system("git -C " $1 " checkout " $3)}}'
 
     sudo ./litex_setup.py install
     ./litex_setup.py --gcc riscv
