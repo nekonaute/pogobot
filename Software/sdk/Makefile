@@ -5,6 +5,11 @@ POGOLIB_BUILDDIR=$(BUILD_POGO_DIR)/software/pogolib
 BUILD_SDK_DIR=./build_sdk
 
 include $(BUILD_POGO_DIR)/software/include/generated/variables.mak
+
+ifeq "${SOC_DIRECTORY}" ""
+    $(error It seems that the TARGET is wrong or the gateware for '${TARGET}' is not already compiled)
+endif
+
 include $(SOC_DIRECTORY)/software/common.mak
 
 POGOBIOS_DIR=../pogobios
