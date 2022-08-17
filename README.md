@@ -22,6 +22,7 @@
     - [Compile and test "HelloWorld"](#compile-and-test-helloworld)
     - [Compile and upload your application](#compile-and-upload-your-application)
     - [Upload a empty or faulty robot [WIP]](#upload-a-empty-or-faulty-robot-wip)
+    - [Memory map](#memory-map)
   - [Tools](#tools)
     - [version_creation_litex.sh](#version_creation_litexsh)
     - [Doc generation](#doc-generation)
@@ -356,6 +357,19 @@ Prog SPI flash directly with bus-pirate :
 Prog SPI flash with FTDI (from Breakout board) :
 
     iceprog -o 0x40000 build/pogobotv2/image.bin
+
+### Memory map
+
+This table shows addresses in flash memory. The flash memory itself is mapped in the system at address 0x100000 (SPIFLASH_BASE).
+
+
+| Address in flash | Size                             | Zone size | Content          |
+|------------------|----------------------------------|-----------|------------------|
+| 0                | 0xa0                             | 0xa0      | Multiboot header |
+| 0xa0             | 0x1969a                          | 0x20000   | Gateware         |
+| 0x20000          | Size of pogobios (usually <64KB) | 0x20000   | Pogobios         |
+| 0x40000          | 0x1969a                          | 0x20000   | User gateware    |
+| 0x60000          | Size of user code                | 0x20000   | User software    |
 
 ## Tools
 
