@@ -120,12 +120,12 @@ class BaseSoC(SoCCore, AutoCSR):
         if (cpu_type == "vexriscv") and (cpu_variant == "lite"):
             self.cpu.use_external_variant("rtl/VexRiscv_Lite.v")
 
-        if ("v2_1" or "v3") in target:
+        if ("v2_1" in target) or ("v3" in target):
             self.add_constant("POGOBOT_VERSION", "3")
 
         # CRG --------------------------------------------------------------------------------------
         from targets.pogobot import _CRG
-        if ("v2_1" or "v3") in target:
+        if ("v2_1" in target) or ("v3" in target):
             PAD = True
         else:
             PAD = False
@@ -144,16 +144,16 @@ class BaseSoC(SoCCore, AutoCSR):
                 from litespi.opcodes import SpiNorFlashOpCodes as Codes
                 self.add_spi_flash(mode="1x", module=N25Q032A(Codes.READ_1_1_1), with_master=False )
             else:
-                from litespi.modules import AT25SF081
+                from litespi.modules import W25Q16JV
                 from litespi.opcodes import SpiNorFlashOpCodes as Codes
-                self.add_spi_flash(mode="1x", module=AT25SF081(Codes.READ_1_1_1))
+                self.add_spi_flash(mode="1x", module=W25Q16JV(Codes.READ_1_1_1_FAST))
 
         else:
             # Old litex SPI module supports memory-mapped reads, as well as a bit-banged mode
             # for doing flash writes or accessing IMU and ADC.
             from spi_flash import SpiFlash
             pads = platform.request("spiflash")
-            self.submodules.spiflash = SpiFlash(pads, dummy=8, endianness=self.cpu.endianness)
+            self.submodules.spiflash = SpiFlash(pads, div=2, dummy=0, endianness=self.cpu.endianness)
             spiflash_region = SoCRegion(origin=self.mem_map.get("spiflash", None), size=flashsize)
             self.bus.add_slave(name="spiflash", slave=self.spiflash.bus, region=spiflash_region)
 
@@ -328,12 +328,13 @@ class BaseSoC(SoCCore, AutoCSR):
                 self.comb += self.platform.request("Motors",1 ).eq(self.motor_left.output)
                 self.comb += self.platform.request("Motors",2 ).eq(self.motor_middle.output)
 
-            if (target == "pogobotv2_1"):
+            if ("v2_1" in target) or ("v3" in target):
+                # -- /!\ -- GPIO:3 is an open-drain pin, with a 10K pull-up.
                 _GPIOs = [
                         ("motor_right", 0, Pins("GPIO:0"), IOStandard("LVCMOS33")),
                         ("motor_right", 1, Pins("GPIO:1"), IOStandard("LVCMOS33")),
                         ("motor_left", 0, Pins("GPIO:2"), IOStandard("LVCMOS33")),
-                        ("motor_left", 1, Pins("GPIO:3"), IOStandard("LVCMOS33")),
+                        ("motor_left", 1, Pins("GPIO:3"), IOStandard("LVCMOS33")), # <- That pin
                         ("motor_middle", 0, Pins("GPIO:6"), IOStandard("LVCMOS33")),
                         ("motor_middle", 1, Pins("GPIO:7"), IOStandard("LVCMOS33")),
                         ("motor_sleep", 0, Pins("GPIO:8"), IOStandard("LVCMOS33"))
@@ -341,7 +342,7 @@ class BaseSoC(SoCCore, AutoCSR):
 
                 self.platform.add_extension(_GPIOs)
                 self.comb += self.platform.request("motor_right", 0).eq(self.motor_right.output)
-                self.comb += self.platform.request("motor_left", 0).eq(self.motor_left.output)
+                self.comb += self.platform.request("motor_left", 0).eq(~self.motor_left.output)  # Normal GPIO 
                 self.comb += self.platform.request("motor_middle").eq(self.motor_middle.output)
                 self.comb += self.platform.request("motor_sleep").eq(1)
                 if bidirirectional_motors == True:
@@ -350,7 +351,7 @@ class BaseSoC(SoCCore, AutoCSR):
                     self.comb += self.platform.request("motor_middle", 1).eq(self.gpio.gpo.fields.Middle_motor_1)
                 else:
                     self.comb += self.platform.request("motor_right", 1).eq(0)
-                    self.comb += self.platform.request("motor_left", 1).eq(1)
+                    self.comb += self.platform.request("motor_left", 1).eq(1)   # open-drain pin, stays at 0
                     self.comb += self.platform.request("motor_middle", 1).eq(0)
 
         # Options to yosys/nextpnr (from foboot)
@@ -627,15 +628,21 @@ def main():
     soc_core_args(parser)
     args = parser.parse_args()
 
-    flashsize=0x100000 # 8Mb (1MB) on fixed pogobotv2
-
-    if args.flash_size:
-        flashsize=args.flash_size   # Overwrite default flash size
-
     if args.target:
         target=args.target
     else:
         print("Error: you must specify which target you want to build for")
+        return -1
+
+
+    if args.flash_size:
+        flashsize=args.flash_size   # Overwrite default flash size
+    elif ("v2" in target):
+        flashsize=0x100000 # 8Mb (1MB) on fixed pogobotv2 and 2.1
+    elif ("v3" in target):
+        flashsize=0x200000 # 16Mb (2MB) on pogobotv3
+    else:
+        print("Error: you must specify flashsize of your target")
         return -1
 
     if args.bootloader:
