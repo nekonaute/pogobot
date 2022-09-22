@@ -21,7 +21,7 @@
     - [Compile the SDK (Has to be done ones too :smile:)](#compile-the-sdk-has-to-be-done-ones-too-smile)
     - [Compile and test "HelloWorld"](#compile-and-test-helloworld)
     - [Compile and upload your application](#compile-and-upload-your-application)
-    - [Upload a empty or faulty robot [WIP]](#upload-a-empty-or-faulty-robot-wip)
+    - [Upload a empty or faulty robot](#upload-a-empty-or-faulty-robot)
     - [Memory map](#memory-map)
   - [Tools](#tools)
     - [version_creation_litex.sh](#version_creation_litexsh)
@@ -343,20 +343,42 @@ To connect using the debugging cable
 The easiest way to create a new application is to duplicate "helloworld" where is pleased you.<br>
 Do not forget to change the PATH to the builded SDK inside the Makefile.
 
-### Upload a empty or faulty robot [WIP]
+### Upload a empty or faulty robot
 
-TODO :
+Connection with our custom board :
 
-- list connection
-- adress 0x0 no Ox40000 to verify
+|      |  C0| C1 |      |
+|-----:|----|---:|------|
+|    X | -o | o- | X    |
+| MISO | -o | o- | MOSI |
+|  CLK | -o | o- | CS   |
+|  GND | -o | o- | X    |
+|    X | -o | o- | X    |
+|  RST | -o | o- | X    |
+
+Prog SPI flash with FTDI (lattice ice40 Ultraplus Breakout board) :
+
+- Connect the Lattice board.
+- Connect GND between both board.
+- Connect CS=>SS, SCK=>CLK, FLASH MISO=>MSIO, FLASH MOSI=>MOSI.
+- Connect RST=>GND or press the RESET button on top during upload.
+- Connect the DEBUG USB (White board) only for the power
+
+<img src="Images/lattice_board_connection.jpg" alt="full connect" width="800"/>
+
+Execute :
+
+    iceprog build/bootloader_pogobotv3/bootloader.bin
+
+:warning: If iceprog can't find the board but dsmesg show that everything is ok.
+
+Create a file /etc/udev/rules.d/53-lattice-ftdi.rules with the following line in it to allow uploading bit-streams to a Lattice iCEstick and/or a Lattice iCE40-HX8K Breakout Board as unprivileged user:
+
+    ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6010", MODE="0660", GROUP="plugdev", TAG+="uaccess"
 
 Prog SPI flash directly with bus-pirate :
 
-    ../flashrom/flashrom --p buspirate_spi:dev=/dev/ttyUSB0 -w build/pogobotv2/gateware/pogobotv2_flashrom.bin 
-
-Prog SPI flash with FTDI (from Breakout board) :
-
-    iceprog -o 0x40000 build/pogobotv2/image.bin
+    ../flashrom/flashrom --p buspirate_spi:dev=/dev/ttyUSB0 -w build/pogobotv3/gateware/pogobotv3_flashrom.bin 
 
 ### Memory map
 
@@ -385,6 +407,7 @@ To generate the docs, we used a opensource project that transform .h to .md. <br
     git https://github.com/ah01/h2md
     npm install
     cd h2md
+    git checkout 21a7918a888084c20a27a9a0a8645a4e988d1bb5
 
 Copy the custom pattern pogobot/tools/pogobot.js inside h2md/lib/patterns/
 
