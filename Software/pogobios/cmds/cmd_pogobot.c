@@ -292,6 +292,50 @@ Channel 4 to 7 : not connected on head PCB but available on connector to belly\n
 }
 define_command(adc_read, adc_read_handler, "Read ADC registers", POGO_CMDS);
 
+static void battery_reading_handler(int nb_params, char **params) {
+    char *c;
+    uint32_t result = 0;
+    uint32_t bLevel = 0;
+    uint8_t iter = 16;
+    
+    // read battery level
+    for (int i = 0; i < iter; i++)
+    {
+        result += ADC_Read(3);
+    }
+    //divide by 16
+    result = result >> 4; 
+    
+    printf("Value read for the battery : 0x%02lx\n", result);
+    // result * ( VRef/(1024) ) * 2 (VBatt divided by 2) * 1000 (for mV), *1000 to stay in int range
+    // VRef = 3.3V
+    bLevel = (result*6445)/1000;
+    printf("Battery voltage : %ld mV\n", bLevel);
+    
+    // LED color
+    if ( bLevel >= 3300)
+    {
+        //green
+        rgb_set(0x00, 0x22, 0x00);
+
+    } else if ( bLevel < 3300 || bLevel >= 3200 )
+    {
+        //yellow
+        rgb_set(0x22, 0x22, 0x00);
+
+    } else if ( bLevel < 3300 || bLevel >= 3200 )
+    {
+        //orange
+        rgb_set(0x22, 0x05, 0x00);
+
+    } else {
+        //red
+        rgb_set(0x22, 0x00, 0x00);
+    }
+
+}
+define_command(bat_life, battery_reading_handler, "give a color corresponding of the voltage", POGO_CMDS);
+
 #endif //CSR_SPI_CS_BASE
 #ifdef CSR_MOTOR_RIGHT_BASE
 /*
