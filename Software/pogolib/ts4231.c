@@ -101,6 +101,23 @@ bool ts_goToWatch(uint8_t index) {
     return watch_success;
 }
 
+void ts_goToSleep(uint8_t index) {
+    // According to datasheet page 4 : 7.1 Sleep Mode
+    // Device should be in watch state before
+    uint32_t oldconf = csr_read_simple(CSR_IR_RX0_CONF_ADDR + index * IR_CONF_ADDR_DELTA );
+    IRn_conf_e_w(index, 0, &oldconf);     // E LOW
+    IRn_conf_e_oe(index, 1, &oldconf);    // E Output
+}
+
+void ts_wakeUp(uint8_t index) {
+    uint32_t oldconf = csr_read_simple(CSR_IR_RX0_CONF_ADDR + index * IR_CONF_ADDR_DELTA );
+    IRn_conf_d_w(index, 0, &oldconf);     // D LOW
+    IRn_conf_d_oe(index, 1, &oldconf);    // D Output
+    IRn_conf_e_w(index, 1, &oldconf);     // E HIGH
+    IRn_conf_d_oe(index, 0, &oldconf);    // D Hi-Z
+    IRn_conf_e_oe(index, 0, &oldconf);    // E Hi-Z
+}
+
 
 uint16_t ts_readConfig(uint8_t index) {
     uint16_t readback;

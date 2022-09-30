@@ -78,6 +78,44 @@ ir_checkBus_handler( int nb_params, char **params )
 }
 define_command( ir_checkBus, ir_checkBus_handler,
                 "Get bus status of TS4231.", POGO_CMDS );
+
+/**
+ *
+ * Set TS4231 to sleep mode
+ *
+ */
+static void
+ir_sleep_handler( int nb_params, char **params )
+{
+    uint8_t i;
+    bool result;
+    for( i=0; i<IR_RX_COUNT; i++) {
+        ts_goToSleep(i);
+    }
+    ir_checkBus_handler(0, NULL);
+}
+define_command( ir_sleep, ir_sleep_handler,
+                "Set TS4231 to sleep mode.", POGO_CMDS );
+
+/**
+ *
+ * Wake up TS4231 from sleep mode
+ *
+ */
+static void
+ir_wake_handler( int nb_params, char **params )
+{
+    uint8_t i;
+    bool result;
+    for( i=0; i<IR_RX_COUNT; i++) {
+        ts_wakeUp(i);
+    }
+    ir_checkBus_handler(0, NULL);
+}
+define_command( ir_wake, ir_wake_handler,
+                "Wake TS4231 from sleep mode.", POGO_CMDS );
+
+
 /**
  *
  * Set TS4231 to watch mode

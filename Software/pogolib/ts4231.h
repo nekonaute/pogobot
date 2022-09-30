@@ -36,10 +36,11 @@
 #define CONFIG_PASS     0x04    //ts_configDevice() function status return value
 
 bool ts_waitForLight(uint8_t index, uint16_t light_timeout);  //timeout in milliseconds
-bool ts_goToSleep(uint8_t index);
 void ts_delayUs(unsigned int delay_val);  //delay in microseconds
 uint8_t ts_configDevice(uint8_t index, uint16_t config_val);
 bool ts_goToWatch(uint8_t index);
+void ts_goToSleep(uint8_t index);
+void ts_wakeUp(uint8_t index);
 void ts_writeConfig(uint8_t index, uint16_t config_val);
 uint16_t ts_readConfig(uint8_t index);
 uint8_t ts_checkBus(uint8_t index);
