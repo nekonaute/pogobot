@@ -813,6 +813,143 @@ define_command( ir_bouncer, ir_bouncer_handler,
 
 #ifdef REMOCON
 /************************* Remote Control Commands ***************************/
+
+/**
+ * Internal function to continusly send the same command by IR.
+ * There are message to the pogobios.
+ */
+
+static void send_command_continusly ( char * cmd2send, uint32_t size)
+{
+    printf("Press any key to stop sending command\n");
+
+    int i = 0;
+    extern const char * ir_magic_req;
+
+    while(uart_read_nonblock() == 0) {
+        for(i=0; i<strlen(ir_magic_req); i++) {
+            ir_tx_tx_write(ir_magic_req[i]);
+        }
+        for(i=0; i<size; i++) {
+            ir_tx_tx_write(cmd2send[i]);
+        }
+        ir_tx_tx_write(0);
+        ir_tx_tx_write(0x0a);
+        ir_tx_conf_tx_trig_write(1);
+        msleep(300);
+    }
+    uart_read(); // Dump the caracter sent to stop 
+
+}
+
+/**
+ * Internal function to continusly send the same slip message by IR.
+ * There are message to the user code.
+ */
+extern slip_send_descriptor_s slip_send_descriptor;
+static void send_slip_message_continusly( char* mPayload, uint32_t size) 
+{
+    printf("Press any key to stop sending message\n");
+
+    message_t message;
+    message.header._emitting_power_list =
+        pogobot_infrared_emitting_power_list(3, 3, 3, 3);
+    message.header.receiver_id = 0x42; //not used
+    message.header.payload_length = size;
+    message.header._sender_ir_index = ir_all;
+    memcpy( message.payload, mPayload, size );
+    message.header._packet_type = 1; // type 1 command message 
+    message.header._sender_id = pogobot_helper_getid();
+
+
+    while(uart_read_nonblock() == 0) {
+        
+        slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
+                                sizeof( message_header_t ) +
+                                message.header.payload_length );
+        msleep(300);
+    }
+    uart_read(); // Dump the caracter sent to stop 
+}
+
+/**
+ * Command "rc_start"
+ *
+ * Start the user code of the robots through infrared
+ * It sends the command to reboot on the user code to the waiting bios
+ *
+ */
+static void
+rc_start_handler( int nb_params, char **params )
+{
+    printf("Starting...\n");
+    char cmd2send[5] = "run 1";
+    send_command_continusly(cmd2send, sizeof(cmd2send));
+}
+
+define_command( rc_start, rc_start_handler,
+                "Start all pogobots available through infrared", POGO_CMDS );
+
+/**
+ * Command "rc_stop"
+ *
+ * Stop the user code of the robots through infrared.
+ * It sends a specific message to the user code.
+ * This message is intercepted by the de pilling message system.
+ *
+ */
+static void
+rc_stop_handler( int nb_params, char **params )
+{
+    printf("Stoping...\n");
+    char cmd2send[8] = "DEADBEEF"; // special message to reboot the robot
+    send_slip_message_continusly(cmd2send, sizeof(cmd2send));
+}
+
+define_command( rc_stop, rc_stop_handler,
+                "Stop all pogobots available through infrared", POGO_CMDS );
+
+/**
+ * Command "rc_send_user_message"
+ *
+ * Send a message to the user code of the robots through infrared.
+ * This message is has the type 1 in order to be filtered
+ *
+ */
+static void
+rc_send_user_message_handler( int nb_params, char **params )
+{
+    if ( ( nb_params != 1 ) )
+    {
+        printf( "rc_send_user_message <message> \n" );
+        return;
+    }
+    
+    printf ("Sending %s, size %d\n", params[0], strlen(params[0]));
+    
+    send_slip_message_continusly(params[0], strlen(params[0])+1); // +1 to send the end caracter 
+}
+
+define_command( rc_send_user_msg, rc_send_user_message_handler,
+                "Continusly send a message type 1 to all pogobots available through infrared", POGO_CMDS );
+
+/**
+ * Command "rc_bat_life"
+ *
+ * Show the battery life on all pogobots available through infrared
+ *
+ */
+static void
+rc_bat_life_handler( int nb_params, char **params )
+{
+    printf("Bat_life cmd...\n");
+    char cmd2send[8] = "bat_life";
+    send_command_continusly(cmd2send, sizeof(cmd2send));
+}
+
+define_command( rc_bat_life, rc_bat_life_handler,
+                "Show the battery life on all pogobots available through infrared", POGO_CMDS );
+
 /**
  * Command "rc_reboot"
  *

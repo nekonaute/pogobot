@@ -34,7 +34,7 @@ static uint8_t buf[IR_RX_COUNT][SLIP_BUF];
 
 static slip_receive_state_s slip_receive_state[IR_RX_COUNT];
 
-static const slip_send_descriptor_s slip_send_descriptor = {
+const slip_send_descriptor_s slip_send_descriptor = {
     .crc_seed = 0xFFFF,
     .write_byte = write_byte_via_a_four_byte_word_channel,
 };
@@ -279,6 +279,17 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
     m->header._receiver_ir_index = (int)tag;
 
     // printf("new message from %d \n", m->header._receiver_ir_index);
+
+    // filter mesage from type 1 (command message)
+    if ( m->header._packet_type == 1)
+    {
+        //if stop message reboot on pogobios
+        int ret = strncmp("DEADBEEF", m->payload, 8);
+        if (ret == 0)
+        {
+            reboot_ctrl_write(0xac);
+        }
+    }
 
     /* when a message arrives, it is put into the FIFO */
     if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
