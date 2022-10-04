@@ -185,7 +185,7 @@ int main(void) {
                 // listen during 3 seconds 
                 if (!standby_reloaded)
                 {
-                    rgb_set(30, 30, 30);
+                    rgb_set(10, 10, 10);
                     pogobot_timer_init( &my_standby_timer, 3000000 );
                     standby_reloaded = 1;
                 }
