@@ -27,6 +27,30 @@
 #endif
 
 /*
+ * Command "Go to standby mode"
+ */
+static void go_to_standby_handler(int nb_params, char **params) {
+
+    printf("go to standby mode \n");
+    extern uint8_t standby_status; 
+    standby_status = 1; 
+    IMU_GoToSleep();
+}
+define_command(goto_standby, go_to_standby_handler, "Go to standby mode", POGO_CMDS);
+
+/*
+ * Command "Go to normal mode"
+ */
+static void go_to_normal_handler(int nb_params, char **params) {
+
+    printf("go to normal mode \n");
+    extern uint8_t standby_status;
+    standby_status = 0; 
+    IMU_Init();
+}
+define_command(goto_normal, go_to_normal_handler, "Go to normal mode", POGO_CMDS);
+
+/*
  * Command "Register a new robot"
  */
 static void add_robot_handler(int nb_params, char **params) {
@@ -188,6 +212,23 @@ define_command(run, run_handler, "Reboot to user image or bootloader", POGO_CMDS
 #endif
 
 #if defined CSR_SPI_CS_BASE
+/*
+ * Start and configure IMU
+ */
+static void imu_start_handler(int nb_params, char **params) {
+    IMU_Init();
+}
+define_command(imu_start, imu_start_handler, "Start IMU", POGO_CMDS);
+
+/*
+ * Put IMU in sleep mode
+ */
+static void imu_sleep_handler(int nb_params, char **params) {
+    IMU_GoToSleep();
+}
+define_command(imu_sleep, imu_sleep_handler, "Put IMU in sleep mode", POGO_CMDS);
+
+
 /*
  * Read SPI registers containing core temperature and display it
  * TODO: Fix the ratio to display the real temperature in °C

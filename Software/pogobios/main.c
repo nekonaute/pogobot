@@ -41,6 +41,10 @@
 #endif
 #endif
 
+// Standby option status
+uint8_t standby_status = 0; // 0 : OFF, 1 : ON LISTENING, 2 : ON SAVE ENERGY
+uint8_t standby_reloaded = 0; // to check if the listening has begin (0 if is needed to reload the timer )
+
 int main(void) {
     char buffer[CMD_LINE_BUFFER_SIZE];
     char *params[MAX_PARAM];
@@ -96,9 +100,10 @@ int main(void) {
         hist_init();
 #endif
 
+    // color wheel memory
     uint8_t wheelpos = 0;
-    time_reference_t my_autostart_timer;
-    pogobot_stopwatch_reset( &my_autostart_timer );
+    //standby timer
+    time_reference_t my_standby_timer;
 
     uint8_t debug_mode = 0;     // debug_mode at 1 if uart connected
 
@@ -134,10 +139,67 @@ int main(void) {
 
     printf("\n%s", POGOPROMPT);
 
+    // main loop
     while(1) {
+
 #ifndef REMOCON
-        if( debug_mode == 0 ) rgb_blink(); // Blink when not debugging 
+        // standby control
+        if (standby_status > 0)
+        {
+            if (standby_status == 2)
+            {
+                // wait 6 secondes deaf
+                rgb_set(0, 0, 0);
+                pogobot_timer_init( &my_standby_timer, 6000000 );
+                while (!pogobot_timer_has_expired( &my_standby_timer )) 
+                { 
+                    //do nothing
+                    __asm__( /* Assembly function body */
+                    "  nop	\n"
+                    "  nop	\n"
+                    "  nop	\n"
+                    "  nop	\n"
+                    "  nop	\n"
+                    "  nop	\n"
+                    );
+                }
+
+                // ending hibernation
+                standby_status = 1;
+                standby_reloaded = 0;
+                int i=0;
+                for( i=0; i<IR_RX_COUNT; i++) {
+                    ts_wakeUp(i);
+                }
+
+            } else if (standby_status == 1) {
+
+                // listen during 3 seconds 
+                if (!standby_reloaded)
+                {
+                    rgb_set(30, 30, 30);
+                    pogobot_timer_init( &my_standby_timer, 3000000 );
+                    standby_reloaded = 1;
+                }
+                if (pogobot_timer_has_expired( &my_standby_timer ))
+                {
+                    // go to hibernation
+                    int i=0;
+                    for( i=0; i<IR_RX_COUNT; i++) {
+                        ts_goToSleep(i);
+                    }
+                    standby_status = 2;
+                }
+
+            }
+            
+        } else {
+            if( debug_mode == 0 ) rgb_blink(); // Blink when not debugging 
+        }
+        
+        
 #endif
+        // cable communication 
 		if(uart_read_nonblock() != 0)
 		{
             debug_mode = 1;
@@ -155,6 +217,8 @@ int main(void) {
 		}
 
 #ifndef REMOCON
+
+        //IR communication
         //if( ROM_BASE == (SPIFLASH_BASE + 0x20000) ) {   // Bootloader mode
             static const char str[] = IR_MAGIC_REQ;
             for( ir_i=0; ir_i<IR_NUMBER; ir_i++) {
