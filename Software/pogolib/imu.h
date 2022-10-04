@@ -73,6 +73,7 @@
 #define INT_STATUS   0x3A
 #define PWR_MGMT_1   0x6B
 #define PWR_CYCLE   0x20
+#define PWR_SLEEP  0x40
 #define PWR_RESET   0x80
 #define CLOCK_SEL_PLL   0x01
 #define PWR_MGMT_2   0x6C
@@ -91,7 +92,9 @@
 #define FIFO_COUNT   0x72
 #define FIFO_READ   0x74
 
+
 void IMU_Init(void);
+void IMU_GoToSleep(void);
 uint32_t IMU_ReadWord(uint8_t address);
 uint8_t IMU_ReadByte(uint8_t address);
 void IMU_WriteWord(uint8_t address, uint8_t data);

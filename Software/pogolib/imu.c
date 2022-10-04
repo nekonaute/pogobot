@@ -67,6 +67,28 @@ void IMU_Init(void)
 
 }
 
+void IMU_GoToSleep(void)
+{
+    uint8_t result;
+    result = IMU_ReadByte(WHO_AM_I);
+    if(result != 0x98)
+    {
+        printf("Error communicating with IMU ICM-20689\n");
+        return;
+    }
+    IMU_WriteByte(PWR_MGMT_1, PWR_RESET);    // Go to sleep mode
+    msleep(10);
+    result = IMU_ReadByte(PWR_MGMT_1);
+    if(result == PWR_SLEEP)
+    {
+        printf("sleep mode ok\n");
+    } else
+    {
+        printf("something went wrong %d\n", result);
+    }
+
+}
+
 uint8_t IMU_ReadByte(uint8_t address)
 {
     uint8_t temp = 0;
