@@ -364,7 +364,7 @@ static void battery_reading_handler(int nb_params, char **params) {
         //yellow
         rgb_set(0x22, 0x22, 0x00);
 
-    } else if ( bLevel < 3300 || bLevel >= 3200 )
+    } else if ( bLevel < 3200 || bLevel >= 3100 )
     {
         //orange
         rgb_set(0x22, 0x05, 0x00);
