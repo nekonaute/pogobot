@@ -56,15 +56,23 @@ int main(void) {
     pogobot_init(); // Needed for printf() (interrupts)
 
     printf("\n");
-    printf("\e[1m        __   _ __      _  __\e[0m\n");
-    printf("\e[1m       / /  (_) /____ | |/_/\e[0m\n");
-    printf("\e[1m      / /__/ / __/ -_)>  <\e[0m\n");
-    printf("\e[1m     /____/_/\\__/\\__/_/|_|\e[0m\n");
-    printf("\e[1m   Build your hardware, easily!\e[0m\n");
+    printf("\e[1m     ____                   _           _         \e[0m\n");
+    printf("\e[1m    |  _ \\ ___   __ _  ___ | |__   ___ | |_      \e[0m\n");
+    printf("\e[1m    | |_) / _ \\ / _` |/ _ \\| '_ \\ / _ \\| __|  \e[0m\n");
+    printf("\e[1m    |  __/ (_) | (_| | (_) | |_) | (_) | |_       \e[0m\n");
+    printf("\e[1m    |_|   \\___/ \\__, |\\___/|_.__/ \\___/ \\__| \e[0m\n");
+    printf("\e[1m                 |___/                            \e[0m\n");
+    printf("\e[1m    https://pogobot.github.io                     \e[0m\n");
     printf("\n");
+
+    printf(" Licensed under the MIT License (also known as Expat License).\n");
+
+    printf(" (c) Copyright 2022 Sorbonne Université, Institut des Systèmes Intelligents et de Robotique (ISIR)\n");
     printf(" (c) Copyright 2012-2022 Enjoy-Digital\n");
     printf(" (c) Copyright 2007-2015 M-Labs\n");
+    printf(" Work funded by the Agence Nationale pour la Recherche (ANR-18-CE33-0006).\n");
     printf("\n");
+
 #ifdef CONFIG_WITH_BUILD_TIME
     printf(" BIOS built on "__DATE__" "__TIME__"\n");
 #endif
