@@ -141,7 +141,7 @@ pogobot_infrared_sendMessageOnce( message_t *const message )
 
     unsigned int mask = 0;
 
-    for ( int index = 0; index < 4; index++ )
+    for ( int index = 0; index < IR_RX_COUNT; index++ )
     {
         uint8_t power = ( message->header._emitting_power_list >>
                           ( pogobot_infrared_emitter_width_bits * index ) ) &
