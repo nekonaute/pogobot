@@ -118,7 +118,7 @@ int main(void) {
     uint8_t debug_mode = 0;     // debug_mode at 1 if uart connected
 
 #ifndef REMOCON
-    uint8_t ir_i;
+    uint8_t ir_i, i;
     uint8_t char_index[IR_NUMBER];
     uint8_t recognized_word[IR_NUMBER];
     char ir_buf[IR_NUMBER][CMD_LINE_BUFFER_SIZE];
@@ -127,6 +127,7 @@ int main(void) {
         recognized_word[ir_i]=0;
     }
     uint8_t flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // return 1 : programmed, or 0: probably erased
+    static const char str_magic[] = IR_MAGIC_REQ;
 
 #ifdef RGB_LEDS
     rgb_blink_set_time(5, 995); // 5ms flash every second
@@ -237,53 +238,35 @@ int main(void) {
 
         //IR communication
         //if( ROM_BASE == (SPIFLASH_BASE + 0x20000) ) {   // Bootloader mode
-            static const char str[] = IR_MAGIC_REQ;
-            for( ir_i=0; ir_i<IR_NUMBER; ir_i++) {
-                if((ir_uart_read_nonblock(ir_i) != 0) ) {
-                    char c;
-                    c = ir_uart_read(ir_i);
-                    if(recognized_word[ir_i] == 0) {
-                        if(c == str[char_index[ir_i]]) {
-                            char_index[ir_i]++;
-                            if(char_index[ir_i] == strlen(str))
-                            {
-                                recognized_word[ir_i]++;
-                                char_index[ir_i]=0;
-                            }
-                        }
-                        else {
-                            if(c == str[0])
-                                char_index[ir_i] = 1;
-                            else {
-                                char_index[ir_i] = 0;
-                            }
-                        }
+            pogobot_infrared_update();
+            while ( pogobot_infrared_message_available() ) {
+                message_t msg;
+                pogobot_infrared_recover_next_message( &msg );
+                for( i=0; i<strlen(str_magic); i++) {
+                    if ( i <= msg.header.payload_length ) {
+                        if(msg.payload[i] != str_magic[i]) break;
                     }
-                    else { // Magic word already received
-                        if(c == '\n') { // End of command received
-                            if (ir_buf[ir_i][0] != 0) {
-                                nb_params = get_param(ir_buf[ir_i], &command, params);
-                                cmd = command_dispatcher(command, nb_params, params);
-                                if (cmd) {
-                                    flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // Update flash state after each command
-                                }
-                            }
-                            for(uint8_t i=0; i<IR_NUMBER; i++) {    // Forget about other messages received on a different IR
-                                recognized_word[i]=0;
-                                char_index[i]=0;
-                            }
-                        }
-                        else {
-                            ir_buf[ir_i][char_index[ir_i]] = c;
-                            char_index[ir_i]++;
-                            if( char_index[ir_i] == CMD_LINE_BUFFER_SIZE ) {    // Something went wrong...
-                                char_index[ir_i]=0;
-                                recognized_word[ir_i]=0;
-                            }
-                        }
+                }
+                if( i != (strlen(str_magic)) ) { // Not a recognized special header, print msg
+                    printf("Message received : Destination id %d, on IR %d, sender %d on IR %d, length %d ",
+                            msg.header.receiver_id, msg.header._receiver_ir_index,
+                            msg.header._sender_id, msg.header._sender_ir_index,
+                            msg.header.payload_length);
+                    for( i=0; i< msg.header.payload_length; i++) {
+                        printf("%c", isprint(msg.payload[i])?msg.payload[i]:'_');
                     }
-				}
-			}
+                    printf("\n");
+                } else {
+                    nb_params = get_param(msg.payload+strlen(str_magic), &command, params);
+                    printf("Command : %s\n", command);
+                    cmd = command_dispatcher(command, nb_params, params);
+                    if (cmd) {
+                        flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // Update flash state after each command
+                    } else {
+                        printf("Command not found\n");
+                    }
+                }
+            }
 		//}
 #endif //REMOCON
     }
