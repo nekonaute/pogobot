@@ -44,6 +44,8 @@
 // Standby option status
 uint8_t standby_status = 0; // 0 : OFF, 1 : ON LISTENING, 2 : ON SAVE ENERGY
 uint8_t standby_reloaded = 0; // to check if the listening has begin (0 if is needed to reload the timer )
+// Voltage status
+uint8_t voltage_status = 0; // 0 : OFF, 1 : DISPLAY VOLTAGE
 
 int main(void) {
     char buffer[CMD_LINE_BUFFER_SIZE];
@@ -201,6 +203,13 @@ int main(void) {
 
             }
             
+        } else if (voltage_status == 1)
+        {
+            cmd = command_dispatcher("bat_life", 0, NULL);
+            if (cmd) {
+                flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // Update flash state after each command
+            }
+
         } else {
             if( debug_mode == 0 ) rgb_blink(); // Blink when not debugging 
         }
