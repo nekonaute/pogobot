@@ -333,6 +333,10 @@ Channel 4 to 7 : not connected on head PCB but available on connector to belly\n
 }
 define_command(adc_read, adc_read_handler, "Read ADC registers", POGO_CMDS);
 
+/*
+ * display the battery voltage 
+ * ( put any parameters to display the debug )
+*/
 static void battery_reading_handler(int nb_params, char **params) {
     char *c;
     uint32_t result = 0;
@@ -347,11 +351,11 @@ static void battery_reading_handler(int nb_params, char **params) {
     //divide by 16
     result = result >> 4; 
     
-    printf("Value read for the battery : 0x%02lx\n", result);
+    if (nb_params) printf("Value read for the battery : 0x%02lx\n", result);
     // result * ( VRef/(1024) ) * 2 (VBatt divided by 2) * 1000 (for mV), *1000 to stay in int range
     // VRef = 3.3V
     bLevel = (result*6445)/1000;
-    printf("Battery voltage : %ld mV\n", bLevel);
+    if (nb_params) printf("Battery voltage : %ld mV\n", bLevel);
     
     // LED color
     if ( bLevel >= 3300)
@@ -375,7 +379,15 @@ static void battery_reading_handler(int nb_params, char **params) {
     }
 
 }
-define_command(bat_life, battery_reading_handler, "give a color corresponding of the voltage", POGO_CMDS);
+define_command(bat_life, battery_reading_handler, "give a color corresponding of the voltage (paramater to activate debug)", POGO_CMDS);
+
+static void voltage_mode_handler(int nb_params, char **params) {
+    extern uint8_t voltage_status;
+    voltage_status = !voltage_status;
+
+    printf(" new voltage mode (%d)\n", voltage_status);
+}
+define_command(volt_mode, voltage_mode_handler, "toggle the voltage mode", POGO_CMDS);
 
 #endif //CSR_SPI_CS_BASE
 #ifdef CSR_MOTOR_RIGHT_BASE
