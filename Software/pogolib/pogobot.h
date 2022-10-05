@@ -225,6 +225,20 @@ typedef struct message_t
     uint8_t payload[MAX_PAYLOAD_SIZE_BYTES];
 } message_t;
 
+/**
+ * ### IR type message list
+ *
+ * - ir_t_cmd  : type use to send command to the robot
+ * - ir_t_user : type use to send message between robot in user space
+ */
+
+typedef enum
+{
+    ir_t_cmd = 1,
+    ir_t_user = 16
+} ir_type_message;
+
+
 /* ******************************** ******************************** */
 
 /* fifo */

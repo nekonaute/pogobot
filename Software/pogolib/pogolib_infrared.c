@@ -126,10 +126,7 @@ pogobot_infrared_sendMessageOnce( message_t *const message )
         return 1;
     }
 
-    message->header._packet_type = 16; // User packets have type 16.  Currently
-                                       // hard-coded, in one function, later a
-                                       // sub-function will be refactored out
-                                       // to allow other packet types.
+    message->header._packet_type = ir_t_user; // User packets have type 16.
 
     message->header._sender_id = pogobot_helper_getid();
 
