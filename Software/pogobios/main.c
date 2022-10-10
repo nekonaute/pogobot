@@ -16,6 +16,7 @@
 #include <system.h>
 #include <irq.h>
 #include <init.h>
+#include <ctype.h> 
 
 #include <command.h>
 #include <helpers.h> // get_param
@@ -118,14 +119,7 @@ int main(void) {
     uint8_t debug_mode = 0;     // debug_mode at 1 if uart connected
 
 #ifndef REMOCON
-    uint8_t ir_i, i;
-    uint8_t char_index[IR_NUMBER];
-    uint8_t recognized_word[IR_NUMBER];
-    char ir_buf[IR_NUMBER][CMD_LINE_BUFFER_SIZE];
-    for(ir_i=0; ir_i<IR_NUMBER; ir_i++) {
-        char_index[ir_i]=0;
-        recognized_word[ir_i]=0;
-    }
+    uint8_t i;
     uint8_t flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // return 1 : programmed, or 0: probably erased
     static const char str_magic[] = IR_MAGIC_REQ;
 
@@ -257,7 +251,7 @@ int main(void) {
                     }
                     printf("\n");
                 } else {
-                    nb_params = get_param(msg.payload+strlen(str_magic), &command, params);
+                    nb_params = get_param((char*)(msg.payload+strlen(str_magic)), &command, params);
                     printf("Command : %s\n", command);
                     cmd = command_dispatcher(command, nb_params, params);
                     if (cmd) {

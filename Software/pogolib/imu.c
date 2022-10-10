@@ -19,6 +19,7 @@
 
 #include "spi.h"
 #include "imu.h"
+#include "sleep.h"
 
 float _accelScale = 0.0;
 float _gyroScale = 0.0;

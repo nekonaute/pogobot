@@ -338,7 +338,6 @@ define_command(adc_read, adc_read_handler, "Read ADC registers", POGO_CMDS);
  * ( put any parameters to display the debug )
 */
 static void battery_reading_handler(int nb_params, char **params) {
-    char *c;
     uint32_t result = 0;
     uint32_t bLevel = 0;
     uint8_t iter = 16;

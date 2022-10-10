@@ -281,7 +281,7 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
     if ( m->header._packet_type == 1)
     {
         //if stop message reboot on pogobios
-        int ret = strncmp("DEADBEEF", m->payload, 8);
+        int ret = strncmp("DEADBEEF", (char*)(m->payload), 8);
         if (ret == 0)
         {
             reboot_ctrl_write(0xac);
