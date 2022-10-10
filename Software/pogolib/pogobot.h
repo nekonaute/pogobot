@@ -234,8 +234,9 @@ typedef struct message_t
 
 typedef enum
 {
-    ir_t_cmd = 1,
-    ir_t_user = 16
+    ir_t_cmd = 1,   // only to send command to the robot
+    ir_t_flash = 2, // only to send part of the prog
+    ir_t_user = 16  // userspace
 } ir_type_message;
 
 
