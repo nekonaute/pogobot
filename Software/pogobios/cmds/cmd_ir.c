@@ -29,10 +29,10 @@
 #include <pogobot.h>
 
 #ifdef REMOCON
-#include <ir_boot.h>
 #include <boot.h>
 #include <sfl.h>
 #endif
+#include <ir_boot.h>
 
 #define xstr( a ) str( a )
 #define str( a )  #a
@@ -549,7 +549,7 @@ ir_read_handler( int nb_params, char **params )
 }
 define_command( ir_read, ir_read_handler, "Read IR message", POGO_CMDS );
 
-#ifdef REMOCON
+#ifndef REMOCON
 /**
  * Command "ir_flash"
  *
@@ -1035,61 +1035,6 @@ rc_send_user_message_handler( int nb_params, char **params )
 define_command( rc_send_user_msg, rc_send_user_message_handler,
                 "Continusly send a message type 1 to all pogobots available through infrared", POGO_CMDS );
 
-
-/**
- * Command "rc_flash"
- *
- * flash program
- *
- */
-static void
-rc_flash_handler( int nb_params, char **params )
-{
-    uint32_t *meta_addr;
-    uint32_t data_addr;
-    uint32_t size;
-    struct sfl_frame frame;
-    meta_addr = USRPRG_CRC+SPIFLASH_BASE;    // 0x180000
-    size = *meta_addr;
-    meta_addr++;                 // Go to start of first frame metadata
-    printf("Address : 0x%08x\nSize to flash = %ld\n", meta_addr, size);
-    for( uint32_t i = 0 ; i < size ; ) {                    // For each frame
-        // 4 bytes for meta_address, 1 for size, two for CRC, one unused
-        printf("DEBUG: treating meta_addr : 0x%08x\n", meta_addr);
-        printf("DEBUG: *meta_addr : 0x%08x\n", *meta_addr);
-        data_addr = (*meta_addr);   // Contains address in flash + SPIFLASH_BASE
-        data_addr -= SPIFLASH_BASE;
-        frame.payload[3] = data_addr >> 24;
-        frame.payload[2] = (data_addr >> 16) & 0xff;
-        frame.payload[1] = (data_addr >> 8) & 0xff;
-        frame.payload[0] = data_addr & 0xff;
-        if((data_addr < 0x40000 ) || (data_addr > 0x90000)) {
-            printf("ERROR: bad address : 0x%08x\n", data_addr);
-            return; // Bad meta_address
-        }
-        meta_addr++; // Next 4 bytes
-        frame.payload_length = (*meta_addr) & 0xff;
-        frame.crc[1] = ((*meta_addr)>>16 & 0xff);
-        frame.crc[0] = ((*meta_addr) & 0xff);
-        frame.cmd = SFL_CMD_LOAD;
-        for( uint32_t j = 0; j< frame.payload_length; j++) {
-            frame.payload[j+4] = *((uint32_t *)data_addr+SPIFLASH_BASE);
-        }
-        if(check_crc(&frame)) {
-            printf("CRC check failed\n");
-            print_frame(&frame);
-        }
-        else {
-            IRn_tx_write_msg(0xff, &frame, frame.payload_length + 4);
-        }
-        i += frame.payload_length;
-        meta_addr++;   // Go to next metadata (8 bytes)
-    }
-
-}
-
-define_command( rc_flash, rc_flash_handler,
-                "Flash pogobots available through infrared", POGO_CMDS );
 /**
  * Command "rc_erase"
  *

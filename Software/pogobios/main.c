@@ -113,15 +113,14 @@ int main(void) {
 
     // color wheel memory
     uint8_t wheelpos = 0;
-    //standby timer
-    time_reference_t my_standby_timer;
-
-    uint8_t debug_mode = 0;     // debug_mode at 1 if uart connected
 
 #ifndef REMOCON
     uint8_t i;
     uint8_t flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // return 1 : programmed, or 0: probably erased
     static const char str_magic[] = IR_MAGIC_REQ;
+    //standby timer
+    time_reference_t my_standby_timer;
+    uint8_t debug_mode = 0;     // debug_mode at 1 if uart connected
 
 #ifdef RGB_LEDS
     rgb_blink_set_time(5, 995); // 5ms flash every second
@@ -216,7 +215,9 @@ int main(void) {
         // cable communication 
 		if(uart_read_nonblock() != 0)
 		{
+#ifndef REMOCON
             debug_mode = 1;
+#endif
 			readline(buffer, CMD_LINE_BUFFER_SIZE);
 			wheelpos+=100;
 			color_wheel(wheelpos);

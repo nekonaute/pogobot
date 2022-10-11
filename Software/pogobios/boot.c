@@ -27,6 +27,7 @@
 #include <generated/csr.h>
 #include <generated/soc.h>
 
+#include <helpers.h> //get_params
 #include <sfl.h>
 #include <boot.h>
 #include <ir_boot.h>
@@ -110,6 +111,27 @@ uint32_t get_uint32(unsigned char* data)
 
 #define MAX_FAILURES 256
 
+#ifdef REMOCON
+extern slip_send_descriptor_s slip_send_descriptor;
+static void send_flash_message( char* mPayload, uint32_t size) 
+{
+    message_t message;
+    message.header._emitting_power_list =
+        pogobot_infrared_emitting_power_list(3, 3, 3, 3);
+    message.header.receiver_id = 0x42; //not used
+    message.header.payload_length = size;
+    message.header._sender_ir_index = ir_all;
+    memcpy( message.payload, mPayload, size );
+    message.header._packet_type = ir_t_flash; 
+    message.header._sender_id = pogobot_helper_getid();
+
+	slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
+							sizeof( message_header_t ) +
+							message.header.payload_length );
+
+}
+#endif
+
 /* Returns 1 if other boot methods should be tried */
 int serialboot(void)
 {
@@ -118,23 +140,51 @@ int serialboot(void)
 	static const char str[] = SFL_MAGIC_REQ;
 	const char *c;
 	int ack_status;
-    uintptr_t ptr=0;    // last flashed mem address
     time_reference_t my_timer;
-#ifdef REMOCON
-    uint32_t crc_ptr=4; // Add later the size of the program to flash
-    uint8_t crc_log [32768]; // 32K enough for gateware+bios (~3072 blocks of 64 bytes, x8 : address(4), size(1), CRC(2) + 1 0xFF)
+#ifndef REMOCON
+		uintptr_t ptr=0;    // last flashed mem address
 #endif
 
-/*#ifdef REMOCON
-    // Send IR_MAGIC_REQ first
-    static const char ir_str[] = IR_MAGIC_REQ;
-    IRn_tx_write_msg(0xF, (ir_uart_word_t *)ir_str, strlen(ir_str));
-    printf("Sending IR_MAGIC_REQ : %s, of length: %d\n",ir_str, strlen(ir_str));
-#else */
+#ifdef REMOCON
+    printf("Sending from serial...\n");
+
+	// sending 10x the command to start the reception 
+	uint8_t i,j;
+    uint16_t count = 0;
+    extern const char * ir_magic_req;
+	char * cmd = "ir_flash";
+	message_t message;
+    message.header._emitting_power_list =
+        pogobot_infrared_emitting_power_list(3, 3, 3, 3);
+    message.header.receiver_id = 0x42; //not used
+    message.header._sender_ir_index = ir_all;
+    message.header._packet_type = ir_t_cmd; 
+    message.header._sender_id = pogobot_helper_getid();
+
+    //First send the magic 
+    for(i=0; i<strlen(ir_magic_req); i++)
+    {
+        message.payload[count++] = ir_magic_req[i];
+    }
+	for (j=0; j < strlen(cmd); j++)
+	{
+		message.payload[count++]=cmd[j];
+	}
+	message.payload[count++]=0;
+	message.header.payload_length = count;
+	for ( i = 0; i < 10; i++)
+	{
+		slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
+							sizeof( message_header_t ) +
+							message.header.payload_length );
+	}
+	
+
+#else 
 	printf("Booting from serial...\n");
 	printf("Press Q or ESC to abort boot completely.\n");
 
-//#endif //REMOCON
+#endif //REMOCON
 	/* Send the serialboot "magic" request to Host and wait for ACK_OK */
 	c = str;
 	while(*c) {
@@ -157,9 +207,9 @@ int serialboot(void)
 		int i;
 		int timeout;
 		int computed_crc;
-		int received_crc;
-        uintptr_t addr;
+		int received_crc; 
 #ifndef REMOCON
+		uintptr_t addr;
         uint32_t jump_addr;
 #endif
 
@@ -209,10 +259,9 @@ int serialboot(void)
 			continue;
 		}
 
-/* #ifdef REMOCON
+#ifdef REMOCON
         // When you're a remote control, you flash nothing but instead forward the orders to IR
-        IRn_tx_write_msg(0xF, (ir_uart_word_t *)&frame, frame.payload_length +4 );    // TODO: Fix the mask
-#endif */
+    
 		/* Execute Frame CMD */
 		switch(frame.cmd) {
 			/* On SFL_CMD_ABORT ... */
@@ -228,105 +277,23 @@ int serialboot(void)
 
 				/* Reset failures */
 				failures = 0;
-
-                addr = get_uint32(&frame.payload[0]);
-//#ifndef REMOCON
-#ifdef CSR_SPIFLASH_BASE
-                /* Write to SPI flash instead of memcpy if address is inside mapped flash area */
-                if( (addr >= SPIFLASH_BASE) & (addr < SPIFLASH_BASE+SPIFLASH_SIZE) ) {
-                    addr -= SPIFLASH_BASE;        // addr is now just the offset in flash
-                    // Only erase if address is on a sector boundary.
-                    if ((addr & ~(SPIFLASH_SECTOR_SIZE - 1) ) == addr) {
-                        erase_flash_sector(addr);
-                        ptr = addr;               // Could be a jump to a new sector
-#ifdef REMOCON
-                        if( addr == 0x60000 ) {   // Start of user prog
-                            erase_flash_sector(USRPRG_CRC);     // Erase prog CRCs
-                        }
-#endif // REMOCON
-                    }
-                    if(ptr != addr) {
-                        printf("Error : Non contiguous flashing, expected: %" PRIxPTR ", actual address: %" PRIxPTR "\n", ptr, addr);
-                        return 0;
-                    }
-                    write_to_flash(addr, (unsigned char *)&frame.payload[4], frame.payload_length - 4);
-                    ptr = addr + frame.payload_length - 4;    // Should be the next address to flash
-#ifdef REMOCON
-                    // Record metadata to flash
-                    if( addr >= 0x60000 ) {   // user prog
-                        crc_log[crc_ptr++] = frame.payload[3];
-                        crc_log[crc_ptr++] = frame.payload[2];
-                        crc_log[crc_ptr++] = frame.payload[1];
-                        crc_log[crc_ptr++] = frame.payload[0];
-                        crc_log[crc_ptr++] = frame.payload_length-4;
-                        crc_log[crc_ptr++] = frame.crc[1];
-                        crc_log[crc_ptr++] = frame.crc[0];
-                        crc_log[crc_ptr++] = 0xff;
-                    }
-#endif // REMOCON
-                }
-                else
-				/* Copy payload to RAM */
-#endif //CSR_SPIFLASH_BASE
-                {
-                    char *load_addr;
-                    load_addr = (char *)addr;
-                    memcpy(load_addr, &frame.payload[4], frame.payload_length - 4);
-                }
-//#endif // not REMOCON
+               
+				send_flash_message((char *)&frame, frame.payload_length + 4);
+				/* to be refined */ 
+				msleep(100);
 				/* Acknowledge */
                 uart_write(SFL_ACK_SUCCESS);
 				break;
 
 			/* On SFL_CMD_JUMP... */
 			case SFL_CMD_JUMP:
-#ifdef CSR_SPIFLASH_BASE
-#ifdef REMOCON
-                addr = get_uint32(&frame.payload[0]);
-                addr -= SPIFLASH_BASE;          // addr is now just the offset in flash
-                ptr -= 0x60000;                 // ptr is now the size of program in flash
-                if( addr == 0x60000 ) {
-                    crc_log[3]=((ptr >> 24) & 0xff);
-                    crc_log[2]=((ptr >> 16) & 0xff);
-                    crc_log[1]=((ptr >> 8) & 0xff);
-                    crc_log[0]=(ptr & 0xff);
-                    write_to_flash(USRPRG_CRC+SPIFLASH_BASE, crc_log, crc_ptr);
-                }
-#endif // REMOCON
-
 				/* Reset failures */
 				failures = 0;
-                
-                /* Serial flash successful, write magic value to flash */
-                char * flash_ok = FLASH_IS_OK;
-                write_to_flash(FLASH_OK_OFFSET, (unsigned char *)flash_ok, strlen(flash_ok));
-#endif //CSR_SPIFLASH_BASE
-
+                send_flash_message((char *)&frame, frame.payload_length + 4);
+				/* to be refined */ 
+				msleep(100);
 				/* Acknowledge and jump */
 				uart_write(SFL_ACK_SUCCESS);
-
-#ifndef REMOCON
-				jump_addr = get_uint32(&frame.payload[0]);
-                if(jump_addr <= (SPIFLASH_BASE + 0x40000) ) {
-                    printf("Rebooting to bootloader\n");
-                    reboot_ctrl_write(0xac);
-                }
-                else {
-                    printf("Rebooting to user image\n");
-                    reboot_ctrl_write(0xac | 1);
-                }
-#else
-                if( addr == 0x60000 ) {
-                    printf("ptr = 0x%08x\n", ptr);
-                    printf("addr = 0x%08x\n", addr);
-                    printf("crc_ptr = %ld\n", crc_ptr);
-                    printf("Log written to flash : \n");
-                    for( uint16_t i=0; i<256; i++) { 
-                        printf("0x%02x ", crc_log[i]);
-                        if(!((i+1)%8)) printf("\n");
-                    }
-                }
-#endif // REMOCON 
                 return 0;
 				break;
 
@@ -345,6 +312,94 @@ int serialboot(void)
 
 				break;
 		}
+#else
+		/* Execute Frame CMD */
+		switch(frame.cmd) {
+			/* On SFL_CMD_ABORT ... */
+			case SFL_CMD_ABORT:
+				/* Reset failures */
+				failures = 0;
+				/* Acknowledge and exit */
+				uart_write(SFL_ACK_SUCCESS);
+				return 1;
+
+			/* On SFL_CMD_LOAD... */
+			case SFL_CMD_LOAD:
+
+				/* Reset failures */
+				failures = 0;
+
+                addr = get_uint32(&frame.payload[0]);
+#ifdef CSR_SPIFLASH_BASE
+                /* Write to SPI flash instead of memcpy if address is inside mapped flash area */
+                if( (addr >= SPIFLASH_BASE) & (addr < SPIFLASH_BASE+SPIFLASH_SIZE) ) {
+                    addr -= SPIFLASH_BASE;        // addr is now just the offset in flash
+                    // Only erase if address is on a sector boundary.
+                    if ((addr & ~(SPIFLASH_SECTOR_SIZE - 1) ) == addr) {
+                        erase_flash_sector(addr);
+                        ptr = addr;               // Could be a jump to a new sector
+                    }
+                    if(ptr != addr) {
+                        printf("Error : Non contiguous flashing, expected: %" PRIxPTR ", actual address: %" PRIxPTR "\n", ptr, addr);
+                        return 0;
+                    }
+                    write_to_flash(addr, (unsigned char *)&frame.payload[4], frame.payload_length - 4);
+                    ptr = addr + frame.payload_length - 4;    // Should be the next address to flash
+                }
+                else
+				/* Copy payload to RAM */
+#endif //CSR_SPIFLASH_BASE
+                {
+                    char *load_addr;
+                    load_addr = (char *)addr;
+                    memcpy(load_addr, &frame.payload[4], frame.payload_length - 4);
+                }
+				/* Acknowledge */
+                uart_write(SFL_ACK_SUCCESS);
+				break;
+
+			/* On SFL_CMD_JUMP... */
+			case SFL_CMD_JUMP:
+#ifdef CSR_SPIFLASH_BASE
+				/* Reset failures */
+				failures = 0;
+                
+                /* Serial flash successful, write magic value to flash */
+                char * flash_ok = FLASH_IS_OK;
+                write_to_flash(FLASH_OK_OFFSET, (unsigned char *)flash_ok, strlen(flash_ok));
+#endif //CSR_SPIFLASH_BASE
+
+				/* Acknowledge and jump */
+				uart_write(SFL_ACK_SUCCESS);
+
+				jump_addr = get_uint32(&frame.payload[0]);
+                if(jump_addr <= (SPIFLASH_BASE + 0x40000) ) {
+                    printf("Rebooting to bootloader\n");
+                    reboot_ctrl_write(0xac);
+                }
+                else {
+                    printf("Rebooting to user image\n");
+                    reboot_ctrl_write(0xac | 1);
+                }
+                return 0;
+				break;
+
+			default:
+				/* Increment failures */
+				failures++;
+
+				/* Acknowledge the UNKNOWN cmd */
+				uart_write(SFL_ACK_UNKNOWN);
+
+				/* Increment failures and exit when max is reached */
+				if(failures == MAX_FAILURES) {
+					printf("Too many consecutive errors, aborting");
+					return 0;
+				}
+
+				break;
+		}
+#endif
 	}
 	return 1;
 }

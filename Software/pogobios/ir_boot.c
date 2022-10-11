@@ -28,6 +28,7 @@
 
 static unsigned int success_addr, ptr;
 const char * ir_magic_req = IR_MAGIC_REQ;
+static unsigned int missing_packet = 0;
 
 //extern uint32_t get_uint32(unsigned char* data); // Defined in boot.c
 
@@ -88,17 +89,22 @@ static unsigned int exec_frame_cmd(struct sfl_frame* frame)
                     }
                     if( ptr != addr) {
                         printf("Error : Non contiguous flashing, expected: %" PRIxPTR ", actual address: %" PRIxPTR "\n", ptr, addr);
-                            return 1;
+                        missing_packet++;
                     }
                     write_to_flash(addr, (unsigned char *)&frame->payload[4], frame->payload_length - 4);
                     ptr=addr+frame->payload_length - 4;  // Should be the next address to flash
-                    printf("Flashed address %08x\n", addr);
+                    //printf("Flashed address %08x\n", addr);
                     //rgb_set(0,0,0);
                 }
 			}
             break;
 			
 		case SFL_CMD_JUMP: 
+            if (missing_packet > 0)
+            {
+                printf("missing %d packets", missing_packet);
+                return 1;
+            }
             /* Flash successful, write magic value to enable autorun */
             write_to_flash(FLASH_OK_OFFSET, (unsigned char *)flash_ok, strlen(flash_ok));
             printf("Rebooting to user image\n");
@@ -111,83 +117,47 @@ static unsigned int exec_frame_cmd(struct sfl_frame* frame)
 			printf("CMD not recognized: %d\n", frame->cmd);
 			break;
 	}
-    return(0);
+    return 0;
 }
 
-int ir_boot_loop(void) {
-// Function called when IR_MAGIC_REQ is received on one of the ir_uarts
-// inspired by boot.c's serialboot()
-// Since there are more than one IR receiver, ptr and success_addr are static.
+void ir_boot_loop(void) {
     time_reference_t mytimer;
-    uint32_t timeout = 250000;  // in microseconds
-    struct sfl_frame frame[IR_NUMBER];
-    uint32_t index[IR_NUMBER]; 	            // index in frame (one for each IR)
-    uint8_t ir_i;                           // index of IR UART accessed
-    for( ir_i=0; ir_i<IR_NUMBER; ir_i++) {
-        index[ir_i]=0;                      // init index
-    }
+    uint32_t timeout = 10000000;  // in microseconds
+    struct sfl_frame * frame;
+    message_t msg;
+    missing_packet = 0;
+    success_addr=0;
     rgb_blink_set_time(5, 95);                      // Flash 5 ms every 100ms
     rgb_blink_set_color(0, 0, 50);                  // Tel the user data is being received
 
-    pogobot_timer_init(&mytimer, timeout);           // Set a timeout
+    pogobot_timer_init(&mytimer, timeout);          // Set a timeout
 
-    success_addr=0;
     while(!pogobot_timer_has_expired(&mytimer)) {
+        pogobot_infrared_update();
         rgb_blink();
         /* Get one Frame */
-		for( ir_i=0; ir_i<IR_NUMBER; ir_i++) {                  // Each IR may receive the same data
-			if (ir_uart_read_nonblock(ir_i)) {
-                pogobot_timer_init(&mytimer, timeout);         // Reset timer each time we receive data
-
-				if (index[ir_i] == 0) {
-					frame[ir_i].payload_length = ir_uart_read(ir_i);
-                    if(frame[ir_i].payload_length != 0) {       // Discard trailing zero
-                        index[ir_i]++;
+        if( pogobot_infrared_message_available() ) {
+            pogobot_timer_init(&mytimer, timeout);         // Reset timer each time we receive data
+            pogobot_infrared_recover_next_message( &msg );
+            if (msg.header._packet_type == ir_t_flash)
+            {
+            
+                //printf("Received length : %d, [%s]\n", msg.header.payload_length, msg.payload);
+                frame = (struct sfl_frame*) msg.payload;
+                if(check_crc(frame)) {
+                    if(exec_frame_cmd(frame) != 0) {
+                        printf("exec_frame_cmd failed\n");
+                        break;
                     }
-				}
-                if (index[ir_i] == 1) {
-					frame[ir_i].crc[0] = ir_uart_read(ir_i);
-					index[ir_i]++;
-				}
-                if (index[ir_i] == 2) {
-					frame[ir_i].crc[1] = ir_uart_read(ir_i);
-					index[ir_i]++;
-				}
-                if (index[ir_i] == 3) {
-					frame[ir_i].cmd    = ir_uart_read(ir_i);
-					index[ir_i]++;
-				}
-                if (index[ir_i] >= 4) {
-                    frame[ir_i].payload[index[ir_i]-4] = ir_uart_read(ir_i);
-                    if (index[ir_i] == (frame[ir_i].payload_length + 4 - 1)) {  // payload plus 4 (length + CRC (2 bytes) + CMD) minus 1 (index starts at 0)
-						// End of frame
-                        //uint32_t addr = get_uint32(&(frame[ir_i].payload[0]));
-                        //printf("End of frame, IR # %d, index=%ld, frame.cmd=%d, frame.size=%d, address: 0x%08x\n",ir_i, index[ir_i], frame[ir_i].cmd, frame[ir_i].payload_length, addr);
-						if(check_crc(&frame[ir_i])) {
-                            if(exec_frame_cmd(&frame[ir_i]) != 0)
-                                return 1;
-                        }
-                        else {
-                            printf("CRC Error after address 0x%08x\n", success_addr);
-                            print_frame(&frame[ir_i]);
-                        }
-                        index[ir_i]=0;
-                    }
-					else {
-                        if(index[ir_i] == 255) {
-                            return 0;
-                        }
-                        else {
-                            index[ir_i]++;
-                        }
-					}
                 }
+                else {
+                    printf("CRC Error after address 0x%08x\n", success_addr);
+                    print_frame(frame);
+                }
+                  
             }
         }
 	}
     rgb_blink_set_time(5, 995);
-    rgb_blink_set_color(50, 0, 0);
-
-    return 1;
+    rgb_blink_set_color(0, 50, 0);
 }
-
