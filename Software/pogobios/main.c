@@ -116,7 +116,6 @@ int main(void) {
 
 #ifndef REMOCON
     uint8_t i;
-    uint8_t flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // return 1 : programmed, or 0: probably erased
     static const char str_magic[] = IR_MAGIC_REQ;
     //standby timer
     time_reference_t my_standby_timer;
@@ -124,19 +123,14 @@ int main(void) {
 
 #ifdef RGB_LEDS
     rgb_blink_set_time(5, 995); // 5ms flash every second
-    if(flash_state) {
-        rgb_blink_set_color(0,40,0);
-    }
-    else {
-        rgb_blink_set_color(0,0,40);
-    }
+    update_led_status();
 #else
     rgb_set(255,0,0);
 #endif
 #else //REMOCON
-    IRn_conf_tx_power_write( 0, 3 ); // Set power to max if remocon
+    // Set power to max if remocon
+    IRn_conf_tx_power_write( 0, 3 ); 
 #ifdef RGB_LEDS
-    //rgb_blink_set_time(5, 495); // 5ms flash every 500ms
     rgb_set(0,10,10);
 #endif
 #endif
@@ -201,10 +195,8 @@ int main(void) {
             
         } else if (voltage_status == 1)
         {
-            cmd = command_dispatcher("bat_life", 0, NULL);
-            if (cmd) {
-                flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // Update flash state after each command
-            }
+            command_dispatcher("bat_life", 0, NULL);
+            // no need to check the flash status
 
         } else {
             if( debug_mode == 0 ) rgb_blink(); // Blink when not debugging 
@@ -225,8 +217,12 @@ int main(void) {
 				printf("\n");
 				nb_params = get_param(buffer, &command, params);
 				cmd = command_dispatcher(command, nb_params, params);
-				if (!cmd)
-						printf("Command not found");
+				if (cmd) {
+                    update_led_status();
+                } else {
+                    printf("Command not found\n");
+                }
+						
 			}
 			printf("\n%s", POGOPROMPT);
 		}
@@ -258,7 +254,7 @@ int main(void) {
                     printf("Command : %s\n", command);
                     cmd = command_dispatcher(command, nb_params, params);
                     if (cmd) {
-                        flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // Update flash state after each command
+                        update_led_status();
                     } else {
                         printf("Command not found\n");
                     }

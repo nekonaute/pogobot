@@ -66,6 +66,7 @@ static unsigned int exec_frame_cmd(struct sfl_frame* frame)
 {
     unsigned int addr=0;
     char * flash_ok = FLASH_IS_OK;
+    char * flash_par = FLASH_IS_PARTIAL;
 	/* Execute Frame CMD and return flashed address (or reboot) */
 	switch(frame->cmd) {
 		case SFL_CMD_LOAD:
@@ -102,14 +103,15 @@ static unsigned int exec_frame_cmd(struct sfl_frame* frame)
 		case SFL_CMD_JUMP: 
             if (missing_packet > 0)
             {
-                printf("missing %d packets", missing_packet);
+                printf("missing %d packets\n", missing_packet);
+                /* Flash partially, write magic value */
+                write_to_flash(FLASH_OK_OFFSET, (unsigned char *)flash_par, strlen(flash_par));
                 return 1;
             }
             /* Flash successful, write magic value to enable autorun */
             write_to_flash(FLASH_OK_OFFSET, (unsigned char *)flash_ok, strlen(flash_ok));
             printf("Rebooting to user image\n");
             msleep(100);
-            rgb_set(64,0,0);    // If program is bad, LED will stay RED
             reboot_ctrl_write(0xac | 1);
 			break;
 
@@ -159,5 +161,5 @@ void ir_boot_loop(void) {
         }
 	}
     rgb_blink_set_time(5, 995);
-    rgb_blink_set_color(0, 50, 0);
+    update_led_status();
 }

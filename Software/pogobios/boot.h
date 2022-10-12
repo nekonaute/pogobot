@@ -16,6 +16,7 @@
 
 void __attribute__((noreturn)) boot(unsigned long r1, unsigned long r2, unsigned long r3, unsigned long addr);
 int serialboot(void);
+void update_led_status(void);
 uint8_t check_flash_state(const char * data, uint32_t address_in_flash);
 uint32_t get_uint32(unsigned char* data);
 #endif /* __BOOT_H */

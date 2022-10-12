@@ -406,7 +406,9 @@ int serialboot(void)
 
 #endif
 
-uint8_t check_flash_state(const char * data, uint32_t address_in_flash) {
+/* check if a string (data) is present at this adress (address_in_flash) */
+uint8_t check_flash_state(const char * data, uint32_t address_in_flash) 
+{
     // Check if string is present at address in flash or not
     spiFree();                                                      // Enable memory-mapped mode
     if(data == 0) return 0;
@@ -417,5 +419,32 @@ uint8_t check_flash_state(const char * data, uint32_t address_in_flash) {
         }
     }
 	return 1;
+}
+
+/* 
+ * update the blink color depending of the flash status
+ * green : ready
+ * blue  : empty
+ * orange: partial
+ */
+void update_led_status(void) 
+{
+	// check is ok
+	int flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // Update flash state after each command
+	if(flash_state) {
+        rgb_blink_set_color(0,40,0);
+		return;
+    }
+
+	// check is partial
+	flash_state = check_flash_state(FLASH_IS_PARTIAL, FLASH_OK_OFFSET);  // Update flash state after each command
+	if(flash_state) {
+        rgb_blink_set_color(40,15,0);
+    }
+    else {
+        rgb_blink_set_color(0,0,40);
+    }
+
+	return;
 }
 
