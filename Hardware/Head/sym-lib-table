@@ -30,5 +30,5 @@
   (lib (name "VSMB1940X01")(type "KiCad")(uri "${KIPRJMOD}/Symbols/VSMB1940X01.kicad_sym")(options "")(descr ""))
   (lib (name "PTS526_SK15_SMTR2_LFS")(type "Legacy")(uri "${KIPRJMOD}/Symbols/PTS526_SK15_SMTR2_LFS.lib")(options "")(descr ""))
   (lib (name "MAX77827DEWC+T")(type "Legacy")(uri "${KIPRJMOD}/Symbols/MAX77827DEWC+T.lib")(options "")(descr ""))
-  (lib (name "mic5365-1.2yc5")(type "KiCad")(uri "/home/fabien/prog/SuperbotKicad/Symbols/mic5365-1.2yc5.kicad_sym")(options "")(descr ""))
+  (lib (name "mic5365-1.2yc5")(type "KiCad")(uri "${KIPRJMOD}/Symbols/mic5365-1.2yc5.kicad_sym")(options "")(descr ""))
 )
