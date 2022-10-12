@@ -178,11 +178,16 @@ static void spi_mm_handler(int nb_params, char **params) {
 define_command(spi_mm, spi_mm_handler, "Enable or disable memory-mapped spiflash", POGO_CMDS);
 
 /*
- * Erase user program in flash (Flag only)
+ * Erase user program in flash (Flag only + start prog)
  */
 static void erase_userprog_handler(int nb_params, char **params) {
+    // Enable memory-mapped mode
     spiFree();
+    //erase a part of the "flash is ok" token
     spiBeginErase4(FLASH_OK_OFFSET);
+    //erase the begining of the user code
+    spiBeginErase64(0x60000);
+
     printf("User program erased\n");
 }
 define_command(erase_userprog, erase_userprog_handler, "Erase userprog in flash", POGO_CMDS);
