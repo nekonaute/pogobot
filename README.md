@@ -383,7 +383,7 @@ Prog SPI flash directly with bus-pirate :
 
 ### Memory map
 
-This table shows addresses in flash memory. The flash memory itself is mapped in the system at address 0x100000 (SPIFLASH_BASE).
+This table shows addresses in flash memory. The flash memory itself is mapped in the system at address 0x200000 (SPIFLASH_BASE).
 
 
 | Address in flash | Size                             | Zone size | Content          |
