@@ -1044,8 +1044,14 @@ define_command( rc_send_user_msg, rc_send_user_message_handler,
 static void
 rc_erase_handler( int nb_params, char **params )
 {
-    //erase_userprog
-    printf("TODO\n");
+
+    char buffer[25] = "send erase_userprog"; // here "send" is not important. To reproduice put "send "+ the command you want to send
+    char *_params[MAX_PARAM];
+    char *_command;
+    int _nb_params = get_param(buffer, &_command, _params);
+
+    send_command(_nb_params, _params, 1);
+    
 }
 
 define_command( rc_erase, rc_erase_handler,
