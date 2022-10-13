@@ -1,4 +1,4 @@
 (sym_lib_table
-  (lib (name "UMFT234XF")(type "KiCad")(uri "/home/fabien/prog/SuperbotKicad/Symbols/UMFT234XF.kicad_sym")(options "")(descr ""))
+  (lib (name "UMFT234XF")(type "KiCad")(uri "${KIPRJMOD}/Symbols/UMFT234XF.kicad_sym")(options "")(descr ""))
   (lib (name "progboard_UMFT234XF-rescue")(type "Legacy")(uri "${KIPRJMOD}/progboard_UMFT234XF-rescue.lib")(options "")(descr ""))
 )

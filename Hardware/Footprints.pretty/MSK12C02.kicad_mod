@@ -55,12 +55,12 @@
   (pad "MP2" smd rect (at 3.45 1.05 90) (size 0.5 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 6eb36486-49f5-455e-8803-fa3ecc2b496a))
   (pad "MP3" smd rect (at -3.45 1.05 90) (size 0.5 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp e29aa67b-cab2-4f32-afb6-5650731047ed))
   (pad "MP4" smd rect (at -3.45 -1.05 90) (size 0.5 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp e654700f-f3d6-47d5-b674-8302e771dfaf))
-  (model "${KIPRJMOD}/3dmodels/MSK12C02.wrl"
+  (model "${KIPRJMOD}/3Dmodels/MSK12C02.wrl"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
   )
-  (model "${KIPRJMOD}/3dmodels/MSK12C02.stp"
+  (model "${KIPRJMOD}/3Dmodels/MSK12C02.stp"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

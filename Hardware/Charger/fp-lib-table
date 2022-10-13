@@ -1,3 +1,3 @@
 (fp_lib_table
-  (lib (name "MyFootprints")(type "KiCad")(uri "/home/fabien/prog/SuperbotKicad/Footprints.pretty/")(options "")(descr ""))
+  (lib (name "MyFootprints")(type "KiCad")(uri "${KIPRJMOD}/Footprints.pretty/")(options "")(descr ""))
 )

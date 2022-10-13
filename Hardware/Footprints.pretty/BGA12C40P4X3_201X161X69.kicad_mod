@@ -43,7 +43,7 @@
   (pad "C2" smd circle (at -0.2 0.4 90) (size 0.216 0.216) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 9de44095-bc49-4838-9c7b-721d375f9b35))
   (pad "C3" smd circle (at 0.2 0.4 90) (size 0.216 0.216) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 2e0bc8e9-1e67-48ac-a3e7-1019c9e27ef5))
   (pad "C4" smd circle (at 0.6 0.4 90) (size 0.216 0.216) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp ad6dfc4a-e816-420f-ba16-bf422452f01a))
-  (model "${KIPRJMOD}/3dmodels/MAX77827DEWC+T.stp"
+  (model "${KIPRJMOD}/3Dmodels/MAX77827DEWC+T.stp"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

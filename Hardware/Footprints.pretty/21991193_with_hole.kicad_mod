@@ -123,7 +123,7 @@
   (pad "MP1" smd rect locked (at -10.35 -2.731) (size 1.2 2.75) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 90646609-c6f3-47dd-904f-45123b4f6a53))
   (pad "MP2" smd rect locked (at 10.35 -2.731) (size 1.2 2.75) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp de4aa6d4-2d8d-40f5-90dc-dbfe3221ca08))
   (pad "MP3" thru_hole circle locked (at 0 25) (size 5 5) (drill 3) (layers *.Cu *.Mask) (tstamp a7b7dfc1-e144-4708-ba72-bfb8911c5ea8))
-  (model "/home/fabien/prog/SuperbotKicad/3dmodels/2199119-3.stp"
+  (model "${KIPRJMOD}/3Dmodels/2199119-3.stp"
     (offset (xyz 0 -4 1.6))
     (scale (xyz 1 1 1))
     (rotate (xyz -90 0 0))

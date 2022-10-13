@@ -33,7 +33,7 @@
   (pad "1" smd rect (at 0 -1.75 90) (size 1.5 1.5) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 6ab77c87-4a7c-4d75-964d-ce186b337dcb))
   (pad "2" smd rect (at 0 1.75 90) (size 1.5 1.5) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 4d23be17-ad99-490e-9ba8-62057d867055))
   (pad "3" smd rect (at -0.65 0 90) (size 0.9 0.9) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 32e3e6f9-94f5-46d5-99aa-da60b3af6b20))
-  (model "${KIPRJMOD}/3dmodels/VSMB10940.wrl"
+  (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))

@@ -27,7 +27,7 @@
   (pad "2" smd rect (at -0.25 -0.375) (size 0.65 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp 5179f1ff-6882-4637-9a78-f5d8408e4593))
   (pad "3" smd rect (at 0.625 -0.375) (size 0.4 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp eeaf6b16-11a8-4062-b865-f56f39004495))
   (pad "4" smd rect (at 1.45 -0.375) (size 0.55 0.8) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp e12c3999-3dc6-4c7c-8cd4-43475d22a7cd))
-  (model "${KIPRJMOD}/3dmodels/IN-PI42TASPRPGPB.step"
+  (model "${KIPRJMOD}/3Dmodels/IN-PI42TASPRPGPB.step"
     (offset (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz -90 0 0))

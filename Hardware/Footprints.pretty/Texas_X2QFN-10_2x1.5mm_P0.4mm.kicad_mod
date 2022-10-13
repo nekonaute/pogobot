@@ -29,7 +29,7 @@
   (pad 8 smd roundrect (at -0.25 -0.635) (size 0.25 0.58) (layers F.Cu F.Paste F.Mask) (roundrect_rratio 0.25))
   (pad 9 smd roundrect (at -0.75 -0.635) (size 0.3 0.58) (layers F.Cu F.Paste F.Mask) (roundrect_rratio 0.25))
   (pad 10 smd roundrect (at -0.86 0) (size 0.63 0.35) (layers F.Cu F.Paste F.Mask) (roundrect_rratio 0.25))
-  (model /home/fabien/prog/SuperbotKicad/3dmodels/TLA2024.step
+  (model ${KIPRJMOD}/3Dmodels/TLA2024.step
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))
     (rotate (xyz 0 0 0))
