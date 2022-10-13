@@ -268,6 +268,10 @@ int serialboot(void)
 			case SFL_CMD_ABORT:
 				/* Reset failures */
 				failures = 0;
+
+				send_flash_message((char *)&frame, frame.payload_length + 4);
+				/* to be refined */ 
+				msleep(100);
 				/* Acknowledge and exit */
 				uart_write(SFL_ACK_SUCCESS);
 				return 1;
@@ -364,6 +368,8 @@ int serialboot(void)
 				/* Reset failures */
 				failures = 0;
                 
+				//erase the "flash is ok" token
+    			spiBeginErase4(FLASH_OK_OFFSET);
                 /* Serial flash successful, write magic value to flash */
                 char * flash_ok = FLASH_IS_OK;
                 write_to_flash(FLASH_OK_OFFSET, (unsigned char *)flash_ok, strlen(flash_ok));
@@ -430,14 +436,14 @@ uint8_t check_flash_state(const char * data, uint32_t address_in_flash)
 void update_led_status(void) 
 {
 	// check is ok
-	int flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  // Update flash state after each command
+	int flash_state = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET);  
 	if(flash_state) {
         rgb_blink_set_color(0,40,0);
 		return;
     }
 
 	// check is partial
-	flash_state = check_flash_state(FLASH_IS_PARTIAL, FLASH_OK_OFFSET);  // Update flash state after each command
+	flash_state = check_flash_state(FLASH_IS_PARTIAL, FLASH_OK_OFFSET); 
 	if(flash_state) {
         rgb_blink_set_color(40,15,0);
     }
