@@ -6956,7 +6956,7 @@
     (pad "2" smd rect locked (at 0 -1.75 157.5) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 2 "+3V3") (pintype "passive") (tstamp 9b7fc235-fcb3-4c90-be12-6c43525dd29b))
     (pad "3" smd rect locked (at -0.65 0 157.5) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 199d0ced-9d79-4304-92ab-607d42b5876a))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VSMB10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -7018,7 +7018,7 @@
     (pad "2" smd rect locked (at 0 -1.75 270) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 27 "/sheetReceive_Right/IIN+") (pinfunction "A") (pintype "passive") (tstamp 04f8b7ec-6b20-46eb-add5-5d764d1d3dc8))
     (pad "3" smd rect locked (at -0.65 0 270) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 10948212-3bc5-4ed7-b9b2-187de9cfcf5e))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VEMD10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VEMD10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -7082,7 +7082,7 @@
     (pad "2" smd rect locked (at 0 -1.75 337.5) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 2 "+3V3") (pintype "passive") (tstamp 0b8edb4c-5883-4c39-bf44-272daa8f304d))
     (pad "3" smd rect locked (at -0.65 0 337.5) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 6c4ba96a-24c1-412c-b62a-a65b9b540e97))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VSMB10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -7146,7 +7146,7 @@
     (pad "2" smd rect locked (at 0 -1.75 247.5) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 2 "+3V3") (pintype "passive") (tstamp fa17e029-ff99-43a5-ac91-cdea3286688f))
     (pad "3" smd rect locked (at -0.65 0 247.5) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp e6c17bce-2bf6-4672-8bf7-710ede6e49c2))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VSMB10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -7210,7 +7210,7 @@
     (pad "2" smd rect locked (at 0 -1.75 67.5) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 2 "+3V3") (pintype "passive") (tstamp f2da1b38-ab2f-448b-b8f9-b4a1a73aeed0))
     (pad "3" smd rect locked (at -0.65 0 67.5) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 80ddad0c-31e7-4f1a-9a50-5b939a5df9f6))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VSMB10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -7272,7 +7272,7 @@
     (pad "2" smd rect locked (at 0 -1.75) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 28 "/sheetReceive_Front/IIN+") (pinfunction "A") (pintype "passive") (tstamp 7629567f-0a78-4029-9415-457eec6b191e))
     (pad "3" smd rect locked (at -0.65 0) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 5a1a4c00-e0d4-4fe1-bbbc-d4e68a43b84e))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VEMD10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VEMD10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -7334,7 +7334,7 @@
     (pad "2" smd rect locked (at 0 -1.75 90) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 30 "/sheetReceive_Left/IIN+") (pinfunction "A") (pintype "passive") (tstamp bb86ee86-6b5d-44a4-ab11-61ffae400184))
     (pad "3" smd rect locked (at -0.65 0 90) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 4529e6ff-edc4-4d16-a09c-4cf250d00b28))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VEMD10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VEMD10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -7834,7 +7834,7 @@
     (pad "2" smd rect locked (at 0 -1.75 180) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 32 "/sheetReceive_Back/IIN+") (pinfunction "A") (pintype "passive") (tstamp 67e7e049-7f1b-41cb-aef9-dba56b1c16c3))
     (pad "3" smd rect locked (at -0.65 0 180) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 38e768a3-45e8-43e9-862b-3d5935bb31e5))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VEMD10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VEMD10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -8180,7 +8180,7 @@
     (pad "2" smd rect locked (at 0 -1.75 202.5) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 2 "+3V3") (pintype "passive") (tstamp 0f83ca05-f807-4dd5-8d34-e9267f622197))
     (pad "3" smd rect locked (at -0.65 0 202.5) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 55eadf78-b8ec-4932-b7c5-9ee1f85f78c2))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VSMB10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -8244,7 +8244,7 @@
     (pad "2" smd rect locked (at 0 -1.75 22.5) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 2 "+3V3") (pintype "passive") (tstamp add48753-5c0a-4edd-8b0f-abeb1a93dc03))
     (pad "3" smd rect locked (at -0.65 0 22.5) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 41168151-2778-49a5-9b30-7516c3daeba6))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VSMB10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -8308,7 +8308,7 @@
     (pad "2" smd rect locked (at 0 -1.75 292.5) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 2 "+3V3") (pintype "passive") (tstamp 1de13f39-6335-4b79-a6d7-90ab5eaeb757))
     (pad "3" smd rect locked (at -0.65 0 292.5) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp 9e99763b-79a5-476b-aff9-8f4872aa592f))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VSMB10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
@@ -8372,7 +8372,7 @@
     (pad "2" smd rect locked (at 0 -1.75 112.5) (size 1.5 1.5) (layers "B.Cu" "B.Paste" "B.Mask")
       (net 2 "+3V3") (pintype "passive") (tstamp bb2b18cc-75a7-48cf-a412-92dd68cc4682))
     (pad "3" smd rect locked (at -0.65 0 112.5) (size 0.9 0.9) (layers "B.Cu" "B.Paste" "B.Mask") (tstamp ce8c727e-ddad-4b20-96d9-ff189be52263))
-    (model "/home/fabien/prog/SuperbotKicad/3Dmodels/VSMB10940.wrl"
+    (model "${KIPRJMOD}/3Dmodels/VSMB10940.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
