@@ -26,11 +26,59 @@
 #include <libbase/spiflash.h>
 #include <pogobot.h>
 
+#define NB_MISSING_ADDR 10
+
 static unsigned int success_addr, ptr;
 const char * ir_magic_req = IR_MAGIC_REQ;
-static unsigned int missing_packet = 0;
+static int missing_packet = 0;
+static unsigned int recovered_packet = 0;
 
-//extern uint32_t get_uint32(unsigned char* data); // Defined in boot.c
+static unsigned int l_missing_packet[NB_MISSING_ADDR];
+static uint8_t ptr_l_missing_packet = 0;
+
+static int flash_state_partial = 0;
+
+static void add_to_missing_list(unsigned int addr) {
+
+    if (ptr_l_missing_packet >= NB_MISSING_ADDR-1) {
+        return;
+    }
+    printf("adding %x at ptr %d\n", addr, ptr_l_missing_packet);
+    l_missing_packet[ptr_l_missing_packet] = addr;
+    ptr_l_missing_packet += 1;
+
+    return;
+}
+
+static uint8_t in_missing_list (unsigned int addr) {
+
+    for (int i = 0; i < ptr_l_missing_packet; i++)
+    {
+        if (addr == l_missing_packet[i])
+        {
+            printf("found missing addr : %x\n", addr);
+            return 1;
+        }
+    }
+
+    return 0;
+
+}
+
+static void print_missing_list (void) {
+
+    printf("mssing list addr : ");
+
+    for (int i = 0; i < ptr_l_missing_packet; i++)
+    {
+        printf("%x\t", l_missing_packet[i]);
+    }
+
+    printf("\n");
+
+    return;
+
+}
 
 uint8_t check_crc(struct sfl_frame* frame) {
 	/* Check Frame CRC */
@@ -67,52 +115,85 @@ static unsigned int exec_frame_cmd(struct sfl_frame* frame)
     unsigned int addr=0;
     char * flash_ok = FLASH_IS_OK;
     char * flash_par = FLASH_IS_PARTIAL;
+
+    //printf("m %d, r %d, p %d\n", missing_packet, recovered_packet, ptr_l_missing_packet);
+
 	/* Execute Frame CMD and return flashed address (or reboot) */
 	switch(frame->cmd) {
+        case SFL_CMD_ABORT:
+            printf("transfert abord!! \n");
+            missing_packet = 0xFFFFFF;
+
 		case SFL_CMD_LOAD:
 			addr = get_uint32(&frame->payload[0]);
 			// Check if we try to write to flash, and not overwrite the bootloader
 			if( (addr >= SPIFLASH_BASE+0x40000) & (addr < SPIFLASH_BASE+SPIFLASH_SIZE) ) {
                 addr -= SPIFLASH_BASE; // addr is now just the offset in flash
-                // Flash only if not already flashed before (duplicated messages)
-                if(addr != success_addr) {
-                    //rgb_set(10,0,10);
-                    success_addr = addr;
-                    // Only erase if address is on a sector boundary.
-                    if ((addr & ~(SPIFLASH_SECTOR_SIZE - 1) ) == addr) {
-                        printf("Erasing sector 0x%" PRIxPTR "\n", addr);
-                        erase_flash_sector(addr);
-                        ptr = addr;
-                        if((addr == 0x40000) | ( addr == 0x60000 )) {
-                            printf("Erasing flashOK flag\n");
-                            spiBeginErase4(FLASH_OK_OFFSET);
+                if ((flash_state_partial && in_missing_list(addr)) || !flash_state_partial) {   
+                    // Flash only if not already flashed before (duplicated messages)  
+                    if(addr != success_addr) {
+                        success_addr = addr;
+                        // Only erase if address is on a sector boundary.
+                        if ((addr & ~(SPIFLASH_SECTOR_SIZE - 1) ) == addr) {
+                            printf("Erasing sector 0x%" PRIxPTR "\n", addr);
+                            erase_flash_sector(addr);
+                            ptr = addr;
+                            if((addr == 0x40000) | ( addr == 0x60000 )) { 
+                                printf("Erasing flashOK flag\n");
+                                spiBeginErase4(FLASH_OK_OFFSET);
+                            }
                         }
+                        if( ptr != addr && !flash_state_partial) {
+                            printf("Error : Non contiguous flashing, expected: %" PRIxPTR ", actual address: %" PRIxPTR "\n", ptr, addr);
+                            for( unsigned int m_addr = ptr; m_addr < addr; m_addr += frame->payload_length - 4) {
+                                add_to_missing_list(m_addr);
+                                missing_packet++;
+                            }
+                        }
+                        if (flash_state_partial)
+                        {
+                            printf("Recovered addr: %" PRIxPTR "\n", addr);
+                            recovered_packet ++;
+                        }
+                        
+                        write_to_flash(addr, (unsigned char *)&frame->payload[4], frame->payload_length - 4);
+                        ptr=addr+frame->payload_length - 4;  // Should be the next address to flash
+                        //printf("Flashed address %08x\n", addr);
                     }
-                    if( ptr != addr) {
-                        printf("Error : Non contiguous flashing, expected: %" PRIxPTR ", actual address: %" PRIxPTR "\n", ptr, addr);
-                        missing_packet++;
-                    }
-                    write_to_flash(addr, (unsigned char *)&frame->payload[4], frame->payload_length - 4);
-                    ptr=addr+frame->payload_length - 4;  // Should be the next address to flash
-                    //printf("Flashed address %08x\n", addr);
-                    //rgb_set(0,0,0);
-                }
+                } 
 			}
             break;
 			
 		case SFL_CMD_JUMP: 
-            if (missing_packet > 0)
+
+
+            printf("jump m %d, r %d\n", missing_packet, recovered_packet);
+            
+            //erase the "flash is ok" token
+    		spiBeginErase4(FLASH_OK_OFFSET);
+            missing_packet -= recovered_packet;
+            recovered_packet = 0;
+
+            if (missing_packet > 0 && missing_packet < NB_MISSING_ADDR)
             {
                 printf("missing %d packets\n", missing_packet);
+                print_missing_list();
                 /* Flash partially, write magic value */
                 write_to_flash(FLASH_OK_OFFSET, (unsigned char *)flash_par, strlen(flash_par));
                 return 1;
+            } else if (missing_packet > NB_MISSING_ADDR) {
+                printf(" too many missing packets (%d)\n", missing_packet);
+                print_missing_list();
+                return 1;
             }
-            /* Flash successful, write magic value to enable autorun */
+            if (missing_packet < 0) {
+                printf("something strange just happened !\n");
+            }
+            /* Flash successful, write magic value */
             write_to_flash(FLASH_OK_OFFSET, (unsigned char *)flash_ok, strlen(flash_ok));
-            printf("Rebooting to user image\n");
-            msleep(100);
-            reboot_ctrl_write(0xac | 1);
+            // no reboot on the code, we wait for a start command. 
+            missing_packet = 0;
+            ptr_l_missing_packet = 0;
 			break;
 
 		default:
@@ -133,6 +214,17 @@ void ir_boot_loop(void) {
     rgb_blink_set_color(0, 0, 50);                  // Tel the user data is being received
 
     pogobot_timer_init(&mytimer, timeout);          // Set a timeout
+
+    flash_state_partial = check_flash_state(FLASH_IS_PARTIAL, FLASH_OK_OFFSET); 
+
+    if (flash_state_partial) {
+        printf (" partial programming ! \n ");
+        missing_packet = ptr_l_missing_packet;
+    } else {
+        ptr_l_missing_packet = 0;
+    }
+
+    //printf ("debut m %d, r %d, p %d \n", missing_packet, recovered_packet, ptr_l_missing_packet);
 
     while(!pogobot_timer_has_expired(&mytimer)) {
         pogobot_infrared_update();
