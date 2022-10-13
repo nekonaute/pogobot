@@ -47,6 +47,10 @@ uint8_t standby_status = 0; // 0 : OFF, 1 : ON LISTENING, 2 : ON SAVE ENERGY
 uint8_t standby_reloaded = 0; // to check if the listening has begin (0 if is needed to reload the timer )
 // Voltage status
 uint8_t voltage_status = 0; // 0 : OFF, 1 : DISPLAY VOLTAGE
+// Autotest status
+uint8_t autotest_status = 0; // 0 : OFF, 1 : DISPLAY AUTOTEST RESULT
+// Autotest done
+uint8_t autotest_done = 0; // 0 : NO, 1 : YES
 
 int main(void) {
     char buffer[CMD_LINE_BUFFER_SIZE];
@@ -197,6 +201,14 @@ int main(void) {
         {
             command_dispatcher("bat_life", 0, NULL);
             // no need to check the flash status
+
+        } else if (autotest_status == 1)
+        {
+            if ( !autotest_done) {
+                command_dispatcher("auto_test", 0, NULL);
+                // no need to check the flash status
+                autotest_done = 1;
+            }
 
         } else {
             if( debug_mode == 0 ) rgb_blink(); // Blink when not debugging 

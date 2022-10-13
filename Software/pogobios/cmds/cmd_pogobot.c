@@ -389,9 +389,20 @@ static void voltage_mode_handler(int nb_params, char **params) {
     extern uint8_t voltage_status;
     voltage_status = !voltage_status;
 
-    printf(" new voltage mode (%d)\n", voltage_status);
+    printf(" new voltage mode status(%d)\n", voltage_status);
 }
 define_command(volt_mode, voltage_mode_handler, "toggle the voltage mode", POGO_CMDS);
+
+static void autotest_mode_handler(int nb_params, char **params) {
+    extern uint8_t autotest_status;
+    extern uint8_t autotest_done;
+
+    autotest_status = !autotest_status;
+    autotest_done = 0;
+
+    printf(" new autotest mode status(%d)\n", autotest_status);
+}
+define_command(autotest_mode, autotest_mode_handler, "toggle the autotest mode", POGO_CMDS);
 
 #endif //CSR_SPI_CS_BASE
 #ifdef CSR_MOTOR_RIGHT_BASE
