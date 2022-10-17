@@ -23,6 +23,11 @@
     - [Compile and upload your application](#compile-and-upload-your-application)
     - [Upload a empty or faulty robot](#upload-a-empty-or-faulty-robot)
     - [Memory map](#memory-map)
+  - [IR Remote](#ir-remote)
+    - [Hardware](#hardware-1)
+    - [Software](#software-1)
+    - [Usage](#usage)
+    - [Pogobios LED Status](#pogobios-led-status)
   - [Tools](#tools)
     - [version_creation_litex.sh](#version_creation_litexsh)
     - [Doc generation](#doc-generation)
@@ -393,6 +398,56 @@ This table shows addresses in flash memory. The flash memory itself is mapped in
 | 0x20000          | Size of pogobios (usually <64KB) | 0x20000   | Pogobios         |
 | 0x40000          | 0x1969a                          | 0x20000   | User gateware    |
 | 0x60000          | Size of user code                | 0x20000   | User software    |
+
+## IR Remote
+To control each robot, two ways are possible: by cable (debug mode) or by IR.
+In order to control robots by IR, you need to create a IR remote.
+
+### Hardware
+An IR remote is combination of a pogobot head + usb-uart-progboard + 3D structure (available in the "3d-addons" folder).
+
+<img src="Images/ir_remote.jpg" alt="IR_ Remote" width="800"/>
+
+### Software
+In order to turn a head into a remote control, we need to put a special user code.
+
+    ./pogosoc.py --target=pogobotv3 --cpu-variant=lite --remocon
+
+Connect to the robot with the command
+
+    ./litex_term.py --serial-boot --images pogobios.json --safe /dev/ttyUSBX
+
+Type the command
+
+    serialboot
+
+in order to upload the code. The robot reboot on the remote control code.
+
+
+### Usage
+
+Connect the remote from the folder where the usercode was compiled.
+
+    make connect (TTY=/dev/ttyUSBX)
+
+When a remote starts, it exposes the standard pogobot bios. You need to start the remote bios by typing : 
+
+    run
+
+A remote can't execute the command "run" and the command "serialboot" has a different meaning.
+Once started different new commands are avaible :
+
+- rc_start : start the user code on the robot (continious).
+- rc_stop  : stop the user code and restart inside the pogobot bios (continious).
+- rc_erase : erase the user code on the robot (continious).
+- rc_send_cmd <cmd> <args> : send the pogobios command by IR (once). 
+- rc_send_cmd_continusly <cmd> <args> : send the pogobios command by IR (continious). 
+- rc_send_user_msg <msg> : send the message by IR. It is not interpreted by the pogobios. The message type is 1 (continious). 
+- serialboot : send the user code to the robots depending on the folder (once).  
+
+### Pogobios LED Status
+
+<img src="Images/pogobot_led_status.png" alt="pogobios leds status" width="800"/>
 
 ## Tools
 
