@@ -216,6 +216,7 @@ void ir_boot_loop(void) {
     pogobot_timer_init(&mytimer, timeout);          // Set a timeout
 
     flash_state_partial = check_flash_state(FLASH_IS_PARTIAL, FLASH_OK_OFFSET); 
+    int flash_status_ok = check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET); 
 
     if (flash_state_partial) {
         printf (" partial programming ! \n ");
@@ -223,6 +224,13 @@ void ir_boot_loop(void) {
     } else {
         ptr_l_missing_packet = 0;
     }
+
+    if (flash_status_ok)
+    {
+        // you need to erase the user prog before programming
+        return;
+    }
+    
 
     //printf ("debut m %d, r %d, p %d \n", missing_packet, recovered_packet, ptr_l_missing_packet);
 
