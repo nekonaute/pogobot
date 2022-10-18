@@ -21,6 +21,7 @@
 #include <helpers.h>
 
 #include <boot.h>
+#include <ir_boot.h>
 
 #ifdef CSR_IR_RX0_BASE
 #include <pogobot.h>
@@ -181,14 +182,17 @@ define_command(spi_mm, spi_mm_handler, "Enable or disable memory-mapped spiflash
  * Erase user program in flash (Flag only + start prog)
  */
 static void erase_userprog_handler(int nb_params, char **params) {
-    // Enable memory-mapped mode
-    spiFree();
-    //erase a part of the "flash is ok" token
-    spiBeginErase4(FLASH_OK_OFFSET);
-    //erase the begining of the user code
-    spiBeginErase64(0x60000);
+    
+    if ( check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET) || check_flash_state(FLASH_IS_PARTIAL, FLASH_OK_OFFSET)) {
+        // Enable memory-mapped mode
+        spiFree();
+        //erase a part of the "flash is ok" token
+        spiBeginErase4(FLASH_OK_OFFSET);
+        //erase the begining of the user code
+        spiBeginErase64(0x60000);
 
-    printf("User program erased\n");
+        printf("User program erased\n");
+    }
 }
 define_command(erase_userprog, erase_userprog_handler, "Erase userprog in flash", POGO_CMDS);
 
