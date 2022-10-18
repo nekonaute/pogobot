@@ -404,7 +404,7 @@ To control each robot, two ways are possible: by cable (debug mode) or by IR.
 In order to control robots by IR, you need to create a IR remote.
 
 ### Hardware
-An IR remote is combination of a pogobot head + usb-uart-progboard + 3D structure (available in the "3d-addons" folder).
+An IR remote is combination of a pogobot head + usb-uart-progboard + 3D structure (available in the "3d-addons" folder) + 2 M3x10mm screws.
 
 <img src="Images/ir_remote.jpg" alt="IR_ Remote" width="800"/>
 
