@@ -39,9 +39,9 @@
 
 
 ## Overview 
-The pogobot is a little robot design to evoluate in swarn. 
-The robot is composed of a head (above) with a iCE40UP5K FPGA chip including a softcore processor, IMU, IR communication and a LED.
-The head is plugged on a belly (under) composed of more LEDs, motor controler, battery and battery regulation.
+The pogobot is a small robot designed for swarm robotics experiments, targeted at collective behaviour and social learning research.
+The robot is composed of a head (above) with a iCE40UP5K FPGA chip including a softcore processor, an IMU, fast Infra-Red communication devices and a LED.
+The head is plugged on a belly (under) which composed of even more LEDs, the motor controler, the battery and the battery regulation system.
 
 ### Git description
 This project is divided into 3 folders :
@@ -49,7 +49,8 @@ This project is divided into 3 folders :
 - Software
 - Tools
 
-Hardware contains the schematics and other files to reproduice the robot. 
+Hardware contains the schematics and other files to build your own robot from scratch. 
+
 All the schematics were done using KiCad 6. You can find : 
 - 'Belly' folder with the belly schematics
 - 'Head' folder with the head schematics
