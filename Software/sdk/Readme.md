@@ -4,14 +4,14 @@ Pogobot
 Table of contents
 -----------------
 
--   [Pogobot](#pogobot)
-    -   [Table of contents](#table-of-contents)
--   [Overview](#overview)
--   [Requirements](#requirements)
--   [Install the dependencies](#install-the-dependencies)
--   [pogoSDK](#pogosdk)
-    -   [Compile examples](#compile-examples)
-    -   [Compile your own application](#compile-your-own-application)
+- [Pogobot](#pogobot)
+  - [Table of contents](#table-of-contents)
+- [Overview](#overview)
+- [Requirements](#requirements)
+- [Install the dependencies](#install-the-dependencies)
+- [pogoSDK](#pogosdk)
+  - [Compile examples](#compile-examples)
+  - [Compile and upload your own application](#compile-and-upload-your-own-application)
 
 
 
@@ -21,6 +21,8 @@ Overview
 We designed a robot with motors, SoC (system-on-chip) inside a
 iCE40LP8K FPGA chip including a softcore processor, motors, sensors, LED, IR communication.
 This SDK allows you to compile and upload code on the robot.
+
+Please visit : https://github.com/nekonaute/pogobot-sdk or https://github.com/nekonaute/pogobot
 
 Requirements
 ============

@@ -292,7 +292,7 @@ You have to go in the folder 'Software'
 
 The following command recompile the gateware, compile the dependencies and the pogobios. (Has to be done ones)
 
-    ./pogosoc.py --target=pogobotv2_1 --cpu-variant=lite --build
+    ./pogosoc.py --target=pogobotv3 --cpu-variant=lite --build
 
 The next command uploads the new gateware and flash the pogobios as an application. (Has to be done ones)
 
@@ -303,7 +303,7 @@ The next command uploads the new gateware and flash the pogobios as an applicati
 If you want or need to change the bootloader, you need to execute the folowing commands.<br>
 :warning: These commands can break your pogobot
 
-    ./pogosoc.py --target=pogobotv2_1 --cpu-variant=lite --build --bootloader
+    ./pogosoc.py --target=pogobotv3 --cpu-variant=lite --build --bootloader
     ./litex_term.py --serial-boot --images images.json --safe /dev/ttyUSBX
 
     You have to change X for the correct number 
