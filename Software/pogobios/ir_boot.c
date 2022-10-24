@@ -228,6 +228,8 @@ void ir_boot_loop(void) {
     if (flash_status_ok)
     {
         // you need to erase the user prog before programming
+        rgb_blink_set_time(5, 995);
+        update_led_status();
         return;
     }
     
