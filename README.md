@@ -17,8 +17,8 @@
   - [Software](#software)
     - [Repository clone](#repository-clone)
     - [Install all the dependency](#install-all-the-dependency)
-    - [Compile gateware and pogobios (Has to be done ones)](#compile-gateware-and-pogobios-has-to-be-done-ones)
-    - [Compile the SDK (Has to be done ones too :smile:)](#compile-the-sdk-has-to-be-done-ones-too-smile)
+    - [Compile gateware and pogobios (Has to be done once)](#compile-gateware-and-pogobios-has-to-be-done-once)
+    - [Compile the SDK (Has to be done once too)](#compile-the-sdk-has-to-be-done-once-too)
     - [Compile and test "HelloWorld"](#compile-and-test-helloworld)
     - [Compile and upload your application](#compile-and-upload-your-application)
     - [Upload a empty or faulty robot](#upload-a-empty-or-faulty-robot)
@@ -284,17 +284,17 @@ Good:
     riscv64-unknown-elf-addr2line: « a.out »: pas de tel fichier
 
 
-### Compile gateware and pogobios (Has to be done ones)
+### Compile gateware and pogobios (Has to be done once)
 
 You have to go in the folder 'Software'
 
     cd Software
 
-The following command recompile the gateware, compile the dependencies and the pogobios. (Has to be done ones)
+The following command recompile the gateware, compile the dependencies and the pogobios. (Has to be done once)
 
     ./pogosoc.py --target=pogobotv3 --cpu-variant=lite --build
 
-The next command uploads the new gateware and flash the pogobios as an application. (Has to be done ones)
+The next command uploads the new gateware and flash the pogobios as an application. (Has to be done once)
 
     ./litex_term.py --serial-boot --images images.json --safe /dev/ttyUSBX
 
@@ -308,7 +308,7 @@ If you want or need to change the bootloader, you need to execute the folowing c
 
     You have to change X for the correct number 
 
-### Compile the SDK (Has to be done ones too :smile:)
+### Compile the SDK (Has to be done once too)
 
 It is possible to extract only a software sdk that will work with the gateware from the user space already in the robot.
 The software compile with a lot of file produice with the gateware so the SDK is gateware version dependant.<br>
