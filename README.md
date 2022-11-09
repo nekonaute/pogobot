@@ -136,7 +136,7 @@ The list is adapted for Ubuntu distribution
 
     sudo apt-get -y install bison build-essential clang clang-format cmake flex gawk git graphviz libboost-all-dev libboost-dev libboost-filesystem-dev libboost-iostreams-dev libboost-program-options-dev libboost-python-dev libboost-system-dev libboost-thread-dev libeigen3-dev libffi-dev libftdi-dev libreadline-dev mercurial pkg-config python python3 python3-dev python3-pip python3-setuptools qt5-default tcl-dev xdot zlib1g-dev
 
-    pip3 install meson ninja
+    sudo pip3 install meson ninja
     echo "export PATH=\"\$PATH:~/.local/bin\"" >>~/.bashrc
 
 **litex + migen**
