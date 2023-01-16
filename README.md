@@ -404,15 +404,20 @@ This table shows addresses in flash memory. The flash memory itself is mapped in
 | 0x60000          | Size of user code                | 0x20000   | User software    |
 
 
-### Install on Linux distribution other than Ubuntu
+### Install on Linux distributions other than Ubuntu by using Singularity Containers
 
-It is possible to build a [Singularity](https://docs.sylabs.io/guides/3.0/user-guide/index.html) image based on Ubuntu 20.04, which could then be used on any Linux distribution.
+It is possible to build a [Singularity](https://docs.sylabs.io/guides/3.0/user-guide/index.html)/[Apptainer](https://apptainer.org/) image based on Ubuntu 20.04, which could then be used on any Linux distribution.
 It may also be used to compile and install the sdk (including dependencies) if you have difficulties following the normal install procedure.
 
 First, you need to install Singularity.
 On Debian/Ubuntu distributions:
 ```bash
-apt-get install -y singularity-container
+sudo apt update
+sudo apt install -y wget lsb-release
+export DISTRIB_NAME=$(lsb_release -c | cut -f 2)
+wget https://github.com/sylabs/singularity/releases/download/v3.10.4/singularity-ce_3.10.4-${DISTRIB_NAME}_amd64.deb 
+# Alternatively, download one of the .deb package available at https://github.com/sylabs/singularity/releases
+sudo apt install -y ./singularity-ce_3.10.4-${DISTRIB_NAME}_amd64.deb
 ```
 On other distributions, follow the procedure from [the official documentation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html).
 
@@ -420,17 +425,18 @@ After that, you will need to either download an already compiled pogosdk image, 
 To download an already compiled image:
 ```bash
 cd pogobot
-singularity pull library://leo.cazenille/pogobot/pogosdk pogosdk.sif
+singularity pull --arch amd64 pogosdk.sif library://leo.cazenille/pogobot/pogosdk:latest
 ```
-*Alternative*: to build it yourself:
+*Alternative*: to build it yourself (can take some time):
 ```bash
 cd pogobot
 sudo singularity build -F pogosdk.sif pogosdk.def
 ```
-This will create a "pogosdk.sif" image file.
+This will create a "pogosdk.sif" image file (size: around 2GB).
 
 Note that the singularity image contains all required applications to use the SDK -- however you'll still need to install SDK dependencies on your local computer, and compile the SDK. In order to do that, use the following commands:
 ```bash
+cd pogobot
 singularity run --app install_dep pogosdk.sif
 singularity run --app compile_sdk pogosdk.sif
 ```
