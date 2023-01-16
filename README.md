@@ -23,7 +23,7 @@
     - [Compile and upload your application](#compile-and-upload-your-application)
     - [Upload a empty or faulty robot](#upload-a-empty-or-faulty-robot)
     - [Memory map](#memory-map)
-    - [Install on Linux distribution other than Ubuntu](#singularity)
+    - [Install on Linux distributions other than Ubuntu by using Singularity Containers](#singularity)
   - [IR Remote](#ir-remote)
     - [Hardware](#hardware-1)
     - [Software](#software-1)
