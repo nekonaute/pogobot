@@ -1,0 +1,130 @@
+Bootstrap: docker
+From: ubuntu:20.04
+
+
+%labels
+    Author leo.cazenille@gmail.com
+    Version 0.1.0
+
+%environment
+    export LC_ALL=C.UTF-8
+    export LANG=C.UTF-8
+    export PATH=$PATH:/pogobot/dependencies/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin
+
+%post
+    export DEBIAN_FRONTEND=noninteractive
+    export NPROC=$(  grep -i "^processor" /proc/cpuinfo | wc -l )
+
+    apt-get update
+    apt-get install -y wget python3 python3-dev python3-pip git
+    apt-get -y install bison build-essential clang clang-format cmake flex gawk git graphviz libboost-all-dev libboost-dev libboost-filesystem-dev libboost-iostreams-dev libboost-program-options-dev libboost-python-dev libboost-system-dev libboost-thread-dev libeigen3-dev libffi-dev libftdi-dev libreadline-dev mercurial pkg-config python3 python3-dev python3-pip python3-setuptools qt5-default tcl-dev xdot zlib1g-dev
+    pip3 install meson==0.64.1 ninja==1.11.1
+
+    cd /
+    git clone https://github.com/nekonaute/pogobot.git
+    cd /pogobot
+    mkdir -p dependencies
+
+    # gcc and toolchain
+    cd dependencies
+    git clone https://github.com/enjoy-digital/litex.git
+    cd litex
+    git checkout 3ab7eaa5f7afb4d432b5641d7761813d3274d25f
+    chmod +x litex_setup.py
+    ./litex_setup.py --dev --gcc riscv
+
+    # icestorm
+    cd /pogobot/dependencies
+    git clone https://github.com/cliffordwolf/icestorm.git icestorm
+    cd icestorm
+    git checkout 2bc541743ada3542c6da36a50e66303b9cbd2059
+    make -j${NPROC} 
+    make install
+
+    # yosys
+    cd /pogobot/dependencies
+    git clone https://github.com/YosysHQ/yosys
+    cd yosys
+    git checkout tags/yosys-0.18
+    make -j${NPROC}
+    make install
+
+    # nextpnr
+    cd /pogobot/dependencies
+    git clone https://github.com/YosysHQ/nextpnr
+    cd nextpnr
+    git checkout 8d063d38b148b1e7095a032ffc9cf957c2407f32
+    cmake . -DARCH=ice40
+    make -j${NPROC}
+    make install
+
+
+
+%runscript
+    echo "Nothing there yet..."
+
+%apprun install_dep
+#    git clone https://github.com/nekonaute/pogobot.git
+#    cd pogobot
+    mkdir -p dependencies
+
+    cd dependencies
+    git clone https://github.com/enjoy-digital/litex.git
+    cd litex
+    git checkout 3ab7eaa5f7afb4d432b5641d7761813d3274d25f
+    chmod +x litex_setup.py
+
+    ./litex_setup.py --dev init
+    ./litex_setup.py --dev install
+    ln -s ../migen
+    cd ..
+    cat ../litex_version.txt | awk '{ if(!system("test -d " $1)) {system("git -C " $1 " checkout " $3)}}'
+
+    # icestorm
+    git clone https://github.com/cliffordwolf/icestorm.git icestorm
+    cd icestorm
+    git checkout 2bc541743ada3542c6da36a50e66303b9cbd2059
+    make -j${NPROC} 
+    cd ..
+
+    # yosys
+    git clone https://github.com/YosysHQ/yosys
+    cd yosys
+    git checkout tags/yosys-0.18
+    make -j${NPROC}
+    cd ..
+
+    # nextpnr
+    git clone https://github.com/YosysHQ/nextpnr
+    cd nextpnr
+    git checkout 8d063d38b148b1e7095a032ffc9cf957c2407f32
+    cmake . -DARCH=ice40
+    make -j${NPROC}
+    cd ..
+
+
+%apprun compile_sdk
+    cd Software
+    ./pogosoc.py --target=pogobotv3 --cpu-variant=lite --build
+    cd sdk
+    make
+
+
+
+%apprun test_install
+    python3 -m litex.soc.integration.soc_core && echo "LITEX: SUCCESS"
+    echo "from migen import *" | python3 && echo "MIGEN: SUCCESS"
+    echo | yosys > /dev/null && echo "YOSYS: SUCCESS"
+    icebox_diff > /dev/null && echo "ICESTORM: SUCCESS"
+    nextpnr-ice40 --version 2> /dev/null && echo "NEXTPNR: SUCCESS"
+    riscv64-unknown-elf-addr2line -v > /dev/null && echo "GCC toolchain: SUCCESS"
+    
+
+%apprun make
+    make clean
+    NPROC=$(  grep -i "^processor" /proc/cpuinfo | wc -l )
+    exec make -j $NPROC
+
+%apprun bash
+    exec bash
+
