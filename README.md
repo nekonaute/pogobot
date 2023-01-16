@@ -23,6 +23,7 @@
     - [Compile and upload your application](#compile-and-upload-your-application)
     - [Upload a empty or faulty robot](#upload-a-empty-or-faulty-robot)
     - [Memory map](#memory-map)
+    - [Install on Linux distribution other than Ubuntu](#singularity)
   - [IR Remote](#ir-remote)
     - [Hardware](#hardware-1)
     - [Software](#software-1)
@@ -401,6 +402,58 @@ This table shows addresses in flash memory. The flash memory itself is mapped in
 | 0x20000          | Size of pogobios (usually <64KB) | 0x20000   | Pogobios         |
 | 0x40000          | 0x1969a                          | 0x20000   | User gateware    |
 | 0x60000          | Size of user code                | 0x20000   | User software    |
+
+
+### Install on Linux distribution other than Ubuntu
+
+It is possible to build a [Singularity](https://docs.sylabs.io/guides/3.0/user-guide/index.html) image based on Ubuntu 20.04, which could then be used on any Linux distribution.
+It may also be used to compile and install the sdk (including dependencies) if you have difficulties following the normal install procedure.
+
+First, you need to install Singularity.
+On Debian/Ubuntu distributions:
+```bash
+apt-get install -y singularity-container
+```
+On other distributions, follow the procedure from [the official documentation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html).
+
+After that, you will need to either download an already compiled pogosdk image, or build it yourself.
+To download an already compiled image:
+```bash
+cd pogobot
+singularity pull library://leo.cazenille/pogobot/pogosdk pogosdk.sif
+```
+*Alternative*: to build it yourself:
+```bash
+cd pogobot
+sudo singularity build -F pogosdk.sif pogosdk.def
+```
+This will create a "pogosdk.sif" image file.
+
+Note that the singularity image contains all required applications to use the SDK -- however you'll still need to install SDK dependencies on your local computer, and compile the SDK. In order to do that, use the following commands:
+```bash
+singularity run --app install_dep pogosdk.sif
+singularity run --app compile_sdk pogosdk.sif
+```
+
+You can then test if the compilation of the SDK was successful:
+```bash
+singularity run --app test_install pogosdk.sif
+```
+
+To compile the helloworld example:
+```bash
+cd Software/example/helloworld
+singularity run --app make ../../../../pogosdk.sif
+```
+or:
+```bash
+cd Software/example/helloworld
+singularity exec ../../../../pogosdk.sif make clean all
+```
+
+
+
+
 
 ## IR Remote
 To control each robot, two ways are possible: by cable (debug mode) or by IR.
