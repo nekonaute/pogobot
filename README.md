@@ -17,13 +17,14 @@
   - [Software](#software)
     - [Repository clone](#repository-clone)
     - [Install all the dependency](#install-all-the-dependency)
+    - [Adding your user to Dialout group](#adding-your-user-to-dialout-group)
     - [Compile gateware and pogobios (Has to be done once)](#compile-gateware-and-pogobios-has-to-be-done-once)
     - [Compile the SDK (Has to be done once too)](#compile-the-sdk-has-to-be-done-once-too)
     - [Compile and test "HelloWorld"](#compile-and-test-helloworld)
     - [Compile and upload your application](#compile-and-upload-your-application)
     - [Upload a empty or faulty robot](#upload-a-empty-or-faulty-robot)
     - [Memory map](#memory-map)
-    - [Install on Linux distributions other than Ubuntu by using Singularity Containers](#singularity)
+    - [Install on Linux distributions other than Ubuntu by using Singularity Containers](#install-on-linux-distributions-other-than-ubuntu-by-using-singularity-containers)
   - [IR Remote](#ir-remote)
     - [Hardware](#hardware-1)
     - [Software](#software-1)
@@ -155,15 +156,17 @@ From https://github.com/enjoy-digital/litex
     cat ../../litex_version.txt | awk '{ if(!system("test -d " $1)) {system("git -C " $1 " checkout " $3)}}'
 
     sudo ./litex_setup.py install
-    ./litex_setup.py --gcc riscv
 
-Adding compiler in the path (replace * with the correct name)
+Recover the Cross Compiler
 
-    export GCC_RISCV=$PWD/riscv64-*/bin/
+    wget https://static.dev.sifive.com/dev-tools/freedom-tools/v2020.08/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14.tar.gz
+    tar xvf riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14.tar.gz
+
+    export GCC_RISCV=$PWD/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin/
     echo "export PATH=\"\$PATH:$GCC_RISCV\"" >>~/.bashrc
 
 
-Notice the option `update` that updates a litex but it can break the project.
+Notice the option `update` of litex_setup.py have a high probability to break the project.
 
 **icestorm**
 
@@ -286,6 +289,11 @@ Good:
 
     riscv64-unknown-elf-addr2line: « a.out »: pas de tel fichier
 
+### Adding your user to Dialout group
+
+    sudo adduser $USER dialout
+
+Reboot the PC.
 
 ### Compile gateware and pogobios (Has to be done once)
 
