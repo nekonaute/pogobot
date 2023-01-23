@@ -27,3 +27,6 @@ csr.csv
 *.json
 
 dependencies/
+
+// Singularity
+*.sif
