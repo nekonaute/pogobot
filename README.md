@@ -429,40 +429,40 @@ sudo apt install -y ./singularity-ce_3.10.4-${DISTRIB_NAME}_amd64.deb
 ```
 On other distributions, follow the procedure from [the official documentation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html).
 
-After that, you will need to either download an already compiled pogosdk image, or build it yourself.
+After that, you will need to either download an already compiled pogobot.sif image, or build it yourself.
 To download an already compiled image:
 ```bash
 cd pogobot
-singularity pull --arch amd64 pogosdk.sif library://leo.cazenille/pogobot/pogosdk:latest
+singularity pull --arch amd64 pogobot.sif library://leo.cazenille/pogobot/pogobot:latest
 ```
 *Alternative*: to build it yourself (can take some time):
 ```bash
 cd pogobot
-sudo singularity build -F pogosdk.sif pogosdk.def
+sudo singularity build -F pogobot.sif pogobot.def
 ```
-This will create a "pogosdk.sif" image file (size: around 2GB).
+This will create a "pogobot.sif" image file (size: around 2GB).
 
 Note that the singularity image contains all required applications to use the SDK -- however you'll still need to install SDK dependencies on your local computer, and compile the SDK. In order to do that, use the following commands:
 ```bash
 cd pogobot
-singularity run --app install_dep pogosdk.sif
-singularity run --app compile_sdk pogosdk.sif
+singularity run --app install_dep pogobot.sif
+singularity run --app compile_sdk pogobot.sif
 ```
 
 You can then test if the compilation of the SDK was successful:
 ```bash
-singularity run --app test_install pogosdk.sif
+singularity run --app test_install pogobot.sif
 ```
 
 To compile the helloworld example:
 ```bash
 cd Software/example/helloworld
-singularity run --app make ../../../../pogosdk.sif
+singularity run --app make ../../../../pogobot.sif
 ```
 or:
 ```bash
 cd Software/example/helloworld
-singularity exec ../../../../pogosdk.sif make clean all
+singularity exec ../../../../pogobot.sif make clean all
 ```
 
 
