@@ -205,7 +205,7 @@ static unsigned int exec_frame_cmd(struct sfl_frame* frame)
 
 void ir_boot_loop(void) {
     time_reference_t mytimer;
-    uint32_t timeout = 10000000;  // in microseconds
+    uint32_t timeout = 2000000;  // in microseconds
     struct sfl_frame * frame;
     message_t msg;
     missing_packet = 0;
