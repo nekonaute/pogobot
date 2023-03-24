@@ -343,6 +343,33 @@ Channel 4 to 7 : not connected on head PCB but available on connector to belly\n
 define_command(adc_read, adc_read_handler, "Read ADC registers", POGO_CMDS);
 
 /*
+ * Read ADC continue
+ */
+static void adc_read_continue_handler(int nb_params, char **params) {
+    char *c;
+    uint32_t result;
+    uint32_t channel;
+
+        printf( "type something to quit\n\
+                Channel 0: rear, Channel 1: Right, Channel 2: Left \n");
+
+       
+    while(uart_read_nonblock() == 0) {
+        for(channel=0; channel<3; channel++) {
+            result = ADC_Read(channel);
+            printf("Value read on channel %ld : 0x%02lx\n", channel, result);
+        }
+        printf("\n");
+        msleep(200);
+    } 
+
+
+}
+define_command(adc_read_continue, adc_read_continue_handler, "Read ADC registers in continue", POGO_CMDS);
+
+
+
+/*
  * display the battery voltage 
  * ( put any parameters to display the debug )
 */
