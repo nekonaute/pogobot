@@ -594,6 +594,31 @@ typedef enum
  */
 void pogobot_motor_set( motor_id motor, uint16_t value );
 
+/** (pogobot_motor_dir_status)
+ * recover the value of the motor direction bit field.
+ * 
+ * # Parameters
+ * - none
+ *
+ * # Return
+ * - bit field ( XXXX XMLR )
+ *
+ */
+uint32_t pogobot_motor_dir_status( void );
+
+/** (pogobot_motor_dir_set)
+ * set the value of pwm that commands the motor
+ * 
+ * # Parameters
+ * - 'motor' - is the id of the motor you want to command
+ * - 'value' - is the choosen direction (0 or 1)
+ *
+ * # Return
+ * - none
+ *
+ */
+void pogobot_motor_dir_set( motor_id motor, uint16_t value );
+
 /**
  * ## Helper API
  */

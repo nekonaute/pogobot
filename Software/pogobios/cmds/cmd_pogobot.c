@@ -528,6 +528,51 @@ Setting PWM for motor %d to value %ld\tPress 'q' to quit\r", m_number, pwm_value
 }
 define_command(motor, motor_handler, "Set PWM for motors", POGO_CMDS);
 
+#ifdef CSR_GPIO_BASE
+static void motor_dir_status_handler(int nb_params, char **params) {
+    uint32_t status = pogobot_motor_dir_status();
+    printf(" motors direction status <%lx> \n", status);
+}
+define_command(motor_dir_status, motor_dir_status_handler, "motors direction status", POGO_CMDS);
+
+static void motor_dir_set_handler(int nb_params, char **params) {
+
+    int32_t dir_value[3]={0, 0, 0};
+    int8_t m_number=0;
+    char *c;
+
+    if (( nb_params == 0 ) || ( nb_params > 2 ) ) {
+        printf( "Usage: motor [R|L|M] [value]\n\
+                 R for right, L for left and M for middle motor\n\
+                 Value is 0 or 1 \n");
+        return;
+    }
+
+    switch ((int)params[0][0]) {
+        case 'R':
+        case 'r':
+            m_number = 0;
+            break;
+        case 'L':
+        case 'l':
+            m_number = 1;
+            break;
+        case 'M':
+        case 'm':
+            m_number = 2;
+            break;
+    }
+    dir_value[0] = (uint32_t)strtoul( params[1], &c, 0 );
+    printf("Setting direction for motor %d to value %ld\n", m_number, dir_value[0]);
+	pogobot_motor_dir_set(m_number, dir_value[0]);
+
+
+
+}
+define_command(motor_dir_set, motor_dir_set_handler, "motors direction set", POGO_CMDS);
+
+#endif
+
 #endif //CSR_MOTOR_RIGHT_BASE
 
 /*

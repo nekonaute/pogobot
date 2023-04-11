@@ -47,9 +47,15 @@ mB = 1024*kB
 class GPIO(Module, AutoCSR):
     def __init__(self):
         self.gpo = CSRStorage(3, fields=[
-            CSRField("Right_motor_1", description="Direction for right motor"),
-            CSRField("Left_motor_1", description="Direction for left motor"),
-            CSRField("Middle_motor_1", description="Direction for middle motor")
+            CSRField("Right_motor_dir", description="Direction for right motor", values=[
+                  ("0", "PLUS", " PLUS way "),
+                  ("1", "MINUS", "MINUS way")]),
+            CSRField("Left_motor_dir", description="Direction for left motor", values=[
+                  ("0", "PLUS", " PLUS way "),
+                  ("1", "MINUS", "MINUS way")]),
+            CSRField("Middle_motor_dir", description="Direction for middle motor", values=[
+                  ("0", "PLUS", " PLUS way "),
+                  ("1", "MINUS", "MINUS way")])
             ])
 
 class SPI_CS(Module, AutoCSR):
@@ -310,7 +316,11 @@ class BaseSoC(SoCCore, AutoCSR):
         # ------------------------------------- Belly -------------------------------------------
         # Motors ---------------------------------------------------------------------------------
         # PWM for the 3 motors
-        bidirirectional_motors = False
+        bidirectional_motors = True
+
+        if bidirectional_motors:
+            self.submodules.gpio = GPIO()
+
         if remocon:
             PWM_enabled = False
         else:
@@ -341,18 +351,31 @@ class BaseSoC(SoCCore, AutoCSR):
                 ]
 
                 self.platform.add_extension(_GPIOs)
-                self.comb += self.platform.request("motor_right", 0).eq(self.motor_right.output)
-                self.comb += self.platform.request("motor_left", 0).eq(~self.motor_left.output)  # Normal GPIO 
-                self.comb += self.platform.request("motor_middle").eq(self.motor_middle.output)
                 self.comb += self.platform.request("motor_sleep").eq(1)
-                if bidirirectional_motors == True:
-                    self.comb += self.platform.request("motor_right", 1).eq(self.gpio.gpo.fields.Right_motor_1)
-                    self.comb += self.platform.request("motor_left", 1).eq(self.gpio.gpo.fields.Left_motor_1)
-                    self.comb += self.platform.request("motor_middle", 1).eq(self.gpio.gpo.fields.Middle_motor_1)
+                if bidirectional_motors == True:
+                    self.comb += self.platform.request("motor_right", 0).eq(self.motor_right.output & self.gpio.gpo.fields.Right_motor_dir )
+                    self.comb += self.platform.request("motor_right", 1).eq(self.motor_right.output & ~self.gpio.gpo.fields.Right_motor_dir)
+
+                    # Pin3 connected to a pullup // brake mode
+                    self.comb += self.platform.request("motor_left", 0).eq((~self.motor_left.output & self.gpio.gpo.fields.Left_motor_dir)  | (1 & ~self.gpio.gpo.fields.Left_motor_dir))
+                    self.comb += self.platform.request("motor_left", 1).eq((~self.motor_left.output & ~self.gpio.gpo.fields.Left_motor_dir) | (1 & self.gpio.gpo.fields.Left_motor_dir))  
+                    #self.comb += self.platform.request("motor_left", 0).eq(~self.motor_left.output)
+                    #self.comb += self.platform.request("motor_left", 1).eq(1)
+                    #self.comb += self.platform.request("motor_left", 0).eq(1)
+                    #self.comb += self.platform.request("motor_left", 1).eq(~self.motor_left.output)
+
+
+                    self.comb += self.platform.request("motor_middle", 0).eq(self.motor_middle.output & self.gpio.gpo.fields.Middle_motor_dir)
+                    self.comb += self.platform.request("motor_middle", 1).eq(self.motor_middle.output & ~self.gpio.gpo.fields.Middle_motor_dir)
+                    
                 else:
+                    self.comb += self.platform.request("motor_right", 0).eq(self.motor_right.output)
+                    self.comb += self.platform.request("motor_left", 0).eq(~self.motor_left.output)  # Normal GPIO 
+                    self.comb += self.platform.request("motor_middle", 0).eq(self.motor_middle.output)
                     self.comb += self.platform.request("motor_right", 1).eq(0)
                     self.comb += self.platform.request("motor_left", 1).eq(1)   # open-drain pin, stays at 0
                     self.comb += self.platform.request("motor_middle", 1).eq(0)
+
 
         # Options to yosys/nextpnr (from foboot)
         foboot_optim=True

@@ -127,7 +127,7 @@ void
 pogobot_motor_set( motor_id motor, uint16_t value )
 {
     if ( value > motorFull)
-        value = 1023;
+        value = motorFull;
 
     switch(motor)
     {
@@ -148,6 +148,40 @@ pogobot_motor_set( motor_id motor, uint16_t value )
 #endif
 		break;
 	}
+}
+
+uint32_t 
+pogobot_motor_dir_status( void )
+{
+    uint32_t value = 0xFFFFFFFF;
+#ifdef CSR_GPIO_BASE
+    value = gpio_gpo_read();
+#endif
+    return value;
+}
+
+void 
+pogobot_motor_dir_set( motor_id motor, uint16_t value )
+{
+    switch(motor)
+    {
+#ifdef CSR_GPIO_BASE
+		case motorR:
+        gpio_gpo_right_motor_dir_write(value);
+        break;
+
+        case motorL:
+        gpio_gpo_left_motor_dir_write(value);
+        break;
+
+        case motorB:
+        gpio_gpo_middle_motor_dir_write(value);
+		break;
+#endif
+        default:
+        break;
+    }
+
 }
 
 /* helper */
