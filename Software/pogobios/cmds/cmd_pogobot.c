@@ -102,13 +102,14 @@ static void spi_sr_read_handler(int nb_params, char **params) {
        [length] can be one to 256\n\
        If no argument is given, the first register is displayed\n");
     }
-    if ( nb_params == 1 ) {
+    if ( nb_params >= 1 ) {
         reg  = (uint8_t)strtoul( params[0], &c, 0 );
     }
-    if ( nb_params == 2 ) {
+    if ( nb_params >= 2 ) {
+        
         addr = (uint8_t)strtoul( params[1], &c, 0 );
     }
-    if ( nb_params == 3 ) {
+    if ( nb_params >= 3 ) {
         length = (uint32_t)strtoul( params[2], &c, 0 );
     }
     if( ( reg < 1) || (reg > 3) ) {

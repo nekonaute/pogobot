@@ -174,7 +174,7 @@ void spiEraseSecurityRegister(uint8_t reg) {
 	spiBegin();
 	spi_single_tx(0x44);
 	spi_single_tx(0x0);                 // Address A23-A16
-	spi_single_tx(reg<<0);              // Address A15-A08
+	spi_single_tx(reg<<4);              // Address A15-A08
 	spi_single_tx(0x0);                 // Address A07-A00
 	spiEnd();
     wait_for_device_ready();
@@ -201,7 +201,7 @@ int8_t spiWriteSecurityRegister(uint8_t reg, uint8_t addr, uint8_t *data, uint32
 	spiBegin();
 	spi_single_tx(0x42);
 	spi_single_tx(0x0);                 // Address A23-A16
-	spi_single_tx(reg<<0);              // Address A15-A08
+	spi_single_tx(reg<<4);              // Address A15-A08
 	spi_single_tx(addr);                // Address A07-A00
     for( i=0; i< size; i++) {
         spi_single_tx(data[i]);
@@ -227,7 +227,7 @@ int8_t spiReadSecurityRegister(uint8_t reg, uint8_t addr, uint32_t size, uint8_t
 	spiBegin();
 	spi_single_tx(0x48);
 	spi_single_tx(0x0);                 // Address A23-A16
-	spi_single_tx(reg<<0);              // Address A15-A08
+	spi_single_tx(reg<<4);              // Address A15-A08
 	spi_single_tx(addr);                // Address A07-A00
 	spi_single_tx(0x0);                 // Dummy byte
     for(i=0; i<size; i++) {
