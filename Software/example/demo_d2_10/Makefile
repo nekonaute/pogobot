@@ -5,14 +5,18 @@ POGO_SDK_TOOLS=$(POGO_SDK)/tools
 POGO_SDK_INCS=$(POGO_SDK)/includes
 POGO_SDK_LIBS=$(POGO_SDK)/libs
 
-include $(POGO_SDK_TOOLS)/variables.mak
+POGO_VAR=../../build/pogobotv3/software/include/generated
+
+include $(POGO_VAR)/variables.mak
 include $(POGO_SDK_TOOLS)/common.mak
+
 
 TTY?=/dev/ttyUSB0
 
 SRCS=$(wildcard *.c)
 OBJECTS=$(SRCS:.c=.o)
 OBJECTS_BUILD = $(addprefix $(BUILD_DIR)/, $(OBJECTS))
+
 
 all: directories $(BUILD_DIR)/firmware.bin
 
