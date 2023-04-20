@@ -1,5 +1,5 @@
 
-TARGET?=pogobotv2_1
+TARGET?=pogobotv3
 
 bootloader:
 	@( ./pogosoc.py --cpu-variant=lite --target=$(TARGET) --bootloader --build )
