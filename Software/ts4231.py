@@ -16,12 +16,12 @@ from litex.soc.interconnect import wishbone
 from litex.soc.interconnect import stream
 
 dw = 8 # Data Width
-RX_ZERO = 6 # Upper limits to compare
-RX_ONE = 10
+RX_ZERO = 14 #6 # Upper limits to compare
+RX_ONE = 18 #10
 RX_ZERO_MIN = 1 # Lower limit (Glitch?)
 
-TX_ZERO = 3 # Wait duration after a pulse
-TX_ONE = 8
+TX_ZERO = 6 #3 # Wait duration after a pulse
+TX_ONE = 16 #8
 
 
 def UARTPads():
@@ -182,14 +182,14 @@ class PHYTX(Module):
 
         self.sync += [
             If(self.tx_busy,
-                If( tx_wait == 0,
+                If( tx_wait <= 2,
                     tx.eq(1),                       # Pulse @sys_clk/2
                 ).Else(
-                    tx_wait.eq(tx_wait - 1),        # tw_wait can be changed only if == 0
                     tx.eq(0)
                 ),
-                If( tx_wait == 1,
-                    tx.eq(1))                       # Pulse @sys_clk/4
+                If( tx_wait != 0,
+                    tx_wait.eq(tx_wait - 1),        # tw_wait can be changed only if == 0
+                )                   
             ).Else(
                 tx.eq(0)
             )
