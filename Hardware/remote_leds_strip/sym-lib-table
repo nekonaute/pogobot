@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name "sp8m6")(type "KiCad")(uri "${KIPRJMOD}/Symbols/sp8m6.kicad_sym")(options "")(descr ""))
+  (lib (name "mcp1406-07")(type "KiCad")(uri "${KIPRJMOD}/Symbols/mcp1406-07.kicad_sym")(options "")(descr ""))
+  (lib (name "bsr802")(type "KiCad")(uri "${KIPRJMOD}/Symbols/BSR802NL6327HTSA1.kicad_sym")(options "")(descr ""))
+)
