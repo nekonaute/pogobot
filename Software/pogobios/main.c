@@ -74,7 +74,7 @@ int main(void) {
 
     printf(" Licensed under the MIT License (also known as Expat License).\n");
 
-    printf(" (c) Copyright 2022 Sorbonne Université, Institut des Systèmes Intelligents et de Robotique (ISIR)\n");
+    printf(" (c) Copyright 2022-2023 Sorbonne Université, Institut des Systèmes Intelligents et de Robotique (ISIR)\n");
     printf(" (c) Copyright 2012-2022 Enjoy-Digital\n");
     printf(" (c) Copyright 2007-2015 M-Labs\n");
     printf(" Work funded by the Agence Nationale pour la Recherche (ANR-18-CE33-0006).\n");
