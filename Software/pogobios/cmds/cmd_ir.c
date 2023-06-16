@@ -506,7 +506,7 @@ ir_echo_cancel_handler( int nb_params, char **params )
 define_command(
     ir_echo_cancel, ir_echo_cancel_handler,
     "Enable/disable IR echo cancellation (when active, shuts off IR reception "
-    "while you emit, when disabled  you receive copy of any IR you send).",
+    "When disabled, a copy of any IR you send is received).",
     POGO_CMDS );
 
 /**
@@ -734,7 +734,7 @@ ir_looptest_handler( int nb_params, char **params )
 }
 define_command(
     ir_looptest, ir_looptest_handler,
-    "Send a string of characters through IR and check they are received.",
+    "Send a string of characters through IR and check reception.",
     POGO_CMDS );
 
 /**
@@ -966,7 +966,7 @@ rc_send_cmd_continusly_handler( int nb_params, char **params )
 
 }
 
-define_command( rc_send_cmd_continusly, rc_send_cmd_continusly_handler, "Send continusly the same command through IR",
+define_command( rc_send_cmd_continusly, rc_send_cmd_continusly_handler, "Continuously send the command through IR",
                 POGO_CMDS );
 
 /**
@@ -1033,7 +1033,7 @@ rc_send_user_message_handler( int nb_params, char **params )
 }
 
 define_command( rc_send_user_msg, rc_send_user_message_handler,
-                "Continusly send a message type 1 to all pogobots available through infrared", POGO_CMDS );
+                "Continuously send a message type 1 to all pogobots available through infrared", POGO_CMDS );
 
 /**
  * Command "rc_erase"
