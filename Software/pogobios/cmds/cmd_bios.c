@@ -175,7 +175,7 @@ static void leds_handler(int nb_params, char **params)
 	leds_out_write(value);
 }
 
-define_command(leds, leds_handler, "Set Leds value", SYSTEM_CMDS);
+define_command(leds, leds_handler, "Set LED values", SYSTEM_CMDS);
 #endif
 
 /**
@@ -203,7 +203,7 @@ static void cmd_sim_finish_handler(int nb_params, char **params)
 {
   sim_finish();
 }
-define_command(finish, cmd_sim_finish_handler, "Finish simulation", SYSTEM_CMDS);
+define_command(finish, cmd_sim_finish_handler, "End simulation", SYSTEM_CMDS);
 #endif
 
 /**
