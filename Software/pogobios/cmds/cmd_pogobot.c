@@ -216,7 +216,13 @@ static void run_handler(int nb_params, char **params)
         reboot_ctrl_write(0xac | (addr & 3));    // Reboot FPGA to image 0 (bootloader image)
     }
     else
-        reboot_ctrl_write(0xac | 1);    // Reboot FPGA to image 1 (user image)
+        if (check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET))
+        {
+            reboot_ctrl_write(0xac | 1);    // Reboot FPGA to image 1 (user image)
+        } else {
+            printf( "run user code not possible\n");   
+        }
+        
 }
 define_command(run, run_handler, "Reboot to user image or bootloader", POGO_CMDS);
 #endif
