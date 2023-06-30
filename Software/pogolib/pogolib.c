@@ -58,6 +58,15 @@ pogobot_init( void )
     uart_init();
 #endif
     spiInit();
+    //recover motor direction 
+    uint8_t data[3] = {0};
+    getMotorDirMem(data);
+    //set the motor direction
+    for (size_t i = 0; i < 3; i++)
+    {
+        pogobot_motor_dir_set(i, data[i]);
+    }
+     
 #ifdef CSR_IR_TX_BASE
     ir_uart_init();
     ir_init(); // Uses usleep()
