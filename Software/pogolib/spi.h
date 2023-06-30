@@ -44,6 +44,9 @@ uint64_t getSerial(void);
 int8_t setMotorDirMem(uint8_t *data);
 int8_t getMotorDirMem(uint8_t *data);
 
+//int8_t setMotorPowerMem(uint16_t *data);
+//int8_t getMotorPowerMem(uint16_t *data);
+
 int spiWrite(uint32_t addr, const uint8_t *data, unsigned int count);
 uint8_t spiReset(void);
 int spiInit(void);

@@ -615,6 +615,18 @@ uint32_t pogobot_motor_dir_status( void );
  */
 void pogobot_motor_dir_set( motor_id motor, uint16_t value );
 
+/** (pogobot_motor_get_power)
+ * recover the value of the motor direction bit field.
+ * 
+ * # Parameters
+ * - 'p_motors' - is a pointer to a table [R, L, B] 
+ *
+ * # Return
+ * - read status
+ *
+ */
+//uint8_t pogobot_motor_get_power( uint16_t *p_motors );
+
 /**
  * ## Helper API
  */

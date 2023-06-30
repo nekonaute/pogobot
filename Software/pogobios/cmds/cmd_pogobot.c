@@ -646,10 +646,10 @@ static void motor_dir_mem_handler(int nb_params, char **params) {
     char *c;
 
     if ( nb_params != 3 ) {
-        printf( "Usage: motor [valueR] [valueL] [valueB]\n\
+        printf( "Usage: motor_dir_mem [valueR] [valueL] [valueB]\n\
                  R for right, L for left and M for middle motor\n\
                  Value is 0 or 1 \n\
-                 e.g. motor 1 0 0 \n");
+                 e.g. motor_dir_mem 1 0 0 \n");
         return;
     }
 
@@ -660,6 +660,38 @@ static void motor_dir_mem_handler(int nb_params, char **params) {
 
 }
 define_command(motor_dir_mem, motor_dir_mem_handler, "memorize motors direction", POGO_CMDS);
+
+/*static void motor_power_mem_set_handler(int nb_params, char **params) {
+
+    uint16_t p_value[3]={0, 0, 0};
+    char *c;
+
+    if ( nb_params != 3 ) {
+        printf( "Usage: motor_power_mem_set [valueR] [valueL] [valueB]\n\
+                 R for right, L for left and M for middle motor\n\
+                 Value is 0 or 1 \n\
+                 e.g. motor_power_mem_set 512 650 0\n");
+        return;
+    }
+
+    p_value[0] = (uint16_t)strtoul( params[0], &c, 0 );
+    p_value[1] = (uint16_t)strtoul( params[1], &c, 0 );
+    p_value[2] = (uint16_t)strtoul( params[2], &c, 0 );
+	setMotorPowerMem(p_value);
+
+}
+define_command(motor_power_mem_set, motor_power_mem_set_handler, "memorize motors power", POGO_CMDS);
+
+static void motor_power_mem_get_handler(int nb_params, char **params) {
+    uint16_t m_power[3]={0};
+    
+    getMotorPowerMem(m_power);
+
+    printf(" motors power status {L %d, R %d, B %d} \n", m_power[0],m_power[1],m_power[2]);
+}
+define_command(motor_power_mem_get, motor_power_mem_get_handler, "motors power status", POGO_CMDS);
+*/
+
 #endif
 
 

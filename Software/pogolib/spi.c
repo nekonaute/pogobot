@@ -172,22 +172,48 @@ int8_t setMotorDirMem(uint8_t *data) {
 	spiWriteSecurityRegister(2, 0, data, size);
 	// writing a key to confirm
 	uint8_t key = 42;
-	return spiWriteSecurityRegister(2, 3, &key, 1);
+	return spiWriteSecurityRegister(2, size, &key, 1);
 
 }
 
 int8_t getMotorDirMem(uint8_t *data) {
 
 	uint8_t key = 0;
-	spiReadSecurityRegister(2, 3, 1, &key);
+	uint32_t size = sizeof(uint8_t) * 3;
+	spiReadSecurityRegister(2, size, 1, &key);
 	if (key != 42)
 		return -1;
-
-	uint32_t size = sizeof(uint8_t) * 3;
 	return spiReadSecurityRegister(2, 0, size, data);
 
 
 }
+
+/*
+* use the third Security Register to memorize the motor power
+* [uint16_t R, uint16_t L, uint16_t M]
+*/
+/*int8_t setMotorPowerMem(uint16_t *data) {
+
+	spiEraseSecurityRegister(3);
+	uint32_t size = sizeof(uint16_t) * 3;
+	spiWriteSecurityRegister(2, 0, (uint8_t *)data, size);
+	// writing a key to confirm
+	uint8_t key = 42;
+	return spiWriteSecurityRegister(2, size, &key, 1);
+
+}
+
+int8_t getMotorPowerMem(uint16_t *data) {
+
+	uint8_t key = 0;
+	uint32_t size = sizeof(uint16_t) * 3;
+	spiReadSecurityRegister(2, size, 1, &key);
+	if (key != 42)
+		return -1;
+	return spiReadSecurityRegister(2, 0, size, (uint8_t *)data);
+
+
+}*/
 
 void spiEraseSecurityRegister(uint8_t reg) {
     /* reg is 1, 2 or 3 to chose the corresponding register to be erased */
