@@ -459,15 +459,15 @@ void pogobot_led_setColors( const uint8_t r, const uint8_t g, const uint8_t b, u
 
 /**
  * ### Photosensor id definition
- * - 0 is the rear sensor
- * - 1 is the right sensor
- * - 2 is the left sensor
+ * - 0 is the back sensor
+ * - 1 is the front-left sensor
+ * - 2 is the front-right sensor
  */
 
 typedef enum
 {
-    p_FR = 1,
-    p_FL = 2,
+    p_FL = 1,
+    p_FR = 2,
     p_B = 0
 } photosensor_id;
 
