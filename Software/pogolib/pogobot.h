@@ -191,8 +191,6 @@ typedef enum
  * - uint8_t _sender_ir_index     - IR id direction of the sender robot  
  * - uint16_t receiver_id         - id of the recipient robot
  * - uint8_t _receiver_ir_index   - IR id direction that received the message
- * - uint8_t _sequence_number     - (not used for now)
- * - uint8_t user_tag             - allows the user to give a tag to a message
  * - uint16_t payload_length      - size of the payload
  *
  */
@@ -205,8 +203,6 @@ typedef struct message_header_t
     uint8_t _sender_ir_index;
     uint16_t receiver_id;
     uint8_t _receiver_ir_index;
-    uint8_t _sequence_number;
-    uint8_t user_tag;
     uint16_t payload_length;
 } message_header_t;
 
