@@ -172,7 +172,7 @@ int8_t setMotorDirMem(uint8_t *data) {
 	spiWriteSecurityRegister(2, 0, data, size);
 	// writing a key to confirm
 	uint8_t key = 42;
-	spiWriteSecurityRegister(2, 3, &key, 1);
+	return spiWriteSecurityRegister(2, 3, &key, 1);
 
 }
 
@@ -181,7 +181,7 @@ int8_t getMotorDirMem(uint8_t *data) {
 	uint8_t key = 0;
 	spiReadSecurityRegister(2, 3, 1, &key);
 	if (key != 42)
-		return;
+		return -1;
 
 	uint32_t size = sizeof(uint8_t) * 3;
 	return spiReadSecurityRegister(2, 0, size, data);
