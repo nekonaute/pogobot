@@ -16,6 +16,7 @@ Table of contents
 - [pogoSDK](#pogosdk)
   - [Compile examples](#compile-examples)
   - [Compile and upload your own application](#compile-and-upload-your-own-application)
+- [Install on Linux distributions other than Ubuntu by using Singularity Containers](#install-on-linux-distributions-other-than-ubuntu-by-using-singularity-containers)
 
 
 
@@ -110,3 +111,45 @@ Compile and upload your own application
 To make a new application, duplicate an example. 
 If you move to a new folder, don't forget to change the SDK path inside the Makefile.
 
+
+Install on Linux distributions other than Ubuntu by using Singularity Containers
+================================================================================
+
+It is possible to build a [Singularity](https://docs.sylabs.io/guides/3.0/user-guide/index.html)/[Apptainer](https://apptainer.org/) image based on Ubuntu 20.04, which could then be used on any Linux distribution.
+It may also be used to compile and install the sdk (including dependencies) if you have difficulties following the normal install procedure.
+
+First, you need to install Singularity.
+On Debian/Ubuntu distributions:
+```bash
+sudo apt update
+sudo apt install -y wget lsb-release
+export DISTRIB_NAME=$(lsb_release -c | cut -f 2)
+wget https://github.com/sylabs/singularity/releases/download/v3.10.4/singularity-ce_3.10.4-${DISTRIB_NAME}_amd64.deb 
+# Alternatively, download one of the .deb package available at https://github.com/sylabs/singularity/releases
+sudo apt install -y ./singularity-ce_3.10.4-${DISTRIB_NAME}_amd64.deb
+```
+On other distributions, follow the procedure from [the official documentation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html).
+
+After that, you will need to either download an already compiled pogobot-sdk.sif image, or build it yourself.
+To download an already compiled image:
+```bash
+cd pogobot-sdk
+singularity pull --arch amd64 pogobot-sdk.sif library://leo.cazenille/pogobot/pogobot-sdk:latest
+```
+*Alternative*: to build it yourself (can take some time):
+```bash
+cd pogobot-sdk
+sudo singularity build -F pogobot-sdk.sif pogobot-sdk.def
+```
+This will create a "pogobot-sdk.sif" image file (size: around 1.5GB).
+
+To compile the helloworld example:
+```bash
+cd example/helloworld
+singularity run --app make ../../pogobot-sdk.sif
+```
+or:
+```bash
+cd example/helloworld
+singularity exec ../../pogobot-sdk.sif make clean all
+```
