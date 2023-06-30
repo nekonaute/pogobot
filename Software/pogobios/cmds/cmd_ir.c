@@ -153,6 +153,11 @@ ir_target_bit_mask_handler( int nb_params, char **params )
     if ( ( nb_params == 0 ) || ( nb_params > 1 ) )
     {
         printf( "ir_target_bit_mask [bit mask]\n" );
+        printf("\t 0001 (0x1) :  front \n");
+        printf("\t 0010 (0x2) :  right \n");
+        printf("\t 0100 (0x4) :  back \n");
+        printf("\t 1000 (0x8) :  left \n");
+        printf("E.g. : ir_target_bit_mask 0x3  #activate only front and right.");
         if ( nb_params > 1 )
         {
             return;
@@ -231,6 +236,15 @@ ir_send_handler( int nb_params, char **params )
     if ( ( nb_params == 0 ) || ( nb_params > 2 ) )
     {
         printf( "ir_send <message> [target_ir_bit_mask]\n" );
+        printf("<message> : message content \n");
+        printf("[target_ir_bit_mask] (optional): \n");
+        printf("\t 0001 (0x1) :  front \n");
+        printf("\t 0010 (0x2) :  right \n");
+        printf("\t 0100 (0x4) :  back \n");
+        printf("\t 1000 (0x8) :  left \n");
+
+        printf(" E.g. : ir_send \"hello!\" 0xf \n");
+
         if ( nb_params > 2 )
         {
             return;
@@ -271,6 +285,153 @@ define_command( ir_send, ir_send_handler, "Send message through IR",
                 POGO_CMDS );
 
 /**
+ * Command "ir_send_loop"
+ *
+ * Send message through the infrared LEDs in loop with a delay
+ *
+ */
+static void
+ir_send_loop_handler( int nb_params, char **params )
+{
+    char *c;
+    unsigned int *value;
+    unsigned int delay;
+
+    if ( ( nb_params == 0 ) || ( nb_params > 3 ) )
+    {
+        printf( "ir_send <message> <time> [target_ir_bit_mask]\n" );
+        printf("<message> : message content \n");
+        printf("<time> : delay between message in ms \n");
+        printf("[target_ir_bit_mask] (optional): \n");
+        printf("\t 0001 (0x1) :  front \n");
+        printf("\t 0010 (0x2) :  right \n");
+        printf("\t 0100 (0x4) :  back \n");
+        printf("\t 1000 (0x8) :  left \n");
+
+        printf(" E.g. : ir_send \"hello!\" 10 0xf \n");
+
+        if ( nb_params > 3 || nb_params == 0 )
+        {
+            return;
+        }
+    }
+
+    if ( nb_params >= 3 )
+    {
+        target_ir_bit_mask = (uint32_t)strtoul( params[2], &c, 0 );
+        if ( *c != 0 )
+        {
+            printf( "Incorrect target_ir_bit_mask value : %s\n", params[1] );
+            return;
+        }
+    }
+    printf( "type something to quit\n");
+    printf( "Using target_ir_bit_mask=0x%x\n", target_ir_bit_mask );    
+	
+    delay = (unsigned int)strtoul(params[1], &c, 0);
+    value = (unsigned int *)strtoul(params[0], &c, 0);
+    if (*c != 0) {
+		char *msg = params[0];
+		size_t msglen = strlen( msg );
+		printf( "Sending message : %s, length : %d, delay : %u ms\n", msg, msglen, delay );
+
+        while (uart_read_nonblock() == 0) {
+            if( IRn_tx_write_msg(target_ir_bit_mask, (ir_uart_word_t *)msg, msglen) != 0 ) {
+                printf("Error sending message");
+            } else {
+                printf(".");
+            }
+
+            msleep(delay);
+        }
+		
+    }
+	else {
+		printf("Sending value : 0x%08x, delay : %u ms\n",(unsigned int)value, delay);
+
+        while (uart_read_nonblock() == 0) {
+            if( IRn_tx_write_msg(target_ir_bit_mask, (ir_uart_word_t *)(&value), sizeof(value)) ) {
+                printf("Error sending message");
+            } else {
+                printf(".");
+            }
+
+            msleep(delay);
+        }
+        
+		
+	}
+
+}
+
+define_command( ir_send_loop, ir_send_loop_handler, "Send message through IR in loop",
+                POGO_CMDS );
+
+/**
+ * Command "ir_monitor"
+ *
+ * counts the number of SLIP messages received from each sensor (i.e. valid messages)
+ *
+ */
+static void
+ir_monitor_handler( int nb_params, char **params )
+{
+    char *c;
+    unsigned int delay_ms;
+    unsigned int delay_us;
+
+    if ( ( nb_params == 0 ) || ( nb_params > 1 ) )
+    {
+        printf( "ir_monitor <time>\n" );
+        printf("<time> : count delay in ms \n");
+        printf(" E.g. : ir_monitor 100 \n");
+
+            return;
+    }
+
+    delay_ms = (unsigned int)strtoul(params[0], &c, 0);
+    delay_us = delay_ms*1000;
+
+    uint32_t nb_cumul[4]={0};
+    
+    printf( "type something to quit\n");
+    printf(" delay betwwen each display %d ms\n", delay_ms);
+    printf("# nb_messages front, right, back, left\n"); // 0, 1, 2, 3
+
+    // init timer 
+    time_reference_t mytimer;
+    pogobot_timer_init( &mytimer, delay_us ); // ms => us
+
+    while (uart_read_nonblock() == 0) {
+        pogobot_infrared_update();
+        while ( pogobot_infrared_message_available() ) {
+                message_t mr;
+                pogobot_infrared_recover_next_message( &mr );
+
+                nb_cumul[mr.header._receiver_ir_index] ++;
+        }
+
+        if ( pogobot_timer_has_expired( &mytimer ) )
+        {
+            pogobot_timer_offset_origin_microseconds( &mytimer, delay_us );
+            for (size_t i = 0; i < 4; i++)
+            {
+                if (i < 3) {
+                    printf("%ld,",nb_cumul[i]);
+                } else {
+                    printf("%ld",nb_cumul[i]);
+                }  
+                nb_cumul[i] = 0;
+            }
+        }
+    }
+
+}
+
+define_command( ir_monitor, ir_monitor_handler, "Counts the number of SLIP messages received from each sensor (i.e. valid messages)",
+                POGO_CMDS );
+
+/**
  * Command "ir_power <powerl_level>"
  *
  * Set power lever for the infrared LEDs
@@ -285,6 +446,14 @@ ir_power_handler( int nb_params, char **params )
     if ( ( nb_params == 0 ) || ( nb_params > 2 ) )
     {
         printf( "ir_power_handler <power_level> [target_ir_bit_mask]\n" );
+        printf("<power_level> : 0(none), 1,2 or 3 (max) \n");
+        printf("[target_ir_bit_mask] : \n");
+        printf("\t 0001 (0x1) :  front \n");
+        printf("\t 0010 (0x2) :  right \n");
+        printf("\t 0100 (0x4) :  back \n");
+        printf("\t 1000 (0x8) :  left \n");
+
+        printf(" E.g. : ir_power 3 0xf # set all sensors to max power.\n");
         //if ( nb_params > 2 )
         {
             return;
@@ -320,7 +489,7 @@ ir_power_handler( int nb_params, char **params )
         IRn_conf_tx_power_write( ir_i, level );
     }
 }
-define_command( ir_power, ir_power_handler, "Set IR power level", POGO_CMDS );
+define_command( ir_power, ir_power_handler, "Set IR power level.", POGO_CMDS );
 
 #ifdef CSR_IR_RX0_CONF_RX_ZERO_OFFSET
 /**

@@ -72,6 +72,24 @@ static void add_robot_handler(int nb_params, char **params) {
 define_command(add_robot, add_robot_handler, "Write serial number to security register of the SPI flash", POGO_CMDS);
 
 /*
+ * Command "Display all robot's Ids"
+ */
+static void robot_id_handler(int nb_params, char **params) {
+
+    extern uint64_t unique_id, serial_number;
+
+    if(unique_id != 0) 
+        printf(" Unique ID: 0x%08lx%08lx\n", (uint32_t)(unique_id>>32), (uint32_t)(unique_id & 0xffffffff));
+    if(serial_number != 0) { 
+        printf(" Serial #: 0x%08lx%08lx , ", (uint32_t)(serial_number>>32), (uint32_t)(serial_number & 0xffffffff));
+        printSerial();
+    }
+    printf("\n Return of pogobot_helper_getid : 0x%x\n", pogobot_helper_getid());
+
+}
+define_command(robot_id, robot_id_handler, "Display all robot's Ids", POGO_CMDS);
+
+/*
  * Erase SPI Security Registers
  */
 static void spi_sr_erase_handler(int nb_params, char **params) {
@@ -285,17 +303,34 @@ static void imu_read_acc_handler(int nb_params, char **params)
 {
     float acc[3] = {0, 0, 0};
     float gyro[3] = {0, 0, 0};
+    char *c;
+    unsigned int delay_ms;
 
+    if ( ( nb_params == 0 ) || ( nb_params > 1 ) )
+    {
+        printf( "imu_read_sensor <time>\n" );
+        printf("<time> : count delay in ms \n");
+        printf(" E.g. : imu_read_sensor 100 \n");
+
+            return;
+    }
+
+    delay_ms = (unsigned int)strtoul(params[0], &c, 0);
+
+    printf( "type something to quit\n");
     printf("Acc *1000 m.s-2\n");
     printf("Gyro *100 rads\n");
+    printf("delay betwwen each display %d ms\n", delay_ms);
+    printf("# Acc X, Acc Y, Acc Z, Gyro X, Gyro Y Gyro Z\n");
 
     while(uart_read_nonblock() == 0) {
         readAcc(acc);
-        //readAcc((float*)(&acc));
-	    printf("Acc X %d Y %d  Z %d \n", (int)(acc[0]*1000), (int)(acc[1]*1000), (int)(acc[2]*1000)); 
         readGyro((float*)(&gyro));
-	    printf("Gyro X %d Y %d  Z %d \n", (int)(gyro[0]*100), (int)(gyro[1]*100), (int)(gyro[2]*100)); 
-        msleep(200);
+
+	    printf("%d, %d, %d, ", (int)(acc[0]*1000), (int)(acc[1]*1000), (int)(acc[2]*1000)); 
+	    printf("%d, %d, %d \n", (int)(gyro[0]*100), (int)(gyro[1]*100), (int)(gyro[2]*100));
+
+        msleep(delay_ms);
     }    
 }
 define_command(imu_read_sensor, imu_read_acc_handler, "Read IMU sensor", POGO_CMDS);
@@ -325,7 +360,7 @@ static void adc_read_handler(int nb_params, char **params) {
     uint32_t channel;
     if (( nb_params == 0 ) || ( nb_params > 1 ) ) {
         printf( "Usage: adc_read [channel]\n\
-Channel 0: rear, Channel 1: Right, Channel 2: Left, Channel 3: Battery level\n\
+Channel 0: Back, Channel 1: Front-Left, Channel 2: Front-Right, Channel 3: Battery level\n\
 Channel 4 to 7 : not connected on head PCB but available on connector to belly\n");
         for(channel=0; channel<ADC_INPUTS; channel++) {
             result = ADC_Read(channel);
@@ -350,29 +385,30 @@ Channel 4 to 7 : not connected on head PCB but available on connector to belly\n
 define_command(adc_read, adc_read_handler, "Read ADC registers", POGO_CMDS);
 
 /*
- * Read ADC continue
+ * Read ADC in loop
  */
-static void adc_read_continue_handler(int nb_params, char **params) {
-    char *c;
+static void adc_read_loop_handler(int nb_params, char **params) {
     uint32_t result;
     uint32_t channel;
 
-        printf( "type something to quit\n\
-                Channel 0: rear, Channel 1: Right, Channel 2: Left \n");
-
+        printf("type something to quit\n");
+        printf("# photosensor Back (0), photosensor Front-Left (1), photosensor Front-Right (2), batery level, CH4, CH5, CH6, CH7\n");
        
     while(uart_read_nonblock() == 0) {
-        for(channel=0; channel<3; channel++) {
+        for(channel=0; channel<8; channel++) {
             result = ADC_Read(channel);
-            printf("Value read on channel %ld : 0x%02lx\n", channel, result);
+            if (channel != 7) {
+                printf("0x%02lx,", result);
+            } else {
+                printf("0x%02lx\n", result);
+            }
         }
-        printf("\n");
         msleep(200);
     } 
 
 
 }
-define_command(adc_read_continue, adc_read_continue_handler, "Read ADC registers in continue", POGO_CMDS);
+define_command(adc_read_loop, adc_read_loop_handler, "Read ADC registers in loop", POGO_CMDS);
 
 
 
@@ -384,6 +420,13 @@ static void battery_reading_handler(int nb_params, char **params) {
     uint32_t result = 0;
     uint32_t bLevel = 0;
     uint8_t iter = 16;
+
+    if(nb_params) {
+        printf(" green : bat >= 3.3V \n\
+                 yellow : 3.2V <= bat < 3.3V \n\
+                 orange : 3.1V <= bar < 3.2V \n\
+                 red : bat < 3.1V \n");
+    }
     
     // read battery level
     for (int i = 0; i < iter; i++)
@@ -425,11 +468,17 @@ define_command(bat_life, battery_reading_handler, "give a color corresponding of
 
 static void voltage_mode_handler(int nb_params, char **params) {
     extern uint8_t voltage_status;
-    voltage_status = !voltage_status;
+    char *c;
+
+    if ( nb_params != 1) {
+        printf( "volt_mode 0|1. (0: OFF, 1: ON) \n");
+        return;
+    }
+    voltage_status = (uint8_t)strtoul(params[0], &c, 0);
 
     printf(" new voltage mode status(%d)\n", voltage_status);
 }
-define_command(volt_mode, voltage_mode_handler, "toggle the voltage mode", POGO_CMDS);
+define_command(volt_mode, voltage_mode_handler, "Voltage mode (0: OFF, 1: ON)", POGO_CMDS);
 
 static void autotest_mode_handler(int nb_params, char **params) {
     extern uint8_t autotest_status;
@@ -453,18 +502,19 @@ static void motor_handler(int nb_params, char **params) {
     char key=0;
     int32_t pwm_values[3]={0, 0, 0};
     int8_t m_number=0, incr=0;
+
     printf( "Usage: motor [R|L|M] [value]\n\
-   R for right, L for left and M for middle motor\n\
-   value is the PWM level between 0 (off) and 1023\n");
-    if ( nb_params > 2 ) {
-        printf("if no argument given: interactive mode\n");
-        return;
-    }
+             R for right, L for left and M for middle motor\n\
+            value is the PWM level between 0 (off) and 1023\n");
+    printf(" or motor [R_value] [L_value] [M_value]\n\
+                value is the PWM level between 0 (off) and 1023\n");
+    printf("if no argument given: interactive mode\n");
+    
     if ( nb_params == 0 ) {
         printf("Interactive mode :\n\
-   press R or r, L or l, M or m to increment or decrement the PWM value\n\
-   press z to zero the values\n\
-   press q to quit\n");
+                press R or r, L or l, M or m to increment or decrement the PWM value\n\
+                press z to zero the values\n\
+                press q to quit\n");
         while( (key != 'q') ) {
             if( uart_read_nonblock() != 0) {
                 key = uart_read();
@@ -513,26 +563,35 @@ Setting PWM for motor %d to value %ld\tPress 'q' to quit\r", m_number, pwm_value
             }
         }
         return;
-    }
-
-    switch ((int)params[0][0]) {
-        case 'R':
-        case 'r':
-            m_number = 0;
-            break;
-        case 'L':
-        case 'l':
-            m_number = 1;
-            break;
-        case 'M':
-        case 'm':
-            m_number = 2;
-            break;
-    }
-    pwm_values[0] = (uint32_t)strtoul( params[1], &c, 0 );
-    printf("Setting PWM for motor %d to value %ld\n", m_number, pwm_values[0]);
-	pogobot_motor_set(m_number, pwm_values[0]);
+    } else if (nb_params == 2 ) {
+        switch ((int)params[0][0]) {
+            case 'R':
+            case 'r':
+                m_number = 0;
+                break;
+            case 'L':
+            case 'l':
+                m_number = 1;
+                break;
+            case 'M':
+            case 'm':
+                m_number = 2;
+                break;
+        }
+        pwm_values[0] = (uint32_t)strtoul( params[1], &c, 0 );
+        printf("Setting PWM for motor %d to value %ld\n", m_number, pwm_values[0]);
+        pogobot_motor_set(m_number, pwm_values[0]);
+    } else if ( nb_params == 3) {
+        for (size_t i = 0; i < 3; i++)
+        {
+            pwm_values[i] = (uint32_t)strtoul( params[i], &c, 0 );
+            printf("Setting PWM for motor %d to value %ld\n", i, pwm_values[i]);
+	        pogobot_motor_set(i, pwm_values[i]);
+        }
+        
+    } 
 }
+
 define_command(motor, motor_handler, "Set PWM for motors", POGO_CMDS);
 
 #ifdef CSR_GPIO_BASE
@@ -587,11 +646,13 @@ define_command(motor_dir_set, motor_dir_set_handler, "motors direction set", POG
  */
 static void rgb_set_handler(int nb_params, char **params) {
 	char *c;
-    uint32_t color, id;
+    uint32_t color;
+    int8_t id;
     if (( nb_params == 0 ) || ( nb_params > 2 ) ) {
         printf( "Usage: rgb_set [color in hex] [LED_id]\n\
+       no [LED_id] means 0, -1 means all, {0,4}\n\
        color is a 24bit value in Red Green Blue MSB to LSB.\n\
-       Example : Set RED color : rgb_set 0xFF0000\n\
+       Example : Set RED color : rgb_set 0xFF0000 0\n\
        You can specify which LED to control as last argument\n\
        LED 0 is the LED on head board\n\
        LED 1 is the LED in front of belly board\n\
@@ -599,11 +660,13 @@ static void rgb_set_handler(int nb_params, char **params) {
         return;
     }
     if ( nb_params == 2 ) {
-        id = (uint32_t)strtoul( params[1], &c, 0 );
-        if ( id > 4 ) {
+        id = (int8_t)strtoul( params[1], &c, 0 );
+        if ( id < -1 && id > 4 ) {
             printf("Error : There are only 5 LEDs, index 0 to 4\n");
             return;
         }
+    } else {
+        id = 0;
     }
     color = (uint32_t)strtoul( params[0], &c, 0 );
     if( color > 0xFFFFFF ) {
@@ -611,17 +674,21 @@ static void rgb_set_handler(int nb_params, char **params) {
         return;
     }
 #ifdef RGB_LEDS
-    if ( nb_params == 2 ) {
+    if ( id >=0 ) {
         rgb_set_led((color&0xFF0000) >> 16, (color&0xFF00) >> 8, color&0xFF, id);
     }
     else {
-        rgb_set((color&0xFF0000) >> 16, (color&0xFF00) >> 8, color&0xFF);
+        for (size_t i = 0; i < 5; i++)
+        {
+            rgb_set_led((color&0xFF0000) >> 16, (color&0xFF00) >> 8, color&0xFF, i);
+        }
+        
     }
 #else
     rgb_set((color&0xFF0000) >> 16, (color&0xFF00) >> 8, color&0xFF);
 #endif
 }
-define_command(rgb_set, rgb_set_handler, "Set RGB LED color", POGO_CMDS);
+define_command(set_led, rgb_set_handler, "Set RGB LED color", POGO_CMDS);
 
 
 /*
