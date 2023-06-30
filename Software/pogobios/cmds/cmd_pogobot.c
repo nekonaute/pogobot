@@ -25,6 +25,7 @@
 
 #ifdef CSR_IR_RX0_BASE
 #include <pogobot.h>
+#include <spi.h>
 #endif
 
 /*
@@ -597,6 +598,7 @@ define_command(motor, motor_handler, "Set PWM for motors", POGO_CMDS);
 #ifdef CSR_GPIO_BASE
 static void motor_dir_status_handler(int nb_params, char **params) {
     uint32_t status = pogobot_motor_dir_status();
+    printf("field ( XXXX XMLR )\n");
     printf(" motors direction status <%lx> \n", status);
 }
 define_command(motor_dir_status, motor_dir_status_handler, "motors direction status", POGO_CMDS);
@@ -636,6 +638,30 @@ static void motor_dir_set_handler(int nb_params, char **params) {
 
 }
 define_command(motor_dir_set, motor_dir_set_handler, "motors direction set", POGO_CMDS);
+
+#ifdef CSR_SPI_CS_BASE
+static void motor_dir_mem_handler(int nb_params, char **params) {
+
+    uint8_t dir_value[3]={0, 0, 0};
+    char *c;
+
+    if ( nb_params != 3 ) {
+        printf( "Usage: motor [valueR] [valueL] [valueB]\n\
+                 R for right, L for left and M for middle motor\n\
+                 Value is 0 or 1 \n\
+                 e.g. motor 1 0 0 \n");
+        return;
+    }
+
+    dir_value[0] = (uint8_t)strtoul( params[0], &c, 0 );
+    dir_value[1] = (uint8_t)strtoul( params[1], &c, 0 );
+    dir_value[2] = (uint8_t)strtoul( params[2], &c, 0 );
+	setMotorDirMem(dir_value);
+
+}
+define_command(motor_dir_mem, motor_dir_mem_handler, "memorize motors direction", POGO_CMDS);
+#endif
+
 
 #endif
 
