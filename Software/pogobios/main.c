@@ -60,17 +60,17 @@ int main(void) {
     int nb_params;
     extern uint64_t unique_id, serial_number;
 
-    pogobot_init(); // Needed for printf() (interrupts)
+    pogobot_init(); // Needed for printf() (interrupts), slip, ...
 
     printf("\n");
-    printf("\e[1m     ____                   _           _         \e[0m\n");
+    /*printf("\e[1m     ____                   _           _         \e[0m\n");
     printf("\e[1m    |  _ \\ ___   __ _  ___ | |__   ___ | |_      \e[0m\n");
     printf("\e[1m    | |_) / _ \\ / _` |/ _ \\| '_ \\ / _ \\| __|  \e[0m\n");
     printf("\e[1m    |  __/ (_) | (_| | (_) | |_) | (_) | |_       \e[0m\n");
     printf("\e[1m    |_|   \\___/ \\__, |\\___/|_.__/ \\___/ \\__| \e[0m\n");
     printf("\e[1m                 |___/                            \e[0m\n");
     printf("\e[1m    https://pogobot.github.io                     \e[0m\n");
-    printf("\n");
+    printf("\n");*/
 
     printf(" Licensed under the MIT License (also known as Expat License).\n");
 
