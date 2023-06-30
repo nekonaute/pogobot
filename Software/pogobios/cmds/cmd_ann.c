@@ -67,4 +67,4 @@ ann_handler( int nb_params, char **params )
     printf( "Elapsed time for i iterations : %lu, per iteration: %lu in microseconds\n",
             time_microseconds, time_microseconds / it );
 }
-define_command( ann_test, ann_handler, "Benchmark ANN.", POGO_CMDS );
+//define_command( ann_test, ann_handler, "Benchmark ANN.", POGO_CMDS );
