@@ -160,6 +160,35 @@ uint64_t getSerial(void) {
     }
 }
 
+
+/*
+* use the second Security Register to memorize the motor direction
+* [uint8_t R, uint8_t L, uint8_t M]
+*/
+int8_t setMotorDirMem(uint8_t *data) {
+
+	spiEraseSecurityRegister(2);
+	uint32_t size = sizeof(uint8_t) * 3;
+	spiWriteSecurityRegister(2, 0, data, size);
+	// writing a key to confirm
+	uint8_t key = 42;
+	spiWriteSecurityRegister(2, 3, &key, 1);
+
+}
+
+int8_t getMotorDirMem(uint8_t *data) {
+
+	uint8_t key = 0;
+	spiReadSecurityRegister(2, 3, 1, &key);
+	if (key != 42)
+		return;
+
+	uint32_t size = sizeof(uint8_t) * 3;
+	return spiReadSecurityRegister(2, 0, size, data);
+
+
+}
+
 void spiEraseSecurityRegister(uint8_t reg) {
     /* reg is 1, 2 or 3 to chose the corresponding register to be erased */
     if(reg > 3) {
