@@ -32,7 +32,7 @@
  * Benchmark Artificial Neural Network
  *
  */
-static void
+/*static void
 ann_handler( int nb_params, char **params )
 {
     printf( "Testing with a fully connected ANN, 24 inputs, 31 hidden neurons, 9 outputs, sigmoid activation function (hidden and output neurons).\n");
@@ -41,7 +41,7 @@ ann_handler( int nb_params, char **params )
     printf( "\nInit neural net step matrix.\n" );
     neural_network_matrix_populate();
 
-    /* init timer */
+    //init timer
     timer0_en_write( 0 );
     timer0_reload_write( 0 );
     timer0_load_write( 0xffffffff );
@@ -67,4 +67,4 @@ ann_handler( int nb_params, char **params )
     printf( "Elapsed time for i iterations : %lu, per iteration: %lu in microseconds\n",
             time_microseconds, time_microseconds / it );
 }
-//define_command( ann_test, ann_handler, "Benchmark ANN.", POGO_CMDS );
+define_command( ann_test, ann_handler, "Benchmark ANN.", POGO_CMDS );*/

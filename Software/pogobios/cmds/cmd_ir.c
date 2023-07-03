@@ -44,7 +44,7 @@
  * Get config of TS4231
  *
  */
-static void
+/*static void
 ir_readConfig_handler( int nb_params, char **params )
 {
     uint8_t i;
@@ -55,13 +55,13 @@ ir_readConfig_handler( int nb_params, char **params )
     }
 }
 define_command( ir_readConfig, ir_readConfig_handler,
-                "Get config of TS4231.", POGO_CMDS );
+                "Get config of TS4231.", POGO_CMDS );*/
 /**
  *
  * Get bus status of TS4231
  *
  */
-static void
+/*static void
 ir_checkBus_handler( int nb_params, char **params )
 {
     uint8_t result, i;
@@ -77,14 +77,14 @@ ir_checkBus_handler( int nb_params, char **params )
     }
 }
 define_command( ir_checkBus, ir_checkBus_handler,
-                "Get bus status of TS4231.", POGO_CMDS );
+                "Get bus status of TS4231.", POGO_CMDS );*/
 
 /**
  *
  * Set TS4231 to sleep mode
  *
  */
-static void
+/*static void
 ir_sleep_handler( int nb_params, char **params )
 {
     uint8_t i;
@@ -94,14 +94,14 @@ ir_sleep_handler( int nb_params, char **params )
     ir_checkBus_handler(0, NULL);
 }
 define_command( ir_sleep, ir_sleep_handler,
-                "Set TS4231 to sleep mode.", POGO_CMDS );
+                "Set TS4231 to sleep mode.", POGO_CMDS );*/
 
 /**
  *
  * Wake up TS4231 from sleep mode
  *
  */
-static void
+/*static void
 ir_wake_handler( int nb_params, char **params )
 {
     uint8_t i;
@@ -111,7 +111,7 @@ ir_wake_handler( int nb_params, char **params )
     ir_checkBus_handler(0, NULL);
 }
 define_command( ir_wake, ir_wake_handler,
-                "Wake TS4231 from sleep mode.", POGO_CMDS );
+                "Wake TS4231 from sleep mode.", POGO_CMDS );*/
 
 
 /**
@@ -119,7 +119,7 @@ define_command( ir_wake, ir_wake_handler,
  * Set TS4231 to watch mode
  *
  */
-static void
+/*static void
 ir_watch_handler( int nb_params, char **params )
 {
     uint8_t i;
@@ -135,7 +135,7 @@ ir_watch_handler( int nb_params, char **params )
     }
 }
 define_command( ir_watch, ir_watch_handler,
-                "Set TS4231 to watch mode.", POGO_CMDS );
+                "Set TS4231 to watch mode.", POGO_CMDS );*/
 
 /**
  * Command "ir_target_bit_mask [bit mask]"
@@ -180,7 +180,7 @@ ir_target_bit_mask_handler( int nb_params, char **params )
     printf( "target_ir_bit_mask=0x%x\n", target_ir_bit_mask );
 }
 define_command( ir_target_bit_mask, ir_target_bit_mask_handler,
-                "Show/select which IRs are targeted by a command.", POGO_CMDS );
+                "Show/select which IRs are targeted by a command", POGO_CMDS );
 
 
 /**
@@ -453,7 +453,7 @@ ir_power_handler( int nb_params, char **params )
         printf("\t 0100 (0x4) :  back \n");
         printf("\t 1000 (0x8) :  left \n");
 
-        printf(" E.g. : ir_power 3 0xf # set all sensors to max power.\n");
+        printf(" E.g. : ir_power 3 0xf # set all sensors to max power\n");
         //if ( nb_params > 2 )
         {
             return;
@@ -489,7 +489,7 @@ ir_power_handler( int nb_params, char **params )
         IRn_conf_tx_power_write( ir_i, level );
     }
 }
-define_command( ir_power, ir_power_handler, "Set IR power level.", POGO_CMDS );
+define_command( ir_power, ir_power_handler, "Set IR power level", POGO_CMDS );
 
 #ifdef CSR_IR_RX0_CONF_RX_ZERO_OFFSET
 /**
@@ -674,8 +674,7 @@ ir_echo_cancel_handler( int nb_params, char **params )
 }
 define_command(
     ir_echo_cancel, ir_echo_cancel_handler,
-    "Enable/disable IR echo cancellation (when active, shuts off IR reception "
-    "When disabled, a copy of any IR you send is received).",
+    "Enable/disable IR echo cancellation",
     POGO_CMDS );
 
 /**
@@ -725,14 +724,14 @@ define_command( ir_read, ir_read_handler, "Read IR message", POGO_CMDS );
  * Write blocks of data to flash
  *
  */
-static void
+/*static void
 ir_flash_handler( int nb_params, char **params )
 {
     ir_boot_loop();
 }
-
 define_command( ir_flash, ir_flash_handler,
-                "Write to flash from infrared (with CRC)", POGO_CMDS );
+                "Write to flash from infrared (with CRC)", POGO_CMDS );*/
+
 #endif
 
 #define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
@@ -762,6 +761,7 @@ dump_bits( uint32_t value, uint8_t width )
  * Send a sequence of words and check that we receive the same.
  *
  */
+/*
 #define MSG_SIZE 64 // Number of words in a packet
 #define WORD_SIZE 4	// Number of bytes per word
 const uint32_t msg [MSG_SIZE] = {0x8601c0ff,0xc2b86c2c,0x89c1d7f8,0xbe2214cd,
@@ -865,21 +865,21 @@ ir_looptest_handler( int nb_params, char **params )
                     }
                 }
             }
-            /* SLIP version in progress :
-            if( pogobot_infrared_message_available() ) {
-                message_t mr;
-                pogobot_infrared_recover_next_message( &mr );
-                for( k=0; k< size_in_word; k++) {
-                    if ( mr.payload[k] != msg_[k] ) {
-                        printf("Sent: 0x%02x, Received : 0x%02x from IR %d\n", msg_[k], mr.payload[k], mr.header._receiver_ir_index);
-                    }
-                }
-            }
-            */
+            // SLIP version in progress :
+            //if( pogobot_infrared_message_available() ) {
+            //    message_t mr;
+            //    pogobot_infrared_recover_next_message( &mr );
+            //    for( k=0; k< size_in_word; k++) {
+            //        if ( mr.payload[k] != msg_[k] ) {
+            //            printf("Sent: 0x%02x, Received : 0x%02x from IR %d\n", msg_[k], mr.payload[k], mr.header._receiver_ir_index);
+            //        }
+            //    }
             //}
-            /*if( ir_uart_read_nonblock(ir_i) != 0 ) {
-                ir_uart_read(ir_i); // Read trailing zero if any
-            }*/
+            
+            //}
+            //if( ir_uart_read_nonblock(ir_i) != 0 ) {
+            //    ir_uart_read(ir_i); // Read trailing zero if any
+            //}
             if ( uart_read_nonblock() != 0 ) {
                 printf( "\nCancelled by keypress at %lu.", j );
                 break;
@@ -905,6 +905,7 @@ define_command(
     ir_looptest, ir_looptest_handler,
     "Send a string of characters through IR and check reception.",
     POGO_CMDS );
+*/
 
 /**
  * Command "ir_bouncer"

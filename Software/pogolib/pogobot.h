@@ -616,7 +616,7 @@ uint32_t pogobot_motor_dir_status( void );
 void pogobot_motor_dir_set( motor_id motor, uint16_t value );
 
 /** (pogobot_motor_get_power)
- * recover the value of the motor direction bit field.
+ * recover the value of the motor power memorized.
  * 
  * # Parameters
  * - 'p_motors' - is a pointer to a table [R, L, B] 
@@ -625,7 +625,19 @@ void pogobot_motor_dir_set( motor_id motor, uint16_t value );
  * - read status
  *
  */
-//uint8_t pogobot_motor_get_power( uint16_t *p_motors );
+uint8_t pogobot_motor_get_power( uint16_t *p_motors );
+
+/** (pogobot_motor_set_power)
+ * write the value of the motor power in memory.
+ * 
+ * # Parameters
+ * - 'p_motors' - is a pointer to a table [R, L, B] 
+ *
+ * # Return
+ * - read status
+ *
+ */
+uint8_t pogobot_motor_get_power( uint16_t *p_motors );
 
 /**
  * ## Helper API

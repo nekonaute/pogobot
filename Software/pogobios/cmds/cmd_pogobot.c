@@ -70,7 +70,7 @@ static void add_robot_handler(int nb_params, char **params) {
     spiWriteSecurityRegister(1, 0, (uint8_t *)params[0], strlen(params[0]));
     printf("Done\n");
 }
-define_command(add_robot, add_robot_handler, "Write serial number to security register of the SPI flash", POGO_CMDS);
+define_command(write_serial, add_robot_handler, "Write serial number to security register of the SPI flash", POGO_CMDS);
 
 /*
  * Command "Display all robot's Ids"
@@ -661,15 +661,15 @@ static void motor_dir_mem_handler(int nb_params, char **params) {
 }
 define_command(motor_dir_mem, motor_dir_mem_handler, "memorize motors direction", POGO_CMDS);
 
-/*static void motor_power_mem_set_handler(int nb_params, char **params) {
+static void motor_power_mem_set_handler(int nb_params, char **params) {
 
     uint16_t p_value[3]={0, 0, 0};
     char *c;
 
     if ( nb_params != 3 ) {
         printf( "Usage: motor_power_mem_set [valueR] [valueL] [valueB]\n\
-                 R for right, L for left and M for middle motor\n\
-                 Value is 0 or 1 \n\
+                 R for right, L for left and B for back motor\n\
+                 Value [0;1023] \n\
                  e.g. motor_power_mem_set 512 650 0\n");
         return;
     }
@@ -687,10 +687,9 @@ static void motor_power_mem_get_handler(int nb_params, char **params) {
     
     getMotorPowerMem(m_power);
 
-    printf(" motors power status {L %d, R %d, B %d} \n", m_power[0],m_power[1],m_power[2]);
+    printf(" motors power status {R %d, L %d, B %d} \n", m_power[0],m_power[1],m_power[2]);
 }
 define_command(motor_power_mem_get, motor_power_mem_get_handler, "motors power status", POGO_CMDS);
-*/
 
 #endif
 
@@ -915,7 +914,7 @@ void autotest_ir(void) {
 #endif
 }
 
-static void auto_test_handler(int nb_params, char **params) {
+static void autotest_handler(int nb_params, char **params) {
     if ( nb_params == 0 ) {
         printf("Usage : autotest [autotest_name]\n  autotest_name can be : led, imu, motors, ir\n");
         autotest_leds();
@@ -940,5 +939,5 @@ static void auto_test_handler(int nb_params, char **params) {
         }
     }
 }
-define_command(auto_test, auto_test_handler, "Launch Auto Test", POGO_CMDS);
+define_command(autotest, autotest_handler, "Launch Auto Test", POGO_CMDS);
 

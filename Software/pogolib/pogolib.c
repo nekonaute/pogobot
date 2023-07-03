@@ -193,11 +193,11 @@ pogobot_motor_dir_set( motor_id motor, uint16_t value )
 
 }
 
-/*uint8_t
+uint8_t
 pogobot_motor_get_power( uint16_t *p_motors )
 {
     return getMotorPowerMem(p_motors);
-}*/
+}
 
 /* helper */
 
