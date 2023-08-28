@@ -1022,13 +1022,14 @@ define_command( ir_bouncer, ir_bouncer_handler,
 
 /**
  * Internal function to send a slip message by IR.
- * - continusly : continusly send the same message
- * - type : type of the message
- * - size : size of the message
  * - mPayload : payload of the message
+ * - size : size of the message
+ * - type : type of the message
+ * - continuously : continuously send the same message
+ * - delayMs : delay between 2 messages
  */
 extern slip_send_descriptor_s slip_send_descriptor;
-static void send_slip_message( char* mPayload, uint32_t size, uint8_t type, uint8_t continusly) 
+static void send_slip_message( char* mPayload, uint32_t size, uint8_t type, uint8_t continuously, uint16_t delayMs) 
 {
     message_t message;
     message.header._emitting_power_list =
@@ -1039,16 +1040,19 @@ static void send_slip_message( char* mPayload, uint32_t size, uint8_t type, uint
     memcpy( message.payload, mPayload, size );
     message.header._packet_type = type; 
     message.header._sender_id = pogobot_helper_getid();
+    uint16_t delay = 500;
 
-    if (continusly)
+    if (continuously)
     {
+        if ( delayMs > 0 )
+            delay = delayMs;
         printf("Press any key to stop sending message\n");
         while(uart_read_nonblock() == 0) {
         
             slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
                                     sizeof( message_header_t ) +
                                     message.header.payload_length );
-            msleep(500);
+            msleep(delay);
         }
         uart_read(); // Dump the caracter sent to stop 
 
@@ -1065,7 +1069,7 @@ static void send_slip_message( char* mPayload, uint32_t size, uint8_t type, uint
  * There are from type 1 
  */
 
-static void send_command ( int nb_params, char **params, uint8_t continusly )
+static void send_command ( int nb_params, char **params, uint8_t continuously, uint16_t delayMs)
 {
     uint8_t i,j;
     uint16_t count = 0;
@@ -1089,14 +1093,14 @@ static void send_command ( int nb_params, char **params, uint8_t continusly )
     }
     message[count++]=0;             // End of string
 
-    send_slip_message( message, count,  ir_t_cmd, continusly );
-    
     printf("Sending message of length %d, %d : %s\n", count, strlen(message), message);
+
+    send_slip_message( message, count,  ir_t_cmd, continuously, delayMs );
 
 }
 
 /**
- * Command "rc_send_cmd"
+ * Command "rc_send_bios_cmd"
  *
  * Send command through infrared
  *
@@ -1106,37 +1110,40 @@ rc_send_cmd_handler( int nb_params, char **params )
 {
     if ( ( nb_params == 0 ) )
     {
-        printf( "rc_send_cmd <command> [arguments] \n" );
+        printf( "rc_send_bios_cmd <command> [arguments] \n" );
         return;
     }
 
-    send_command(nb_params, params, 0);
+    send_command(nb_params, params, 0, 0);
 
 }
 
-define_command( rc_send_cmd, rc_send_cmd_handler, "Send command through IR",
+define_command( rc_send_bios_cmd, rc_send_cmd_handler, "Send command through IR",
                 POGO_CMDS );
 
 /**
- * Command "rc_send_cmd_continusly"
+ * Command "rc_send_bios_cmd_cont"
  *
- * Send continusly the same command through infrared
+ * Send continuously the same command through infrared
  *
  */
 static void
-rc_send_cmd_continusly_handler( int nb_params, char **params )
+rc_send_cmd_continuously_handler( int nb_params, char **params )
 {
+    char *c;
+
     if ( ( nb_params == 0 ) )
     {
-        printf( "rc_send_cmd_continusly <command> [arguments] \n" );
+        printf( "rc_send_bios_cmd_cont <delay Ms> <command> [arguments] \n" );
         return;
     }
 
-    send_command(nb_params, params, 1);
+    uint16_t delay = (uint16_t)strtoul( params[0], &c, 0 );
+    send_command(nb_params-1, params+1, 1, delay);
 
 }
 
-define_command( rc_send_cmd_continusly, rc_send_cmd_continusly_handler, "Continuously send the command through IR",
+define_command( rc_send_bios_cmd_cont, rc_send_cmd_continuously_handler, "continuously send the command through IR",
                 POGO_CMDS );
 
 /**
@@ -1156,7 +1163,7 @@ rc_start_handler( int nb_params, char **params )
     char *_command;
     int _nb_params = get_param(buffer, &_command, _params);
 
-    send_command(_nb_params, _params, 1);
+    send_command(_nb_params, _params, 1, 0);
 }
 
 define_command( rc_start, rc_start_handler,
@@ -1175,11 +1182,12 @@ rc_stop_handler( int nb_params, char **params )
 {
     printf("Stoping...\n");
     char cmd2send[8] = "DEADBEEF"; // special message to reboot the robot
-    send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1);
+    send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 0);
 }
 
 define_command( rc_stop, rc_stop_handler,
                 "Stop all pogobots available through infrared", POGO_CMDS );
+
 
 /**
  * Command "rc_send_user_message"
@@ -1191,19 +1199,49 @@ define_command( rc_stop, rc_stop_handler,
 static void
 rc_send_user_message_handler( int nb_params, char **params )
 {
+
     if ( ( nb_params != 1 ) )
     {
         printf( "rc_send_user_message <message> \n" );
         return;
     }
-    
+
     printf ("Sending %s, size %d\n", params[0], strlen(params[0]));
     
-    send_slip_message(params[0], strlen(params[0])+1, ir_t_cmd, 1); // +1 to send the end caracter 
+    send_slip_message(params[0], strlen(params[0])+1, ir_t_cmd, 0, 0); // +1 to send the end caracter 
 }
 
 define_command( rc_send_user_msg, rc_send_user_message_handler,
-                "Continuously send a message type 1 to all pogobots available through infrared", POGO_CMDS );
+                "Send a message type 1 to all pogobots available through infrared", POGO_CMDS );
+
+
+/**
+ * Command "rc_send_user_message_cont"
+ *
+ * Send continuously message to the user code of the robots through infrared.
+ * This message is has the type 1 in order to be filtered
+ *
+ */
+static void
+rc_send_user_message_cont_handler( int nb_params, char **params )
+{
+    char *c;
+
+    if ( ( nb_params != 2 ) )
+    {
+        printf( "rc_send_user_message_cont <delay Ms> <message> \n" );
+        return;
+    }
+    
+    uint16_t delay = (uint16_t)strtoul( params[0], &c, 0 );
+
+    printf ("Sending %s, size %d, delay %d\n", params[1], strlen(params[1]), delay);
+    
+    send_slip_message(params[1], strlen(params[1])+1, ir_t_cmd, 1, delay); // +1 to send the end caracter 
+}
+
+define_command( rc_send_user_msg_cont, rc_send_user_message_cont_handler,
+                "Continuously send a message type 1 to all pogobots available through infrared every delay Ms", POGO_CMDS );
 
 /**
  * Command "rc_erase"
@@ -1220,7 +1258,7 @@ rc_erase_handler( int nb_params, char **params )
     char *_command;
     int _nb_params = get_param(buffer, &_command, _params);
 
-    send_command(_nb_params, _params, 1);
+    send_command(_nb_params, _params, 1, 0);
     
 }
 

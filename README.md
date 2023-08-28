@@ -510,9 +510,10 @@ Once started different new commands are avaible :
 - rc_start : start the user code on the robot (continious).
 - rc_stop  : stop the user code and restart inside the pogobot bios (continious).
 - rc_erase : erase the user code on the robot (continious).
-- rc_send_cmd <cmd> <args> : send the pogobios command by IR (once). 
-- rc_send_cmd_continusly <cmd> <args> : send the pogobios command by IR (continious). 
-- rc_send_user_msg <msg> : send the message by IR. It is not interpreted by the pogobios. The message type is 1 (continious). 
+- rc_send_bios_cmd <cmd> <args> : send the pogobios command by IR (once). 
+- rc_send_bios_cmd_cont <delay> <cmd> <args> : send the pogobios command by IR every delay Ms (continious). 
+- rc_send_user_msg <msg> : send the message by IR. It is not interpreted by the pogobios. The message type is 1. 
+- rc_send_user_msg_cont <delay> <msg> : send the message by IR every delay Ms. It is not interpreted by the pogobios. The message type is 1 (continious). 
 - serialboot : send the user code to the robots depending on the folder (once).  
 
 ### Pogobios LED Status
