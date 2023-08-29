@@ -45,8 +45,8 @@
   (pad 20 smd rect (at -2.25 1.8 0) (size 0.3 1.6) (layers F.Cu F.Paste F.Mask))
   (pad 21 smd rect (at -4 0 0) (size 0.8 1.8) (layers F.Cu F.Paste F.Mask))
   (pad 22 smd rect (at 4 0 0) (size 0.8 1.8) (layers F.Cu F.Paste F.Mask))
-  (pad 23 np_thru_hole circle (at -3.3 -1.5) (size 0.75 0) (drill 0.75) (layers *.Cu *.Mask))
-  (pad 24 np_thru_hole circle (at 3.3 -1.5) (size 0.75 0) (drill 0.75) (layers *.Cu *.Mask))
+  (pad 23 np_thru_hole circle (at -3.3 -1.5) (size 0.75 0.001) (drill 0.75) (layers *.Cu *.Mask))
+  (pad 24 np_thru_hole circle (at 3.3 -1.5) (size 0.75 0.001) (drill 0.75) (layers *.Cu *.Mask))
   (model 10132798-022100LF.stp
     (at (xyz 0 0 0))
     (scale (xyz 1 1 1))

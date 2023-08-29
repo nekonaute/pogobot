@@ -96,8 +96,8 @@
   (pad 73 smd rect (at 8.750 -3.506 0) (size 0.300 1.550) (layers F.Cu F.Paste F.Mask))
   (pad 74 smd rect (at 9.000 4.044 0) (size 0.300 1.550) (layers F.Cu F.Paste F.Mask))
   (pad 75 smd rect (at 9.250 -3.506 0) (size 0.300 1.550) (layers F.Cu F.Paste F.Mask))
-  (pad MH1 np_thru_hole circle (at -10.000 1.769) (size 1.15 0) (drill 1.15) (layers *.Cu *.Mask))
-  (pad MH2 np_thru_hole circle (at 10.000 1.769) (size 1.65 0) (drill 1.65) (layers *.Cu *.Mask))
+  (pad MH1 np_thru_hole circle (at -10.000 1.769) (size 1.15 0.001) (drill 1.15) (layers *.Cu *.Mask))
+  (pad MH2 np_thru_hole circle (at 10.000 1.769) (size 1.65 0.001) (drill 1.65) (layers *.Cu *.Mask))
   (pad MP1 smd rect (at -10.350 -2.731 0) (size 1.200 2.750) (layers F.Cu F.Paste F.Mask))
   (pad MP2 smd rect (at 10.350 -2.731 0) (size 1.200 2.750) (layers F.Cu F.Paste F.Mask))
   (model 2199119-3.stp
