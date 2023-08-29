@@ -637,7 +637,7 @@ uint8_t pogobot_motor_get_power( uint16_t *p_motors );
  * - read status
  *
  */
-uint8_t pogobot_motor_get_power( uint16_t *p_motors );
+uint8_t pogobot_motor_set_power( uint16_t *p_motors );
 
 /**
  * ## Helper API
