@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pogobject Control</title>
+	<link rel="stylesheet" type="text/css" href="styles.css">
+	<script src="script.js"></script>
+</head>
+<body>
+	<h1>Pogobject Control</h1>
+    <div class="container">
+		<div class="main-content">
+			<label for="ipAddress">Enter IP Address:</label>
+			<input type="text" id="ipAddress" name="ipAddress" oninput="saveIpAddressToLocalStorage()">
+			<button onclick="sendRebootRequest()">Send Reboot Request</button>
+			
+			<button onclick="getStatus()">Get Server Status</button>
+			<div id="statusResult"></div>
+			
+			
+			<label for="commandType">Select Command Type:</label>
+			<select id="commandType" name="commandType" onchange="toggleCustomParams(); clearCustomParams();">
+				<option value="run">run</option>
+				<option value="rc_send_user_msg">rc_send_user_msg</option>
+				<option value="rc_send_cmd_continusly">rc_send_cmd_continusly</option>
+				<option value="rc_send_cmd">rc_send_cmd</option>
+				<option value="autotest">autotest</option>
+				
+			</select>
+			
+			<div id="customParamsField" style="display: none;">
+				<label for="customParams">Custom Parameters:</label>
+				<input type="text" id="customParams" name="customParams">
+			</div>
+			
+			<button onclick="sendCommandRequest()">Send Command Request</button>
+			
+			<label for="manualCommandParams">Manual Command Params:</label>
+			<input type="text" id="manualCommandParams" placeholder="Enter Command Params">
+			
+			<button onclick="sendManualCommand()">Send Manual Command</button>
+			
+			<label for="ledSlider">LED Brightness:</label>
+			<input type="range" id="ledSlider" name="ledSlider" min="0" max="1024" value="0" onchange="updateSliderValue(this.value)">
+			<div>
+				Current Slider Value: <span id="currentSliderValue">0</span>
+			</div>
+			
+			<div class="input-button">
+				<div class="input-button-left">
+					<input type="text" id="sliderValueTextbox" placeholder="Enter slider value">
+				</div>
+				<div>
+					<button onclick="updateSliderFromTextbox()">Update Slider</button>
+				</div>
+			</div>
+			
+			<button onclick="sendLedRequest()">Send LED Value</button>
+			
+			<div id="resultDiv"></div>
+		</div>
+		<div class="readme">
+			Passer le pogobot en mode remote après un boot ou un reboot avec la cmd "run". <br>
+            Voici la liste des fonctions: <br>
+			<ul>
+				<li>run				         - Start the user program </li>
+				<li>rc_send_user_msg         - Send a message type 1 to all pogobots available through infrared </li>
+				<li>rc_send_user_msg_cont    - Continuously send a message type 1 to all pogobots available through infrared </li>
+				<li>rc_send_cmd              - Send command through IR </li>
+				<li>rc_send_cmd_cont         - Continuously send the command through IR </li>
+				<li>autotest      	         - Autotest (allows to verifiy that is alive) </li>
+			</ul>
+        </div>
+    </div>
+	<div class="footer">
+		&copy; 2023 Isir - All Rights Reserved
+    </div>
+    
+    <script>
+        // Appeler la fonction de chargement lors du chargement de la page
+        window.onload = loadIpAddressFromLocalStorage;
+    </script>
+</body>
+</html>
+

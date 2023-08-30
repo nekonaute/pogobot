@@ -1,0 +1,106 @@
+body {
+	font-family: Arial, sans-serif;
+	background-color: #f0f0f0;
+	margin: 0;
+	padding: 0;
+}
+
+h1 {
+	text-align: center;
+	margin-top: 20px;
+}
+
+.container {
+	max-width: 1024px;
+	margin: 0 auto;
+	padding: 20px;
+	background-color: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+label {
+	display: block;
+	font-weight: bold;
+	margin-top: 10px;
+}
+
+input[type="text"],
+select,
+input[type="range"] {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: #f8f8f8;
+	margin-top: 5px;
+}
+
+button {
+	display: block;
+	width: 100%;
+	padding: 10px;
+	background-color: #3498db;
+	border: none;
+	color: white;
+	font-weight: bold;
+	border-radius: 4px;
+	cursor: pointer;
+	margin-top: 10px;
+}
+
+button:hover {
+	background-color: #2980b9;
+}
+
+#sliderValue {
+	font-weight: bold;
+	display: inline-block;
+	margin-left: 10px;
+}
+
+#resultDiv {
+	margin-top: 20px;
+	font-weight: bold;
+}
+
+/* Styles pour les champs d'entrée et les boutons */
+input[type="text"],
+select,
+input[type="range"],
+button {
+	width: 100%;
+	padding: 10px;
+	margin-top: 5px;
+	box-sizing: border-box; /* Inclure les bordures et le padding dans la largeur totale */
+}
+
+.container {
+    display: flex;
+}
+
+.main-content {
+    float: left;
+    width: 45%; /* Ajustez la largeur selon vos besoins */
+    margin-right: 5%; /* Marge droite pour séparer les deux div */
+}
+
+.readme {
+    float: left;
+    width: 50%; /* Ajustez la largeur selon vos besoins */
+}
+
+.input-button {
+	display: flex;
+	width: 100%
+}
+
+.input-button-left {
+	margin-right: 5%;
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #f2f2f2;
+}
