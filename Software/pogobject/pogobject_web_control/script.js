@@ -143,6 +143,11 @@ function getStatus() {
             // Formatez la réponse JSON de manière jolie
             var formattedJson = JSON.stringify(data, null, 2); // Le deuxième argument spécifie la mise en forme
             var statusResultDiv = document.getElementById("statusResult");
+			var batteryPercentage = data.variables.bat_percentage || 0; // Valeur par défaut de 0 si la propriété bat_percentage n'est pas présente
+			 // Assurez-vous que la valeur est dans la plage 0-100%
+            batteryPercentage = Math.min(100, Math.max(0, batteryPercentage));
+
+            batteryLevel.value = batteryPercentage;
             statusResultDiv.innerHTML = "<pre>Server Status:\n" + formattedJson + "</pre>";
         })
         .catch(error => {
@@ -150,4 +155,34 @@ function getStatus() {
             var statusResultDiv = document.getElementById("statusResult");
             statusResultDiv.textContent = "Error fetching server status: " + error.message;
         });
+}
+
+function updateBatteryValue() {
+    var ipAddress = document.getElementById("ipAddress").value;
+    var batteryUrl = "http://" + ipAddress + "/read_bat";
+
+    fetch(batteryUrl)
+        .then(response => response.json())
+        .then(result => {
+			// Formatez la réponse JSON de manière jolie
+            var formattedJson = JSON.stringify(result, null, 2); // Le deuxième argument spécifie la mise en forme
+            var statusResultDiv = document.getElementById("resultDiv");
+            statusResultDiv.innerHTML = "<pre>Server response:\n" + formattedJson + "</pre>";
+        })
+        .catch(error => {
+            console.error("Error:", error);
+			var statusResultDiv = document.getElementById("resultDiv");
+			statusResultDiv.textContent = "Error fetching server status: " + error.message;
+        });
+		
+	// Appelez la fonction getStatus() pour la mise à jour de l'affichage
+	getStatus();
+}
+// Définissez une fonction pour mettre à jour la batterie à intervalles réguliers (par exemple, toutes les secondes)
+function startBatteryUpdateInterval() {
+    // Appelez la fonction updateBatteryValue() pour la mise à jour
+    updateBatteryValue();
+
+    // Ensuite, définissez une intervalle pour appeler la fonction toutes les secondes
+    setInterval(updateBatteryValue, 10000); // 1000 millisecondes équivalent à 1 seconde
 }
