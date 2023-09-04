@@ -24,6 +24,9 @@
  * screen in 3.3V
  * standard  I2C connexion
  * 
+ * battery verification
+ * voltage divider between VCC - A0 - GND (2*100kOhms) 
+ * 
  */
 
 #include <Arduino.h>
@@ -40,8 +43,11 @@
 U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); 
 
 // WiFi parameters
-const char* ssid = "YOUR SSID";
+const char* ssid = "YOUR_SSID";
 const char* password = "YOUR_CODE";
+
+// Check Battery voltage using multimeter & add/subtract the value
+float calibration = 0.64; 
 
 // The port to listen for incoming TCP connections
 #define LISTEN_PORT           80
@@ -55,6 +61,8 @@ aREST rest = aREST();
 // Variables to be exposed to the API
 String IPaddr;
 int led_on = 0;
+int bat_percentage = 0;
+float voltage = 0;
 
 // Pin Definition
 #define RX D3 // -> TX pogobot
@@ -70,6 +78,8 @@ SoftwareSerial swSerial(RX, TX);
 // Declare functions to be exposed to the API
 int CmdControl(String command);
 int ledControl(String command);
+int reboot_p(String command);
+int update_bat_percent(String command);
 
 // author apicquot from https://forum.arduino.cc/index.php?topic=228884.0
 String IpAddress2String(const IPAddress& ipAddress)
@@ -91,6 +101,12 @@ void printScreen(String text)
     delay(1000);
     Serial.println(text);
 } 
+
+// from https://github.com/radishlogic/MapFloat/blob/master/src/MapFloat.cpp
+float mapFloat(float value, float fromLow, float fromHigh, float toLow, float toHigh) {
+  return (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow; 
+}
+
 
 void setup(void) {
 
@@ -124,9 +140,15 @@ void setup(void) {
   u8g2.sendBuffer();          // transfer internal memory to the display
   delay(1000);  
 
+  //Check Battery
+  update_bat_percent("none");
+  Serial.println(bat_percentage);
+
   // Init variables and expose them to REST API
   rest.variable("IPaddr",&IPaddr);
   rest.variable("LedOn",&led_on);
+  rest.variable("bat_percentage",&bat_percentage);
+  rest.variable("bat_voltage",&voltage);
 
   // Function to be exposed
   // http://X.X.X.X/cmd?params=cmd  -> all cmd (without ", spaces are understand) compabible with the pogobot "auto_test led" for example
@@ -138,10 +160,13 @@ void setup(void) {
   // http://X.X.X.X/reboot_p 
   // alows to reboot the pogobot for whatever is needed  
   rest.function((char*)"reboot_p",reboot_p);
+  // http://X.X.X.X/read_bat 
+  // update the battery reading 
+  rest.function((char*)"read_bat",update_bat_percent);
 
   // Give name & ID to the device (ID should be 6 characters long)
   rest.set_id("1"); // Allows to give a unique ID to the pogobot object
-  rest.set_name((char*)"pogoObject");
+  rest.set_name((char*)"pogObject");
 
   // Start the Software Serial to communicate with the pogobot
   swSerial.begin(BAUD_RATE);
@@ -152,6 +177,9 @@ void setup(void) {
 }
 
 void loop(void) {
+
+  //Check Battery
+  //update_bat_percent();
 
   // Handle REST calls
   WiFiClient client = server.available();
@@ -165,7 +193,6 @@ void loop(void) {
 
 }
 
-
 // function executed when a cmd on the pogobot is asked
 int CmdControl(String command) {
 
@@ -175,6 +202,19 @@ int CmdControl(String command) {
   //send by serial
   swSerial.print(command+"\n");
   
+  return 1;
+}
+
+
+// function to recover the battery voltage
+int update_bat_percent(String command) {
+  //recover sensor value
+  int sensorValue = analogRead(A0);
+  //multiply by two as voltage divider network is 100K & 100K Resistor
+  voltage = (((sensorValue * 3.3) / 1024) * 2 + calibration); 
+  //2.8V as Battery Cut off Voltage & 4.2V as Maximum Voltage
+  bat_percentage = mapFloat(voltage, 3.0, 4.2, 0, 100); 
+
   return 1;
 }
 
