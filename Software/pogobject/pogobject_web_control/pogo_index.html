@@ -21,8 +21,9 @@
 			<select id="commandType" name="commandType" onchange="toggleCustomParams(); clearCustomParams();">
 				<option value="run">run</option>
 				<option value="rc_send_user_msg">rc_send_user_msg</option>
-				<option value="rc_send_cmd_continusly">rc_send_cmd_continusly</option>
-				<option value="rc_send_cmd">rc_send_cmd</option>
+				<option value="rc_send_user_msg_cont">rc_send_user_msg_cont</option>
+				<option value="rc_send_bios_cmd">rc_send_bios_cmd</option>
+				<option value="rc_send_bios_cmd_cont">rc_send_bios_cmd_cont</option>
 				<option value="autotest">autotest</option>
 				
 			</select>
@@ -62,12 +63,18 @@
 			Passer le pogobot en mode remote après un boot ou un reboot avec la cmd "run". <br>
             Voici la liste des fonctions: <br>
 			<ul>
-				<li>run				         - Start the user program </li>
-				<li>rc_send_user_msg         - Send a message type 1 to all pogobots available through infrared </li>
-				<li>rc_send_user_msg_cont    - Continuously send a message type 1 to all pogobots available through infrared </li>
-				<li>rc_send_cmd              - Send command through IR </li>
-				<li>rc_send_cmd_cont         - Continuously send the command through IR </li>
-				<li>autotest      	         - Autotest (allows to verifiy that is alive) </li>
+				<li>run</li>
+					<span>Start the user program</span>
+				<li>rc_send_user_msg</li> 
+					<span>Send a message type 1 to all pogobots available through infrared</span> 
+				<li>rc_send_user_msg_cont</li>
+					<span> Continuously send a message type 1 to all every delay Ms (rc_send_user_message_cont 'delay Ms' 'message')</span> 
+				<li>rc_send_bios_cmd</li>
+					<span>Send command through IR</span> 
+				<li>rc_send_bios_cmd_cont</li>
+					<span>Continuously send the command through IR  every delay Ms (rc_send_user_message_cont 'delay Ms' 'message' 'args')</span> 
+				<li>autotest</li>
+					<span>Autotest (allows to verifiy that is alive)</span> 
 			</ul>
 			
 			<div class="battery">
