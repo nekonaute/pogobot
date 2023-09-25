@@ -8,7 +8,7 @@ body {
 h1 {
 	text-align: center;
 	margin-top: 20px;
-	color: #5cc72a;
+	color: #74c25c;
 }
 
 .container {
@@ -41,7 +41,7 @@ button {
 	display: block;
 	width: 100%;
 	padding: 10px;
-	background-color: #5cc72a;
+	background-color: #74c25c;
 	border: none;
 	color: white;
 	font-weight: bold;
@@ -105,3 +105,83 @@ button {
     padding: 10px;
     background-color: #f2f2f2;
 }
+
+/* battery section */ 
+.container-bat {
+	background-color: #7a7a7a;
+	width: 80%;
+	border-radius: 15px;
+}
+
+#batteryLevel {
+	background-color: 7a7a7a;
+	color: white;
+	padding: 1%;
+	text-align: right;
+	font-size: 20px;
+	border-radius: 15px;
+	width: 100%;
+}
+
+/* The switch - the box around the slider */
+.switch {
+position: relative;
+display: inline-block;
+width: 30px;
+height: 17px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+opacity: 0;
+width: 0;
+height: 0;
+}
+
+/* The slider */
+.slider {
+position: absolute;
+cursor: pointer;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #ccc;
+-webkit-transition: .4s;
+transition: .4s;
+}
+
+.slider:before {
+position: absolute;
+content: "";
+height: 13px;
+width: 13px;
+left: 2px;
+bottom: 2px;
+background-color: white;
+-webkit-transition: .4s;
+transition: .4s;
+}
+
+input:checked + .slider {
+background-color: #74c25c;
+}
+
+input:focus + .slider {
+box-shadow: 0 0 1px #5e974d;
+}
+
+input:checked + .slider:before {
+-webkit-transform: translateX(13px);
+-ms-transform: translateX(13px);
+transform: translateX(13px);
+}
+
+/* Rounded sliders */
+.slider.round {
+border-radius: 17px;
+}
+
+.slider.round:before {
+border-radius: 50%;
+} 

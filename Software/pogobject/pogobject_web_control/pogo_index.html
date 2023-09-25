@@ -78,10 +78,18 @@
 			</ul>
 			
 			<div class="battery">
-				<label for="batteryLevel">Battery Level:</label>
-				<progress id="batteryLevel" max="100" value="0"></progress>
+				<p>Battery Level:</p>
+				<div class="container-bat">
+					<div id="batteryLevel">Not available</div>
+				</div>
+				<div>
+					<span>Auto: </span>
+					<label class="switch">
+						<input id="auto_bat" type="checkbox" onchange="autoBatToggle();">
+						<span class="slider round"></span>
+					</label>
+				</div>
 			</div>
-			
         </div>
 				
         </div>
@@ -94,8 +102,6 @@
     <script>
         // Appeler la fonction de chargement lors du chargement de la page
         window.onload = loadIpAddressFromLocalStorage;
-		// Appelez la fonction pour démarrer les mises à jour de la batterie
-		startBatteryUpdateInterval();
     </script>
 </body>
 </html>
