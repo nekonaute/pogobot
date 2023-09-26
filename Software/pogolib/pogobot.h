@@ -222,6 +222,39 @@ typedef struct message_t
 } message_t;
 
 /**
+ * ### IR short message header structure
+ * 
+ * message_short_header_t :
+ *
+ * The parameters that begin with "_" are not completed by the user
+ *
+ * - uint8_t _packet_type         - allows to give type of a packet (fixed for now)
+ * - uint16_t payload_length      - size of the payload
+ *
+ */
+
+typedef struct message_short_header_t
+{
+    uint8_t _packet_type;
+    uint16_t payload_length;
+} message_short_header_t;
+
+/**
+ * ### IR short message header structure
+ *  
+ * short_message_t :
+ *
+ * - message_short_header_t header            - header of the message
+ * - uint8_t payload[MAX_PAYLOAD_SIZE_BYTES]  - payload of the message
+ */
+
+typedef struct short_message_t
+{
+    message_short_header_t header;
+    uint8_t payload[MAX_PAYLOAD_SIZE_BYTES];
+} short_message_t;
+
+/**
  * ### IR type message list
  *
  * - ir_t_cmd  : type use to send command to the robot
@@ -232,6 +265,7 @@ typedef enum
 {
     ir_t_cmd = 1,   // only to send command to the robot
     ir_t_flash = 2, // only to send part of the prog
+    ir_t_short = 3, // only to send short header message
     ir_t_user = 16  // userspace
 } ir_type_message;
 
@@ -338,6 +372,21 @@ void pogobot_infrared_set_power( uint8_t power );
  */
 uint32_t pogobot_infrared_sendMessageOnce( message_t *const message );
 
+/** (pogobot_infrared_sendShortMessageOnce)
+ *  Prepare and send one packet, with a short header
+ *  containing the specified message.
+ *
+ * # Parameters
+ * - 'dir' - indicates the direction to send the message
+ * - 'message' - fully filled short_message_t variable
+ *
+ * # Return
+ * - '0' in case of success
+ * - '1' in case of payload too long
+ *
+ */
+uint32_t pogobot_infrared_sendShortMessageOnce( ir_direction dir, short_message_t *const message );
+
 /** (pogobot_infrared_sendMessageOneDirection)
  * Send a message in only direction at defined power
  * Use pogobot_infrared_sendMessageOnce
@@ -386,6 +435,37 @@ uint32_t pogobot_infrared_sendMessageAllDirection( uint16_t receiver_id, uint8_t
  *
  */
 uint32_t pogobot_infrared_sendMessageAllDirectionWithId( uint16_t receiver_id, uint8_t *message, uint16_t message_size );
+
+
+/** (pogobot_infrared_sendShortMessageOneDirection)
+ * Send a short header message in only direction at defined power
+ * Use pogobot_infrared_sendShortMessageOnce
+ *
+ * # Parameters
+ * - 'dir' - indicates the direction to send the message
+ * - 'message' - the current payload to send
+ * - 'message_size' - the size of the payload
+ *
+ * # Return
+ * - '0' in case of success
+ * - '1' in case of payload too long
+ */
+uint32_t pogobot_infrared_sendShortMessageOneDirection( ir_direction dir, uint8_t *message, uint16_t message_size );
+
+/** (pogobot_infrared_sendShortMessageAllDirection)
+ * Send a short header message in all direction at defined power
+ * Use pogobot_infrared_sendShortMessageOnce
+ *
+ * # Parameters
+ * - 'message' - the current payload to send
+ * - 'message_size' - the size of the payload
+ *
+ * # Return
+ * - '0' in case of success
+ * - '1' in case of payload too long
+ */
+uint32_t pogobot_infrared_sendShortMessageAllDirection( uint8_t *message, uint16_t message_size );
+
 
 /** (pogobot_infrared_get_receiver_error_counter)
  * Get the receiver error counter value

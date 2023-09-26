@@ -159,6 +159,48 @@ pogobot_infrared_sendMessageOnce( message_t *const message )
     return 0;
 }
 
+uint32_t 
+pogobot_infrared_sendShortMessageOnce( ir_direction dir, short_message_t *const message )
+{
+    if ( message->header.payload_length > MAX_PAYLOAD_SIZE_BYTES )
+    {
+        return 1;
+    }
+
+    message->header._packet_type = ir_t_short; // User packets have type 3.
+
+    unsigned int mask = 0;
+    uint8_t emitting_power_list = 0;
+
+
+    if (dir < ir_all)
+    {
+        emitting_power_list = _selected_power << (dir * pogobot_infrared_emitter_width_bits );
+    } else {
+        emitting_power_list = pogobot_infrared_emitting_power_list(_selected_power, _selected_power, _selected_power, _selected_power);
+    }
+    
+    for ( int index = 0; index < IR_RX_COUNT; index++ )
+    {
+        uint8_t power = ( emitting_power_list >>
+                          ( pogobot_infrared_emitter_width_bits * index ) ) &
+                        ( ( 1 << pogobot_infrared_emitter_width_bits ) - 1 );
+        IRn_conf_tx_power_write( index, power );
+
+        if ( power > 0 )
+        {
+            mask |= ( 1 << index );
+        }
+    }
+
+    ir_tx_conf_tx_mask_write( mask );
+    slip_send_message( &( slip_send_descriptor ), (uint8_t *)message,
+                       sizeof( message_short_header_t ) +
+                           message->header.payload_length );
+
+    return 0;
+}
+
 uint32_t
 pogobot_infrared_sendMessageOneDirection( ir_direction dir,
                                           uint16_t receiver_id,
@@ -218,6 +260,31 @@ pogobot_infrared_sendMessageAllDirectionWithId( uint16_t receiver_id,
     return error;
 }
 
+uint32_t
+pogobot_infrared_sendShortMessageOneDirection( ir_direction dir,
+                                               uint8_t *message,
+                                               uint16_t message_size )
+{
+
+    short_message_t m;
+    m.header.payload_length = message_size;
+    memcpy( m.payload, message, message_size );
+
+    return pogobot_infrared_sendShortMessageOnce( dir, &m );
+}
+
+uint32_t
+pogobot_infrared_sendShortMessageAllDirection( uint8_t *message,
+                                               uint16_t message_size )
+{
+
+    short_message_t m;
+    m.header.payload_length = message_size;
+    memcpy( m.payload, message, message_size );
+
+    return pogobot_infrared_sendShortMessageOnce( ir_all, &m );
+}
+
 uint8_t
 write_byte_via_a_four_byte_word_channel( uint8_t byte )
 {
@@ -272,27 +339,50 @@ void
 on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
                                         void *tag )
 {
-    message_t *m = (message_t *)( data );
-    m->header._receiver_ir_index = (int)tag;
+    //if the message type is "ir_t_short", we reconstruct a long message to avoid pb after
+    //we choose extrem false information 
+    if (data[0] == ir_t_short) {
+        message_t m; 
+        short_message_t *ms = (short_message_t*)( data );
+        m.header._packet_type = ms->header._packet_type;
+        m.header._emitting_power_list = 0; // power all to 0 shouldn't emit something
+        m.header._sender_id = 0xFF; 
+        m.header._sender_ir_index = 0xF; // index not possible
+        m.header.receiver_id = 0xFF;
+        m.header._receiver_ir_index = (int)tag;
+        m.header.payload_length = ms->header.payload_length;
+        memcpy( m.payload, ms->payload, m.header.payload_length);
 
-    // printf("new message from %d \n", m->header._receiver_ir_index);
-
-    // filter mesage from type 1 (command message)
-    if ( m->header._packet_type == 1)
-    {
-        //if stop message reboot on pogobios
-        int ret = strncmp("DEADBEEF", (char*)(m->payload), 8);
-        if (ret == 0)
+        /* when a message arrives, it is put into the FIFO */
+        if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
         {
-            reboot_ctrl_write(0xac);
+            FifoBuffer_write( my_mes_fifo_p, m );
         }
+
+    } else {
+        message_t *m = (message_t *)( data );
+        m->header._receiver_ir_index = (int)tag;
+        // printf("new message from %d \n", m->header._receiver_ir_index);
+
+        // filter mesage from type ir_t_cmd (command message)
+        if ( m->header._packet_type == ir_t_cmd)
+        {
+            //if stop message reboot on pogobios
+            int ret = strncmp("DEADBEEF", (char*)(m->payload), 8);
+            if (ret == 0)
+            {
+                reboot_ctrl_write(0xac);
+            }
+        }
+
+        /* when a message arrives, it is put into the FIFO */
+        if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
+        {
+            FifoBuffer_write( my_mes_fifo_p, *m );
+        }
+
     }
 
-    /* when a message arrives, it is put into the FIFO */
-    if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
-    {
-        FifoBuffer_write( my_mes_fifo_p, *m );
-    }
 }
 
 void
