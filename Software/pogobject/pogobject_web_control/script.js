@@ -1,4 +1,6 @@
 
+var myInterval = 0;
+
 function sendRebootRequest() {
 	var ipAddress = document.getElementById("ipAddress").value;
 	var url = "http://" + ipAddress + "/reboot_p";
@@ -82,7 +84,6 @@ function sendLedRequest() {
 }
 
 // Pour sauvegarder et récupérer l'adresse IP depuis le localStorage
-
 // Pour sauvegarder l'adresse IP
 function saveIpAddressToLocalStorage() {
 	localStorage.setItem("ipAddress", document.getElementById("ipAddress").value);
@@ -134,6 +135,7 @@ function sendManualCommand() {
 }
 
 function getStatus() {
+    console.log("get Status");
     var ipAddress = document.getElementById("ipAddress").value; // Récupérez l'adresse IP du champ
     var statusUrl = "http://" + ipAddress + "/"; 
 
@@ -147,7 +149,15 @@ function getStatus() {
 			 // Assurez-vous que la valeur est dans la plage 0-100%
             batteryPercentage = Math.min(100, Math.max(0, batteryPercentage));
 
-            batteryLevel.value = batteryPercentage;
+            batteryLevel.textContent = batteryPercentage + "%";
+            batteryLevel.style.width = batteryPercentage + "%";
+            if (batteryPercentage > 60) {
+                batteryLevel.style.background = "rgb(116, 194, 92)"; //green
+            } else if (batteryPercentage <= 60 && batteryPercentage > 30) {
+                batteryLevel.style.background = "rgb(255, 153, 51)"; // orange    
+            } else if (batteryPercentage <= 30) {
+                batteryLevel.style.background = "rgb(255, 51, 0)"; //red
+            }
             statusResultDiv.innerHTML = "<pre>Server Status:\n" + formattedJson + "</pre>";
         })
         .catch(error => {
@@ -158,6 +168,7 @@ function getStatus() {
 }
 
 function updateBatteryValue() {
+    console.log("update Battery Value");
     var ipAddress = document.getElementById("ipAddress").value;
     var batteryUrl = "http://" + ipAddress + "/read_bat";
 
@@ -178,11 +189,27 @@ function updateBatteryValue() {
 	// Appelez la fonction getStatus() pour la mise à jour de l'affichage
 	getStatus();
 }
-// Définissez une fonction pour mettre à jour la batterie à intervalles réguliers (par exemple, toutes les secondes)
+// Définis une fonction pour mettre à jour la batterie à intervalles réguliers 
 function startBatteryUpdateInterval() {
+    console.log("start auto bat update");
     // Appelez la fonction updateBatteryValue() pour la mise à jour
     updateBatteryValue();
 
-    // Ensuite, définissez une intervalle pour appeler la fonction toutes les secondes
-    setInterval(updateBatteryValue, 10000); // 1000 millisecondes équivalent à 1 seconde
+    // Définis un interval
+    myInterval = setInterval(updateBatteryValue, 60000); // 60 secondes
 }
+// Définis une fonction pour stoper la mise à jour automatique
+function stopBatteryUpdateInterval() {
+    console.log("stop auto bat update");
+    clearInterval(myInterval);
+}
+
+function autoBatToggle() {
+    var bt = document.getElementById("auto_bat");
+    if (bt.checked == true) {
+        startBatteryUpdateInterval();
+    } else if (bt.checked == false) {
+        stopBatteryUpdateInterval();
+    }
+}
+
