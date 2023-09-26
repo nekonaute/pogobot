@@ -86,7 +86,7 @@ int main(void) {
                 }
                 else
                 {
-                    my_message_t *recept = &( mr.payload );
+                    my_message_t *recept = (my_message_t *)&( mr.payload );
                     printf( "message from : %s\n", recept->name );
                     printf( "color (%d,%d,%d)\n", recept->color.r, recept->color.g,
                             recept->color.b );
