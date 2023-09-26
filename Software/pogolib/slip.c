@@ -134,6 +134,7 @@ put_byte_to_buffer( slip_receive_state_s *slip, uint8_t byte )
     }
     else
     {
+        //printf( isprint( byte ) ? "%c" : "_", byte );
         slip->buf[slip->size++] = byte;
         slip->crc = calc_crc_ccitt( byte, slip->crc );
         slip->state = SLIP_STATE_NORMAL;
@@ -159,6 +160,7 @@ slip_decode_received_byte( slip_receive_state_s *slip, uint8_t byte )
             {
                 if ( slip->crc == 0 )
                 {
+                    //slip_dump_state( slip, "retreived msg" );
                     slip->recv_message( slip->buf, slip->size - 2, slip->tag );
                 }
                 else
@@ -226,7 +228,7 @@ write_encoded_byte( const slip_send_descriptor_s *const slipdesc, uint8_t byte )
         break;
     }
 
-    //    printf( isprint( byte ) ? "%c" : "_", byte );
+    //printf( isprint( byte ) ? "%c" : "_", byte );
 
     if ( escape != 0 )
     {
