@@ -1093,7 +1093,7 @@ static void send_command ( int nb_params, char **params, uint8_t continuously, u
     }
     message[count++]=0;             // End of string
 
-    printf("Sending message of length %d, %d : %s\n", count, strlen(message), message);
+    printf("Sending message %s of length %d, every %d Ms \n",message, strlen(message), delayMs);
 
     send_slip_message( message, count,  ir_t_cmd, continuously, delayMs );
 
