@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Pogobot Wall App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="key_command">
+    <h2> Identification </h2>
+    <button id="identification-button">Identification</button>
+    <p>ttyUSB0: <span class="rouge">Rouge</span>; ttyUSB1: <span class="bleu">Bleu</span>; ttyUSB2: <span class="vert">Vert</span>; ttyUSB3: <span class="violet">Violet</span></p> 
+  </div>
+  <div id="layout">
+    <h2>Layout</h2>
+    <div class = "layout-select-only" >
+      <span> Top :</span>
+      <!-- Top list -->
+      <select class="selector" id="ttyUSB-selector-top">
+        <option value=""></option>
+      </select>
+    </div>
+    
+    <div class="layout-center">
+      <!-- Left list -->
+      <div class = "layout-select-square">
+        <span> Left :</span>
+        <select class="selector" id="ttyUSB-selector-left">
+          <option value=""></option>
+        </select>
+      </div>
+      
+      <!-- center square -->
+      <div class="layout-square" > Arena </div>
+      
+      <!-- Right List -->
+      <div class = "layout-select-square">
+        <span> Right :</span>
+        <select class="selector" id="ttyUSB-selector-right">
+          <option value=""></option>
+        </select>
+      </div>
+    </div>
+  
+    <!-- Down List -->
+    <div class = "layout-select-only">
+      <span> Down :</span>
+      <select class="selector" id="ttyUSB-selector-bottom">
+        <option value=""></option>
+      </select>
+    </div>
+
+    <button id="change-device-name">Update Device Name</button>
+  </div>
+  
+  <div id="communication">    
+  </div>
+
+  <script src="render.js"></script>
+</body>
+</html>
+

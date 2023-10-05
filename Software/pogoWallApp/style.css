@@ -1,0 +1,130 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+}
+
+#layout {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+}
+
+#communication {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px;
+}
+
+#key_command {
+    text-align: center;
+    padding: 20px;
+    margin: 20px;
+}
+
+.device {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 10px;
+    width: 45%;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+}
+
+.device h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.device_cmd {
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    width: 80%;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+button {
+    background-color: #0074d9;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.device_recp {
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+.device_recp h2 {
+    margin-top: 20px;
+}
+
+.uart-reception {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 10px;
+    height: 150px;
+    overflow-y: scroll;
+    background-color: #f9f9f9;
+}
+
+.layout-select-only {
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.layout-square {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    width: 200px; 
+    height: 100px; 
+    border: 1em solid black; 
+    border-radius: 0.5em;
+}
+
+.layout-center {
+    display: flex; 
+    flex-direction: row; 
+    align-items: center; 
+    justify-content: center;
+}
+
+.selector {
+    margin: 10px;
+    font-size: 1.2rem;
+}
+
+.layout-select-square {
+    margin: 10px;
+}
+
+.rouge {
+    color: red;
+}
+
+.bleu {
+    color: blue;
+}
+
+.vert {
+    color: green;
+}
+
+.violet {
+    color: purple;
+}
