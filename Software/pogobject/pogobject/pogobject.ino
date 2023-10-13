@@ -112,6 +112,12 @@ void setup(void) {
 
   // Start Serial
   Serial.begin(BAUD_RATE);
+  Serial.println("\n Starting");
+
+  // Start screen
+  u8g2.begin();
+  printScreen("Waiting for wifi");
+
 
   // pin mode definition
   pinMode(LED_PIN, OUTPUT);
@@ -122,15 +128,15 @@ void setup(void) {
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
   }
+
+  printScreen("Wifi ok");
+  Serial.println("\n Wifi connected");
   
   // Start the server
   server.begin();
 
   // Print the IP address
   Serial.println(WiFi.localIP());
-
-  // Start screen
-  u8g2.begin();
 
   // Print the IP address on  the screen
   IPaddr = IpAddress2String(WiFi.localIP());
