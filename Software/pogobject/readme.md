@@ -19,6 +19,7 @@ this code is the fusion of example from the libraries
 - SoftwareSerial
 - dfRobot u8g2 (https://github.com/olikraus/u8g2 v2.27.2)
 - board library FireBeetle-ESP8266 (https://raw.githubusercontent.com/DFRobot/FireBeetle-ESP8266/master/package_firebeetle8266_index.json v2.3.3)
+  or http://download.dfrobot.top/boards/package_DFRobot_index.json 
   
 
 ## Pogobject Web Control Directory
