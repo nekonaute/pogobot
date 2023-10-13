@@ -13,13 +13,12 @@ It is composed of a custom PCB, a Pogobot v3 head, and a DFRobot FireBeetle ESP8
 This directory contains the code for the FireBeetle to be used with the Arduino IDE.
 Instructions and library versions are available within the code.
 
-Tested with the arduino IDE 1.8.13
+Tested with the arduino IDE 1.8.13 and 2.2.1
 this code is the fusion of example from the libraries
 - aREST (https://github.com/marcoschwartz/aREST v2.9.7)
 - SoftwareSerial
-- dfRobot u8g2 (https://github.com/olikraus/u8g2 v2.27.2)
-- board library FireBeetle-ESP8266 (https://raw.githubusercontent.com/DFRobot/FireBeetle-ESP8266/master/package_firebeetle8266_index.json v2.3.3)
-  or http://download.dfrobot.top/boards/package_DFRobot_index.json 
+- dfRobot u8g2 (https://github.com/olikraus/u8g2 v2.27.2 or v2.34.22)
+- board library FireBeetle-ESP8266 (https://raw.githubusercontent.com/DFRobot/FireBeetle-ESP8266/master/package_firebeetle8266_index.json or http://download.dfrobot.top/boards/package_DFRobot_index.json v2.3.3)
   
 
 ## Pogobject Web Control Directory
