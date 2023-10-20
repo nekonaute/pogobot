@@ -724,13 +724,13 @@ define_command( ir_read, ir_read_handler, "Read IR message", POGO_CMDS );
  * Write blocks of data to flash
  *
  */
-/*static void
+static void
 ir_flash_handler( int nb_params, char **params )
 {
     ir_boot_loop();
 }
 define_command( ir_flash, ir_flash_handler,
-                "Write to flash from infrared (with CRC)", POGO_CMDS );*/
+                "Write to flash from infrared (with CRC)", POGO_CMDS );
 
 #endif
 
