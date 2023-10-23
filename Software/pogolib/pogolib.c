@@ -225,3 +225,9 @@ pogobot_helper_getid( void )
     srand( seed );
     return rand();
 }
+
+void 
+pogobot_helper_print_version( void )
+{
+    printf(" Pogolib Version : %s\n", RELEASE_VERSION);
+}

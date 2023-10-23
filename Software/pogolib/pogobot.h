@@ -36,6 +36,7 @@
 #include "sleep.h"
 #include "adc.h"
 #include "slip.h"
+#include "release.h"
 
 
 /* clang-format-ok */
@@ -746,5 +747,18 @@ uint16_t pogobot_helper_getid( void );
  *
  */
 int16_t pogobot_helper_getRandSeed( void );
+
+/** (pogobot_helper_print_version)
+ * print the version inside the prompt
+ * It is also possible to use the define RELEASE_VERSION in release.h
+ *
+ * # Parameters
+ * - none
+ *
+ * # Return
+ * - none
+ *
+ */
+void pogobot_helper_print_version( void );
 
 #endif /* __POGOBOT_H__ */
