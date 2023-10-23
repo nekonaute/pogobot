@@ -378,6 +378,8 @@ int serialboot(void)
 				/* Acknowledge and jump */
 				uart_write(SFL_ACK_SUCCESS);
 
+				printf(" execute 'run' to start the programme \n ");
+				/* removing auto boot after a programmation
 				jump_addr = get_uint32(&frame.payload[0]);
                 if(jump_addr <= (SPIFLASH_BASE + 0x40000) ) {
                     printf("Rebooting to bootloader\n");
@@ -386,7 +388,7 @@ int serialboot(void)
                 else {
                     printf("Rebooting to user image\n");
                     reboot_ctrl_write(0xac | 1);
-                }
+                }*/
                 return 0;
 				break;
 
