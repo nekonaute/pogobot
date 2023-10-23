@@ -86,6 +86,7 @@ int main(void) {
 	//crcbios();
     printf(" LiteX git sha1: "LITEX_GIT_SHA1"\n");
     printf(" PogoSoC git sha1: "POGOSOC_GIT_SHA1"\n");
+    pogobot_helper_print_version();
     if(unique_id != 0) printf(" Unique ID: 0x%08lx%08lx\n", (uint32_t)(unique_id>>32), (uint32_t)(unique_id & 0xffffffff));
     if(serial_number != 0) { printf(" Serial #: 0x%08lx%08lx, ", (uint32_t)(serial_number>>32), (uint32_t)(serial_number & 0xffffffff));
     printSerial(); }
