@@ -51,7 +51,7 @@ message:
 #define alphabet             "abcdefghijklmnopqrstuvwyz"
 #define message_length_bytes ( sizeof( robot_name "front" alphabet ) )
 
-unsigned char *messages[message_length_bytes] = {
+unsigned char *messages[4] = {
     (unsigned char *)robot_name "front" alphabet,
     (unsigned char *)robot_name "right" alphabet,
     (unsigned char *)robot_name "back_" alphabet,
