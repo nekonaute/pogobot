@@ -1,0 +1,4 @@
+{
+    "build/pogobotv3/gateware/pogobotv3.bin": "0x240000",
+    "build/pogobotv3/software/pogobios/pogobios.bin": "0x260000"
+}
