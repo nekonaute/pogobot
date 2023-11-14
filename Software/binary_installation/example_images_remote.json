@@ -1,0 +1,4 @@
+{
+    "binary_installation/install_APIv2.2.1/remocon/remocon_pogobotv3/gateware/remocon_pogobotv3.bin": "0x240000",
+    "binary_installation/install_APIv2.2.1/remocon/remocon_pogobotv3/software/pogobios/pogobios.bin": "0x260000"
+}

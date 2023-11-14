@@ -1,4 +1,4 @@
 {
-    "build/pogobotv3/gateware/pogobotv3.bin": "0x240000",
-    "build/pogobotv3/software/pogobios/pogobios.bin": "0x260000"
+    "binary_installation/install_APIv2.2.1/pogobios/pogobotv3/gateware/pogobotv3.bin": "0x240000",
+    "binary_installation/install_APIv2.2.1/pogobios/pogobotv3/software/pogobios/pogobios.bin": "0x260000"
 }
