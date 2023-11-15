@@ -487,11 +487,11 @@ The big one is combination of a pogobot head + remote + remote_Leds_strip + 3D s
 ### Software
 In order to turn a head into a remote control, we need to put a special user code.
 
-    ./pogosoc.py --target=pogobotv3 --cpu-variant=lite --remocon
+    ./pogosoc.py --target=pogobotv3 --cpu-variant=lite --build --remocon
 
 Connect to the robot with the command
 
-    ./litex_term.py --serial-boot --images pogobios.json --safe /dev/ttyUSBX
+    ./litex_term.py --serial-boot --images images.json --safe /dev/ttyUSBX
 
 Type the command
 
