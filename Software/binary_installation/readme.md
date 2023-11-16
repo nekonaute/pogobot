@@ -21,7 +21,7 @@ Modify the path depending on the version needed and execute (replace XXX to matc
 
 Reboot the robot. It will then display the "pogoboot >" prompt
 
-For The robot to download and restart with the new code, execute (on the robot):
+For the robot to download and restart with the new code, execute (on the robot):
 
 ```
 serialboot
