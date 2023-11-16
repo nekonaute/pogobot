@@ -27,3 +27,16 @@ serialboot
 ```
 
 The robot download and restart on the new code
+
+## In the case of the bootloader
+
+Inside the folder "pogobot/Software".
+
+```
+./litex_term.py --serial-boot --kernel=binary_installation/install_APIv2.2.1/bootloader/bootloader_pogobotv3/bootloader.bin --kernel-adr=0x200000 --safe /dev/ttyUSBX
+```
+execute on the robot
+
+```
+serialboot
+```
