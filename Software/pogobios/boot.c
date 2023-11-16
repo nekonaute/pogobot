@@ -141,50 +141,17 @@ int serialboot(void)
 	const char *c;
 	int ack_status;
     time_reference_t my_timer;
-#ifndef REMOCON
-		uintptr_t ptr=0;    // last flashed mem address
-#endif
+	uintptr_t ptr=0;    // last flashed mem address
 
 #ifdef REMOCON
-    printf("Sending from serial...\n");
+		printf("Serialboot is desactivate.\n");
+		printf("To programm the robots use rc_flash_robot.\n");
+		return 1;
+#endif
 
-	// sending 10x the command to start the reception 
-	uint8_t i,j;
-    uint16_t count = 0;
-    extern const char * ir_magic_req;
-	char * cmd = "ir_flash";
-	message_t message;
-    message.header._emitting_power_list =
-        pogobot_infrared_emitting_power_list(3, 3, 3, 3);
-    message.header.receiver_id = 0x42; //not used
-    message.header._sender_ir_index = ir_all;
-    message.header._packet_type = ir_t_cmd; 
-    message.header._sender_id = pogobot_helper_getid();
-
-    //First send the magic 
-    for(i=0; i<strlen(ir_magic_req); i++)
-    {
-        message.payload[count++] = ir_magic_req[i];
-    }
-	for (j=0; j < strlen(cmd); j++)
-	{
-		message.payload[count++]=cmd[j];
-	}
-	message.payload[count++]=0;
-	message.header.payload_length = count;
-	for ( i = 0; i < 10; i++)
-	{
-		slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
-							sizeof( message_header_t ) +
-							message.header.payload_length );
-	}
-	
-
-#else 
 	printf("Booting from serial...\n");
 	printf("Press Q or ESC to abort boot completely.\n");
 
-#endif //REMOCON
 	/* Send the serialboot "magic" request to Host and wait for ACK_OK */
 	c = str;
 	while(*c) {
@@ -208,10 +175,8 @@ int serialboot(void)
 		int timeout;
 		int computed_crc;
 		int received_crc; 
-#ifndef REMOCON
 		uintptr_t addr;
-        uint32_t jump_addr;
-#endif
+        //uint32_t jump_addr;
 
 		/* Get one Frame */
 		i = 0;
@@ -259,64 +224,6 @@ int serialboot(void)
 			continue;
 		}
 
-#ifdef REMOCON
-        // When you're a remote control, you flash nothing but instead forward the orders to IR
-    
-		/* Execute Frame CMD */
-		switch(frame.cmd) {
-			/* On SFL_CMD_ABORT ... */
-			case SFL_CMD_ABORT:
-				/* Reset failures */
-				failures = 0;
-
-				send_flash_message((char *)&frame, frame.payload_length + 4);
-				/* to be refined */ 
-				msleep(100);
-				/* Acknowledge and exit */
-				uart_write(SFL_ACK_SUCCESS);
-				return 1;
-
-			/* On SFL_CMD_LOAD... */
-			case SFL_CMD_LOAD:
-
-				/* Reset failures */
-				failures = 0;
-               
-				send_flash_message((char *)&frame, frame.payload_length + 4);
-				/* to be refined */ 
-				msleep(100);
-				/* Acknowledge */
-                uart_write(SFL_ACK_SUCCESS);
-				break;
-
-			/* On SFL_CMD_JUMP... */
-			case SFL_CMD_JUMP:
-				/* Reset failures */
-				failures = 0;
-                send_flash_message((char *)&frame, frame.payload_length + 4);
-				/* to be refined */ 
-				msleep(100);
-				/* Acknowledge and jump */
-				uart_write(SFL_ACK_SUCCESS);
-                return 0;
-				break;
-
-			default:
-				/* Increment failures */
-				failures++;
-
-				/* Acknowledge the UNKNOWN cmd */
-				uart_write(SFL_ACK_UNKNOWN);
-
-				/* Increment failures and exit when max is reached */
-				if(failures == MAX_FAILURES) {
-					printf("Too many consecutive errors, aborting");
-					return 0;
-				}
-
-				break;
-		}
-#else
 		/* Execute Frame CMD */
 		switch(frame.cmd) {
 			/* On SFL_CMD_ABORT ... */
@@ -407,10 +314,185 @@ int serialboot(void)
 
 				break;
 		}
-#endif
 	}
 	return 1;
 }
+
+#ifdef REMOCON
+
+/* Returns 1 if other boot methods should be tried */
+int flash_robot(void)
+{
+	struct sfl_frame frame;
+	int failures;
+	static const char str[] = SFL_MAGIC_REQ;
+	const char *c;
+	int ack_status;
+    time_reference_t my_timer;
+
+    printf("Sending from serial...\n");
+
+	// sending 10x the command to start the reception 
+	uint8_t i,j;
+    uint16_t count = 0;
+    extern const char * ir_magic_req;
+	char * cmd = "ir_flash";
+	message_t message;
+    message.header._emitting_power_list =
+        pogobot_infrared_emitting_power_list(3, 3, 3, 3);
+    message.header.receiver_id = 0x42; //not used
+    message.header._sender_ir_index = ir_all;
+    message.header._packet_type = ir_t_cmd; 
+    message.header._sender_id = pogobot_helper_getid();
+
+    //First send the magic 
+    for(i=0; i<strlen(ir_magic_req); i++)
+    {
+        message.payload[count++] = ir_magic_req[i];
+    }
+	for (j=0; j < strlen(cmd); j++)
+	{
+		message.payload[count++]=cmd[j];
+	}
+	message.payload[count++]=0;
+	message.header.payload_length = count;
+	for ( i = 0; i < 10; i++)
+	{
+		slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
+							sizeof( message_header_t ) +
+							message.header.payload_length );
+	}
+	
+	/* Send the serialboot "magic" request to Host and wait for ACK_OK */
+	c = str;
+	while(*c) {
+		uart_write(*c);
+		c++;
+	}
+	ack_status = check_ack();
+	if(ack_status == ACK_TIMEOUT) {
+		printf("Timeout\n");
+		return 0;
+	}
+	if(ack_status == ACK_CANCELLED) {
+		printf("Cancelled\n");
+		return 0;
+	}
+
+	/* Assume ACK_OK */
+	failures = 0;
+	while(1) {
+		int i;
+		int timeout;
+		int computed_crc;
+		int received_crc; 
+
+		/* Get one Frame */
+		i = 0;
+		timeout = 1;
+        pogobot_timer_init( &my_timer, CMD_TIMEOUT_DELAY);
+		while((i == 0) || !pogobot_timer_has_expired(&my_timer)) {
+			if (uart_read_nonblock()) {
+				if (i == 0) {
+						frame.payload_length = uart_read();
+				}
+				if (i == 1) frame.crc[0] = uart_read();
+				if (i == 2) frame.crc[1] = uart_read();
+				if (i == 3) frame.cmd    = uart_read();
+				if (i >= 4) {
+					frame.payload[i-4] = uart_read();
+					if (i == (frame.payload_length + 4 - 1)) {
+						timeout = 0;
+						break;
+					}
+				}
+				i++;
+			}
+		}
+
+		/* Check Timeout */
+		if (timeout) {
+			/* Acknowledge the Timeout and continue with a new frame */
+			uart_write(SFL_ACK_ERROR);
+			continue;
+		}
+
+		/* Check Frame CRC */
+		received_crc = ((int)frame.crc[0] << 8)|(int)frame.crc[1];
+		computed_crc = crc16(&frame.cmd, frame.payload_length+1);
+		if(computed_crc != received_crc) {
+			/* Acknowledge the CRC error */
+			uart_write(SFL_ACK_CRCERROR);
+
+			/* Increment failures and exit when max is reached */
+			failures++;
+			if(failures == MAX_FAILURES) {
+				printf("Too many consecutive errors, aborting");
+				return 0;
+			}
+			continue;
+		}
+    
+		/* Execute Frame CMD */
+		switch(frame.cmd) {
+			/* On SFL_CMD_ABORT ... */
+			case SFL_CMD_ABORT:
+				/* Reset failures */
+				failures = 0;
+
+				send_flash_message((char *)&frame, frame.payload_length + 4);
+				/* to be refined */ 
+				msleep(100);
+				/* Acknowledge and exit */
+				uart_write(SFL_ACK_SUCCESS);
+				return 1;
+
+			/* On SFL_CMD_LOAD... */
+			case SFL_CMD_LOAD:
+
+				/* Reset failures */
+				failures = 0;
+               
+				send_flash_message((char *)&frame, frame.payload_length + 4);
+				/* to be refined */ 
+				msleep(100);
+				/* Acknowledge */
+                uart_write(SFL_ACK_SUCCESS);
+				break;
+
+			/* On SFL_CMD_JUMP... */
+			case SFL_CMD_JUMP:
+				/* Reset failures */
+				failures = 0;
+                send_flash_message((char *)&frame, frame.payload_length + 4);
+				/* to be refined */ 
+				msleep(100);
+				/* Acknowledge and jump */
+				uart_write(SFL_ACK_SUCCESS);
+                return 0;
+				break;
+
+			default:
+				/* Increment failures */
+				failures++;
+
+				/* Acknowledge the UNKNOWN cmd */
+				uart_write(SFL_ACK_UNKNOWN);
+
+				/* Increment failures and exit when max is reached */
+				if(failures == MAX_FAILURES) {
+					printf("Too many consecutive errors, aborting");
+					return 0;
+				}
+
+				break;
+		}
+
+	}
+	return 1;
+}
+
+#endif
 
 #endif
 

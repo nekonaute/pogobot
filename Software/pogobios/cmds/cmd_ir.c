@@ -1265,6 +1265,21 @@ rc_erase_handler( int nb_params, char **params )
 define_command( rc_erase, rc_erase_handler,
                 "Erase all pogobots available through infrared", POGO_CMDS );
 
+/**
+ * Command "rc_flash_robot"
+ *
+ * Send program through IR
+ *
+ */
+static void
+rc_flash_robot_handler( int nb_params, char **params )
+{
+    flash_robot();   
+}
+
+define_command( rc_flash_robot, rc_flash_robot_handler,
+                "Programming all pogobots available through infrared", POGO_CMDS );
+
 
 #endif
 #else /* CSR_IR_RX0_BASE */

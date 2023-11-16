@@ -19,4 +19,5 @@ int serialboot(void);
 void update_led_status(void);
 uint8_t check_flash_state(const char * data, uint32_t address_in_flash);
 uint32_t get_uint32(unsigned char* data);
+int flash_robot(void);
 #endif /* __BOOT_H */
