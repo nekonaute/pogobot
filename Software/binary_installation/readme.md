@@ -1,18 +1,19 @@
-# How to use already compiled binaries
+# How to use the compiled binaries
 
 ## Using the ice40 dev board
-If your are access to the ice40 dev borad and the complementary pogobot board as in the Readme section " Upload a empty or faulty robot ",
-you can use the script " program_remote.sh" or "program_robot.sh" available in the version you need.
+
+If you have access to the ice40 dev board and the complementary pogobot board as in the Readme section " Upload an empty or faulty robot ",
+you can use the script "program_remote.sh" or "program_robot.sh" available for the version you need.
 
 ## Using Litex_term.py
 
-Inside the folder "pogobot/Software".
+From the folder "pogobot/Software":
 
 ```
 cp binary_installation/example_images.json .
 ```
 
-modify the path depending on the version needed and execute
+Modify the path depending on the version needed and execute:
 
 ```
 ./litex_term.py --serial-boot --images example_images.json --safe /dev/ttyUSBX (X depending of the system)
@@ -26,16 +27,17 @@ execute on the robot
 serialboot
 ```
 
-The robot download and restart on the new code
+The robot downloads and restarts with the new code.
 
 ## In the case of the bootloader
 
-Inside the folder "pogobot/Software".
+In the folder "pogobot/Software":
 
 ```
 ./litex_term.py --serial-boot --kernel=binary_installation/install_APIv2.2.1/bootloader/bootloader_pogobotv3/bootloader.bin --kernel-adr=0x200000 --safe /dev/ttyUSBX
 ```
-execute on the robot
+
+On the robot, execute:
 
 ```
 serialboot
