@@ -45,6 +45,17 @@ The pogobot is a small robot designed for swarm robotics experiments, targeted a
 The robot is composed of a head (above) with a iCE40UP5K FPGA chip including a softcore processor, an IMU, fast Infra-Red communication devices and a LED.
 The head is plugged on a belly (under) which composed of even more LEDs, the motor controler, the battery and the battery regulation system.
 
+To help the understanding, there is two version name used inside the project, one for the hardware and one for the software. <br> 
+The following table gives an overview :
+
+| hardware version | software version | comments                                           |
+|:----------------:|:----------------:|----------------------------------------------------|
+|        V3        |        V1        | initial version                                    |
+|        V3        |        V2        | reduce communication speed to increase reliability |
+|        V3        |       V2.1       | reduce header footprint                            |
+|        V3        |       V2.2       | introduce short message and clean the pogobios     |
+|        V3        |      V2.2.1      | fix the IR programation problem                    |
+
 ### Git description
 This project is divided into 3 folders :
 - Hardware
