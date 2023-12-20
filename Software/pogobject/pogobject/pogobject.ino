@@ -113,6 +113,8 @@ void setup(void) {
   // Start Serial
   Serial.begin(BAUD_RATE);
   Serial.println("\n Starting");
+  Serial.print("ESP Board MAC Address:  ");
+  Serial.println(WiFi.macAddress());
 
   // Start screen
   u8g2.begin();
