@@ -1,187 +1,114 @@
+/* Mise en place de la grille de la page  */
 body {
-	font-family: Arial, sans-serif;
-	background-color: #f0f0f0;
-	margin: 0;
-	padding: 0;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(12, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    min-height: 100vh;
 }
 
-h1 {
-	text-align: center;
-	margin-top: 20px;
-	color: #74c25c;
+/* Position de l'en-tête  sur la grille */
+header {
+    grid-area: 1 / 1 / 2 / 9; 
 }
 
-.container {
-	max-width: 1024px;
-	margin: 0 auto;
-	padding: 20px;
-	background-color: #ffffff;
-	border-radius: 10px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Position de la section latérale gauche sur la grille */
+section {
+    grid-area: 2 / 1 / 12 / 5; 
 }
 
-label {
-	display: block;
-	font-weight: bold;
-	margin-top: 10px;
+/* Position de la section latérale droite sur la grille */
+aside {
+    grid-area: 2 / 5 / 12 / 9; 
+    height: auto;
 }
 
-input[type="text"],
-select,
-input[type="range"] {
-	width: 100%;
-	padding: 10px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
-	background-color: #f8f8f8;
-	margin-top: 5px;
+/* Position du pied de page sur la grille */
+footer {
+    grid-area: 12 / 1 / 13 / 9;
 }
 
-button {
-	display: block;
-	width: 100%;
-	padding: 10px;
-	background-color: #74c25c;
-	border: none;
-	color: white;
-	font-weight: bold;
-	border-radius: 4px;
-	cursor: pointer;
-	margin-top: 10px;
+/* Style de h1 */
+h1{
+    color: #75d675;
 }
 
-button:hover {
-	background-color: #2b5e09;
+/* Style de infos */
+#infos{
+    /* La largeur s'adapte en fonction du contenu */
+    height: auto;
 }
 
-#sliderValue {
-	font-weight: bold;
-	display: inline-block;
-	margin-left: 10px;
+/* Style des buttons */
+button{
+    /* !important : Force le changement de style fait par bootstrap */
+    color: rgb(117,214,117) !important;
+    background-color: #a8a7a7 !important;
+    opacity: 0.9;
 }
 
-#resultDiv {
-	margin-top: 20px;
-	font-weight: bold;
+/* Survole des buttons */
+button:hover{
+    opacity: 1;
 }
 
-/* Styles pour les champs d'entrée et les boutons */
-input[type="text"],
-select,
-input[type="range"],
-button {
-	width: 100%;
-	padding: 10px;
-	margin-top: 5px;
-	box-sizing: border-box; /* Inclure les bordures et le padding dans la largeur totale */
+/* Style de response */
+.response{
+    /* La largeur s'adapte en fonction du contenu */
+    height: auto;
 }
 
-.container {
-    display: flex;
+/* Style de l'image */
+img{
+    margin-left: 20px;
+    height: 60px;
 }
 
-.main-content {
-    float: left;
-    width: 45%; /* Ajustez la largeur selon vos besoins */
-    margin-right: 5%; /* Marge droite pour séparer les deux div */
+/* Style de slideContainer */
+.slideContainer{
+    width: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-.readme {
-    float: left;
-    width: 50%; /* Ajustez la largeur selon vos besoins */
+/* Style de slider */
+.slider{
+    /* Enlever l'apparence par default */
+    -webkit-appearance: none;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(90deg, rgb(214,214,214) 60%,rgb(214,214,214) 60%);
+    /* Enlève les contours */
+    outline: none;
+    opacity: 0.7;
+    /* Transition de l'opacité sur une durée de 0.2s */
+    -webkit-transition: 0.2s;
+    transition: opacity 0.2s;
+    border-radius: 12px;
 }
 
-.input-button {
-	display: flex;
-	width: 100%
+/* Survole du slider */
+.slider:hover{
+    opacity: 1;
 }
 
-.input-button-left {
-	margin-right: 5%;
+/* Style de la puce pour google */
+.slider::-webkit-slider-thumb{
+    /* Enlever l'apparence par default */
+    -webkit-appearance: none;
+    width: 35px;
+    height: 35px;
+    background: rgb(117,214,117);
+    border-radius: 50%;
+    cursor: pointer;
 }
 
-.footer {
-    text-align: center;
-    padding: 10px;
-    background-color: #f2f2f2;
+/* Style de la puce pour Mozilla Firefox */
+.slider::-moz-range-thumb{
+    width: 35px;
+    height: 35px;
+    background: rgb(117,214,117);
+    border-radius: 50%;
+    cursor: pointer;
 }
-
-/* battery section */ 
-.container-bat {
-	background-color: #7a7a7a;
-	width: 80%;
-	border-radius: 15px;
-}
-
-#batteryLevel {
-	background-color: 7a7a7a;
-	color: white;
-	padding: 1%;
-	text-align: right;
-	font-size: 20px;
-	border-radius: 15px;
-	width: 100%;
-}
-
-/* The switch - the box around the slider */
-.switch {
-position: relative;
-display: inline-block;
-width: 30px;
-height: 17px;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-opacity: 0;
-width: 0;
-height: 0;
-}
-
-/* The slider */
-.slider {
-position: absolute;
-cursor: pointer;
-top: 0;
-left: 0;
-right: 0;
-bottom: 0;
-background-color: #ccc;
--webkit-transition: .4s;
-transition: .4s;
-}
-
-.slider:before {
-position: absolute;
-content: "";
-height: 13px;
-width: 13px;
-left: 2px;
-bottom: 2px;
-background-color: white;
--webkit-transition: .4s;
-transition: .4s;
-}
-
-input:checked + .slider {
-background-color: #74c25c;
-}
-
-input:focus + .slider {
-box-shadow: 0 0 1px #5e974d;
-}
-
-input:checked + .slider:before {
--webkit-transform: translateX(13px);
--ms-transform: translateX(13px);
-transform: translateX(13px);
-}
-
-/* Rounded sliders */
-.slider.round {
-border-radius: 17px;
-}
-
-.slider.round:before {
-border-radius: 50%;
-} 
