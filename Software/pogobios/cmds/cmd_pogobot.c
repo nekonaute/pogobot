@@ -706,7 +706,7 @@ static void rgb_set_handler(int nb_params, char **params) {
     uint32_t color;
     int8_t id;
     if (( nb_params == 0 ) || ( nb_params > 2 ) ) {
-        printf( "Usage: rgb_set [color in hex] [LED_id]\n\
+        printf( "Usage: set_led [color in hex] [LED_id]\n\
        no [LED_id] means 0, -1 means all, {0,4}\n\
        color is a 24bit value in Red Green Blue MSB to LSB.\n\
        Example : Set RED color : rgb_set 0xFF0000 0\n\
