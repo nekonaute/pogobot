@@ -9,7 +9,7 @@ Now you have each device interface identified with the name of the Wall.
 Autocompletion is available for the most used command.
 
 ## installation
-
+```
 sudo apt-get install nodejs
 sudo apt-get install npm
 npm install electron
@@ -21,14 +21,14 @@ nvm install 18
 
 npm install serialport
 npm install --save-dev @electron-forge/cli
-
+```
 ## local launch
-
+```
 cd pogoWallApp
 npm start
-
+```
 ## build the app (.deb)
-
+```
 cd pogoWallApp
 npm run make
-
+```
