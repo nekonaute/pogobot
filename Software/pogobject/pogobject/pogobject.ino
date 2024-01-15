@@ -26,6 +26,13 @@
  * 
  * battery verification
  * voltage divider between VCC - A0 - GND (2*100kOhms) 
+ *
+ * configuration du wifi
+ * pin D9 to GND -> normal mode
+ * pin D9 to VCC -> configuration mode
+ * 
+ * The SSID can only make 32 caracters
+ * The password is only 64 caracters
  * 
  */
 
@@ -38,19 +45,29 @@
 #include <Wire.h>
 // Software Serial
 #include "SoftwareSerial.h"
+// Wifi configuration
+#include <ESP8266WebServer.h>
+#include <EEPROM.h>
 
 //screen variables
 U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); 
 
-// WiFi parameters
-const char* ssid = "YOUR_SSID";
-const char* password = "YOUR_CODE";
+// WiFi configuration parameters
+const char* defaultSSID = "PogobjectConfig";
+const char* defaultPassword = "pogobotconfig";
+
+// Global ssid / password value used
+char ssid[32]; 
+char password[64]; 
+
+// Create an instance of a WebServer for configuration
+ESP8266WebServer server_config(80);
 
 // Check Battery voltage using multimeter & add/subtract the value
 float calibration = 0.64; 
 
 // The port to listen for incoming TCP connections
-#define LISTEN_PORT           80
+#define LISTEN_PORT 80
 
 // Create an instance of the server
 WiFiServer server(LISTEN_PORT);
@@ -69,6 +86,7 @@ float voltage = 0;
 #define TX D4 // -> RX pogobot
 #define RESET_P D2 // -> RESET pogobot
 #define LED_PIN D5 // -> PWM for Led control
+#define CONFIG_PIN D9 // put to vcc to start configuration 
 
 // software serial definition
 #define BAUD_RATE 115200
@@ -107,6 +125,91 @@ float mapFloat(float value, float fromLow, float fromHigh, float toLow, float to
   return (value - fromLow) * (toHigh - toLow) / (fromHigh - fromLow) + toLow; 
 }
 
+void handleRoot() {
+  String html = "<html><head><style>";
+  html += "body {font-family: Arial, sans-serif; margin: 50px;}";
+  html += "h1 {color: #333; text-align: center;}";
+  html += "form {max-width: 400px; margin: auto;}";
+  html += "input {width: 100%; padding: 10px; margin: 5px 0;}";
+  html += "input[type=submit], input[type=button] {background-color: #B7B7B7; color: white;}";
+  html += "</style></head><body>";
+  html += "<h1>Configuration WiFi</h1>";
+  html += "<form action='/configure' method='post'>";
+  html += "SSID: <input type='text' name='ssid' value='" + String(ssid) + "' required><br>";
+  html += "Mot de passe: <input type='password' name='password' id='password' value='" + String(password) + "' required>";
+  html += "<input type='button' value='Afficher le mot de passe' onclick='togglePasswordVisibility()'><br>";
+  html += "<input type='submit' value='Configurer'>";
+  html += "</form>";
+  html += "<script>";
+  html += "function togglePasswordVisibility() {";
+  html += "  var passwordInput = document.getElementById('password');";
+  html += "  if (passwordInput.type === 'password') {";
+  html += "    passwordInput.type = 'text';";
+  html += "  } else {";
+  html += "    passwordInput.type = 'password';";
+  html += "  }";
+  html += "}";
+  html += "</script>";
+  html += "</body></html>";
+
+  server_config.send(200, "text/html", html);
+}
+
+void handleConfigure() {
+  String newSSID = server_config.arg("ssid");
+  String newPassword = server_config.arg("password");
+
+  // update WIFI information
+  newSSID.toCharArray(ssid, sizeof(ssid));
+  newPassword.toCharArray(password, sizeof(password));
+
+  // WRITE info to EEPROM 
+  // writeWiFiCredentials();
+
+  // Html response
+  String response = "<html><body>";
+  response += "<h1>Wifi info updated with success</h1>";
+  response += "<p>Please move D9 to 0, the pogobect will restart now...</p>";
+  response += "</body></html>";
+
+  server_config.send(200, "text/html", response);
+
+  delay(4000);
+  ESP.restart();
+}
+
+void readWiFiCredentials() {
+  EEPROM.begin(512);
+
+  // READ EEPROM for SSID
+  for (int i = 0; i < sizeof(ssid); ++i) {
+    ssid[i] = EEPROM.read(i);
+  }
+
+  // READ EEPROM for password
+  for (int i = 0; i < sizeof(password); ++i) {
+    password[i] = EEPROM.read(sizeof(ssid) + i);
+  }
+
+  EEPROM.end();
+}
+
+void writeWiFiCredentials() {
+  EEPROM.begin(512);
+
+  // WRITE new ssid to EEPROM
+  for (int i = 0; i < sizeof(ssid); ++i) {
+    EEPROM.write(i, ssid[i]);
+  }
+
+  // WRITE new password to EEPROM
+  for (int i = 0; i < sizeof(password); ++i) {
+    EEPROM.write(sizeof(ssid) + i, password[i]);
+  }
+
+  EEPROM.commit();
+  EEPROM.end();
+}
 
 void setup(void) {
 
@@ -118,6 +221,48 @@ void setup(void) {
 
   // Start screen
   u8g2.begin();
+
+  // wifi credentials
+  readWiFiCredentials();
+  Serial.print("Memorized credentials : ");
+  Serial.print(ssid);
+  Serial.print(" , ");
+  Serial.println(password);
+
+  // look for config Pin
+  pinMode(CONFIG_PIN, INPUT);
+  int config_mode = digitalRead(CONFIG_PIN); 
+
+  if (config_mode) { // 1 means start configuration
+    //Start AP mode
+    Serial.print("Setting wifi mode ... ");
+    Serial.println(WiFi.mode(WIFI_AP) ? "Ready" : "Failed!");
+    Serial.print("Setting soft-AP ... ");
+    Serial.println(WiFi.softAP(defaultSSID, defaultPassword) ? "Ready" : "Failed!");
+
+    Serial.print("Soft-AP IP address = ");
+    Serial.println(WiFi.softAPIP());
+
+    // print IP to screen
+    IPaddr = IpAddress2String(WiFi.softAPIP());
+    u8g2.clearBuffer();          // clear the internal memory
+    u8g2.setFont(u8g2_font_ncenB08_tr); // choose a suitable font
+    u8g2.drawStr(0,10,IPaddr.c_str());  // write something to the internal memory
+    u8g2.sendBuffer();          // transfer internal memory to the display
+    delay(1000);
+    printScreen("Config mode");
+
+    // Start config server
+    server_config.on("/", HTTP_GET, handleRoot);
+    server_config.on("/configure", HTTP_POST, handleConfigure);
+    server_config.begin();
+
+    while (1) {
+      server_config.handleClient();
+    }
+
+  }
+
   printScreen("Waiting for wifi");
 
 
@@ -195,7 +340,7 @@ void loop(void) {
     return;
   }
   while(!client.available()){
-    delay(1);
+    delay(100);
   }
   rest.handle(client);
 
