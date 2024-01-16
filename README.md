@@ -43,8 +43,8 @@ Tools corresponds to the differents tools used around the robot.
 - [Normal mode software](https://github.com/nekonaute/pogobot-sdk)
 - [Expert mode software](/Software/readme.md)
 - [Hardware](/Hardware/readme.md)
-- [Ir Remote](/readme-irRemote.md)
-- [Charger](/readme-charger.md)
+- [Ir Remote software](/readme-irRemote.md)
+- [Charger](/Hardware/readme.md)
 - [Pogobject](/Software/pogobject/readme.md)
 - [PogoWallApp](/Software/pogoWallApp/readme.md)
 
