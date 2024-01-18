@@ -164,7 +164,7 @@ void handleConfigure() {
   newPassword.toCharArray(password, sizeof(password));
 
   // WRITE info to EEPROM 
-  // writeWiFiCredentials();
+  writeWiFiCredentials();
 
   // Html response
   String response = "<html><body>";
