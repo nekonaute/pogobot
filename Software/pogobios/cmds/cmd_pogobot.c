@@ -504,16 +504,16 @@ static void motor_handler(int nb_params, char **params) {
     int32_t pwm_values[3]={0, 0, 0};
     int8_t m_number=0, incr=0;
 
-    printf( "Usage: motor [R|L|M] [value]\n\
-             R for right, L for left and M for middle motor\n\
+    printf( "Usage: motor [R|L|B] [value]\n\
+             R for right, L for left and B for middle motor\n\
             value is the PWM level between 0 (off) and 1023\n");
-    printf(" or motor [R_value] [L_value] [M_value]\n\
+    printf(" or motor [R_value] [L_value] [B_value]\n\
                 value is the PWM level between 0 (off) and 1023\n");
     printf("if no argument given: interactive mode\n");
     
     if ( nb_params == 0 ) {
         printf("Interactive mode :\n\
-                press R or r, L or l, M or m to increment or decrement the PWM value\n\
+                press R or r, L or l, B or b to increment or decrement the PWM value\n\
                 press z to zero the values\n\
                 press q to quit\n");
         while( (key != 'q') ) {
@@ -535,11 +535,11 @@ static void motor_handler(int nb_params, char **params) {
                     m_number = 1;
                     incr = INCREMENT;
                 }
-                if (key == 'm'){
+                if (key == 'b'){
                     m_number = 2;
                     incr = -INCREMENT;
                 }
-                if (key == 'M'){
+                if (key == 'B'){
                     m_number = 2;
                     incr = INCREMENT;
                 }
@@ -574,8 +574,8 @@ Setting PWM for motor %d to value %ld\tPress 'q' to quit\r", m_number, pwm_value
             case 'l':
                 m_number = 1;
                 break;
-            case 'M':
-            case 'm':
+            case 'B':
+            case 'b':
                 m_number = 2;
                 break;
         }
@@ -597,11 +597,14 @@ define_command(motor, motor_handler, "Set PWM for motors", POGO_CMDS);
 
 #ifdef CSR_GPIO_BASE
 static void motor_dir_status_handler(int nb_params, char **params) {
-    uint32_t status = pogobot_motor_dir_status();
-    printf("field ( XXXX XMLR )\n");
-    printf(" motors direction status <%lx> \n", status);
+    uint32_t status = pogobot_motor_dir_current_status();
+    //field ( XXXX XBLR )
+    int8_t R = status & 0x1;
+    int8_t L = (status>>1) & 0x1;
+    int8_t B = (status>>2) & 0x1; 
+    printf(" motors direction current status <%lx> : R:%d L:%d B:%d \n", status, R, L, B);
 }
-define_command(motor_dir_status, motor_dir_status_handler, "motors direction status", POGO_CMDS);
+define_command(motor_dir_current_status, motor_dir_status_handler, "motors direction current status", POGO_CMDS);
 
 static void motor_dir_set_handler(int nb_params, char **params) {
 
@@ -610,8 +613,8 @@ static void motor_dir_set_handler(int nb_params, char **params) {
     char *c;
 
     if (( nb_params == 0 ) || ( nb_params > 2 ) ) {
-        printf( "Usage: motor [R|L|M] [value]\n\
-                 R for right, L for left and M for middle motor\n\
+        printf( "Usage: motor_dir_set [R|L|B] [value]\n\
+                 R for right, L for left and B for middle motor\n\
                  Value is 0 or 1 \n");
         return;
     }
@@ -625,16 +628,17 @@ static void motor_dir_set_handler(int nb_params, char **params) {
         case 'l':
             m_number = 1;
             break;
-        case 'M':
-        case 'm':
+        case 'B':
+        case 'b':
             m_number = 2;
             break;
+        default:
+            printf("motor unknown\n");
+            return;
     }
     dir_value[0] = (uint32_t)strtoul( params[1], &c, 0 );
     printf("Setting direction for motor %d to value %ld\n", m_number, dir_value[0]);
 	pogobot_motor_dir_set(m_number, dir_value[0]);
-
-
 
 }
 define_command(motor_dir_set, motor_dir_set_handler, "motors direction set", POGO_CMDS);
@@ -646,8 +650,8 @@ static void motor_dir_mem_handler(int nb_params, char **params) {
     char *c;
 
     if ( nb_params != 3 ) {
-        printf( "Usage: motor_dir_mem [valueR] [valueL] [valueB]\n\
-                 R for right, L for left and M for middle motor\n\
+        printf( "Usage: motor_dir_mem_set [valueR] [valueL] [valueB]\n\
+                 R for right, L for left and B for middle motor\n\
                  Value is 0 or 1 \n\
                  e.g. motor_dir_mem 1 0 0 \n");
         return;
@@ -659,7 +663,15 @@ static void motor_dir_mem_handler(int nb_params, char **params) {
 	setMotorDirMem(dir_value);
 
 }
-define_command(motor_dir_mem, motor_dir_mem_handler, "memorize motors direction", POGO_CMDS);
+define_command(motor_dir_mem_set, motor_dir_mem_handler, "set memorized motors direction", POGO_CMDS);
+
+static void motor_dir_mem_get_handler(int nb_params, char **params) {
+    
+    uint8_t data[3] = {0};
+    getMotorDirMem(data);
+    printf(" memorized motors direction: R:%d L:%d B:%d \n", data[0], data[1], data[2]);
+}
+define_command(motor_dir_mem_get, motor_dir_mem_get_handler, "get memorized motors direction", POGO_CMDS);
 
 static void motor_power_mem_set_handler(int nb_params, char **params) {
 

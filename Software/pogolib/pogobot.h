@@ -259,6 +259,8 @@ typedef struct short_message_t
  * ### IR type message list
  *
  * - ir_t_cmd  : type use to send command to the robot
+ * - ir_t_flash : type use to send part of a program
+ * - ir_t_short : type use to send short message between robot in user space
  * - ir_t_user : type use to send message between robot in user space
  */
 
@@ -658,8 +660,8 @@ typedef enum
  * ## Motors API Functions
  */
 
-/** (pogobot_motor_set)
- * set the value of pwm that commands the motor
+/** (pogobot_motor_power_set)
+ * set the value of pwm that commands the motor (active)
  * 
  * # Parameters
  * - 'motor' - is the id of the motor you want to command
@@ -669,9 +671,10 @@ typedef enum
  * - none
  *
  */
-void pogobot_motor_set( motor_id motor, uint16_t value );
+void pogobot_motor_power_set( motor_id motor, uint16_t value );
+void pogobot_motor_set ( motor_id motor, uint16_t value );
 
-/** (pogobot_motor_dir_status)
+/** (pogobot_motor_dir_current_status)
  * recover the value of the motor direction bit field.
  * 
  * # Parameters
@@ -681,10 +684,36 @@ void pogobot_motor_set( motor_id motor, uint16_t value );
  * - bit field ( XXXX XMLR )
  *
  */
-uint32_t pogobot_motor_dir_status( void );
+uint32_t pogobot_motor_dir_current_status( void );
+
+/** (pogobot_motor_dir_mem_get)
+ * get the value of pwm that commands the motor.
+ * 
+ * # Parameters
+ * - 'data' - is the value of each direction 0:R 1:L 2:B
+ *            data is an array of size 3.
+ *
+ * # Return
+ * - the success or not of the read in memory (0: Ok, -1: NOk)
+ *
+ */
+int8_t pogobot_motor_dir_mem_get( uint8_t *data );
+
+/** (pogobot_motor_dir_mem_set)
+ * set the value of pwm that commands the motor (persistent).
+ * 
+ * # Parameters
+  * - 'data' - is the value of each direction 0:R 1:L 2:B
+ *            data is an array of size 3.
+ *
+ * # Return
+ * - the success or not of the read in memory (0: Ok, -1: NOk)
+ *
+ */
+int8_t pogobot_motor_dir_mem_set( uint8_t *data);
 
 /** (pogobot_motor_dir_set)
- * set the value of pwm that commands the motor
+ * set the value of pwm that commands the motor (active).
  * 
  * # Parameters
  * - 'motor' - is the id of the motor you want to command
@@ -696,7 +725,7 @@ uint32_t pogobot_motor_dir_status( void );
  */
 void pogobot_motor_dir_set( motor_id motor, uint16_t value );
 
-/** (pogobot_motor_get_power)
+/** (pogobot_motor_power_mem_get)
  * recover the value of the motor power memorized.
  * 
  * # Parameters
@@ -706,10 +735,10 @@ void pogobot_motor_dir_set( motor_id motor, uint16_t value );
  * - read status
  *
  */
-uint8_t pogobot_motor_get_power( uint16_t *p_motors );
+uint8_t pogobot_motor_power_mem_get( uint16_t *p_motors );
 
-/** (pogobot_motor_set_power)
- * write the value of the motor power in memory.
+/** (pogobot_motor_power_mem_set)
+ * write the value of the motor power in memory (persistent).
  * 
  * # Parameters
  * - 'p_motors' - is a pointer to a table [R, L, B] 
@@ -718,7 +747,7 @@ uint8_t pogobot_motor_get_power( uint16_t *p_motors );
  * - read status
  *
  */
-uint8_t pogobot_motor_set_power( uint16_t *p_motors );
+uint8_t pogobot_motor_power_mem_set( uint16_t *p_motors );
 
 /**
  * ## Helper API

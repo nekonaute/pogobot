@@ -133,7 +133,7 @@ pogobot_battery_voltage_read( void )
 /* motors */
 
 void
-pogobot_motor_set( motor_id motor, uint16_t value )
+pogobot_motor_power_set( motor_id motor, uint16_t value )
 {
     if ( value > motorFull)
         value = motorFull;
@@ -158,15 +158,33 @@ pogobot_motor_set( motor_id motor, uint16_t value )
 		break;
 	}
 }
+// for retrofiting
+void 
+pogobot_motor_set ( motor_id motor, uint16_t value ) 
+{
+    pogobot_motor_power_set(motor, value);
+}
 
 uint32_t 
-pogobot_motor_dir_status( void )
+pogobot_motor_dir_current_status( void )
 {
     uint32_t value = 0xFFFFFFFF;
 #ifdef CSR_GPIO_BASE
     value = gpio_gpo_read();
 #endif
     return value;
+}
+
+int8_t
+pogobot_motor_dir_mem_get( uint8_t* data )
+{
+    return getMotorDirMem(data);
+}
+
+int8_t
+pogobot_motor_dir_mem_set( uint8_t* data)
+{
+    return setMotorDirMem(data);
 }
 
 void 
@@ -194,13 +212,13 @@ pogobot_motor_dir_set( motor_id motor, uint16_t value )
 }
 
 uint8_t
-pogobot_motor_get_power( uint16_t *p_motors )
+pogobot_motor_power_mem_get( uint16_t *p_motors )
 {
     return getMotorPowerMem(p_motors);
 }
 
 uint8_t
-pogobot_motor_set_power( uint16_t *p_motors )
+pogobot_motor_power_mem_set( uint16_t *p_motors )
 {
     return setMotorPowerMem(p_motors);
 }
