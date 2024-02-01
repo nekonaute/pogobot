@@ -1,34 +1,48 @@
 # Pogobot Software
 
-## <a name='table-of-contents'></a>Table of contents 
-
 <!-- vscode-markdown-toc -->
-* [Table of contents](#table-of-contents)
-* [First consideration](#first-consideration)
-* [Software API](#software-api)
-* [Software Installation (for expert mode)](#software-installation-(for-expert-mode))
-    * [Repository clone](#repository-clone)
-    * [Install all the dependency](#install-all-the-dependency)
-    * [Adding your user to Dialout group](#adding-your-user-to-dialout-group)
-    * [Compile gateware and pogobios (Has to be done once)](#compile-gateware-and-pogobios-(has-to-be-done-once))
-    * [Compile the SDK (Has to be done once too)](#compile-the-sdk-(has-to-be-done-once-too))
-    * [Compile and test "HelloWorld"](#compile-and-test-"helloworld")
-    * [Compile and upload your application](#compile-and-upload-your-application)
-    * [Upload a empty or faulty robot](#upload-a-empty-or-faulty-robot)
-    * [Memory map](#memory-map)
-    * [Install on Linux distributions other than Ubuntu by using Singularity Containers](#install-on-linux-distributions-other-than-ubuntu-by-using-singularity-containers)
-* [Tools](#tools)
-    * [version_creation_litex.sh](#version_creation_litex.sh)
-    * [Doc generation](#doc-generation)
-* [Kwown Issues](#kwown-issues)
-    * [yosys-abc](#yosys-abc)
-    * [nextpnr](#nextpnr)
+- [Pogobot Software](#pogobot-software)
+  - [Folder contains](#folder-contains)
+  - [First consideration](#first-consideration)
+  - [Software API](#software-api)
+  - [Software Installation (for expert mode)](#software-installation-for-expert-mode)
+    - [Repository clone](#repository-clone)
+    - [Install all the dependency](#install-all-the-dependency)
+    - [Adding your user to Dialout group](#adding-your-user-to-dialout-group)
+    - [Compile gateware and pogobios (Has to be done once)](#compile-gateware-and-pogobios-has-to-be-done-once)
+    - [Compile the SDK (Has to be done once too)](#compile-the-sdk-has-to-be-done-once-too)
+    - [Compile and test "HelloWorld"](#compile-and-test-helloworld)
+    - [Compile and upload your application](#compile-and-upload-your-application)
+    - [Upload a empty or faulty robot](#upload-a-empty-or-faulty-robot)
+    - [Memory map](#memory-map)
+    - [Install on Linux distributions other than Ubuntu by using Singularity Containers](#install-on-linux-distributions-other-than-ubuntu-by-using-singularity-containers)
+  - [Tools](#tools)
+    - [version\_creation\_litex.sh](#version_creation_litexsh)
+    - [Doc generation](#doc-generation)
+  - [Kwown Issues](#kwown-issues)
+    - [yosys-abc](#yosys-abc)
+    - [nextpnr](#nextpnr)
 
 <!-- vscode-markdown-toc-config
 	numbering=false
 	autoSave=true
 	/vscode-markdown-toc-config -->
 <!-- /vscode-markdown-toc -->
+
+## Folder contains
+This folder contains all the code needed to all the object in this project.
+
+The folder :
+- "binary_installation" contains all the binary at different version and the script to install them.
+- "example" contains the example for the robot (software)
+- "platforms" contains the python code for the different plateform used (gateware)
+- "pogobios" contains the all the code of the bios on each robot when you start them (software)
+- "pogobject" contains the code for the esp8266 and the code of the webapp to control them
+- "pogolib" contains the code of the library that will used to program the robots (software)
+- "pogoWallApp" contains the code of a webapp that help to control the wall
+- "rtl" contains the python code for the different plateform used (gateware)
+- "targets" contains the python code for the different plateform used (gateware)
+
 
 ## <a name='first-consideration'></a>First consideration 
 In order to avoid to much complexity for the pogobot usage, there is to way to program a pogobot : the simple mode and the expert mode.
@@ -408,7 +422,7 @@ To generate the docs, we used a opensource project that transform .h to .md. <br
     cd h2md
     git checkout 21a7918a888084c20a27a9a0a8645a4e988d1bb5
 
-Copy the custom pattern pogobot/tools/pogobot.js inside h2md/lib/patterns/
+Copy the custom pattern "pogobot/tools/pogobot.js" inside h2md/lib/patterns/
 
 Add a return carrier to be understand by the tools
     
