@@ -1163,7 +1163,7 @@ rc_start_handler( int nb_params, char **params )
     char *_command;
     int _nb_params = get_param(buffer, &_command, _params);
 
-    send_command(_nb_params, _params, 1, 0);
+    send_command(_nb_params, _params, 1, 200);
 }
 
 define_command( rc_start, rc_start_handler,
@@ -1182,7 +1182,7 @@ rc_stop_handler( int nb_params, char **params )
 {
     printf("Stoping...\n");
     char cmd2send[8] = "DEADBEEF"; // special message to reboot the robot
-    send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 0);
+    send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 200);
 }
 
 define_command( rc_stop, rc_stop_handler,
@@ -1258,7 +1258,7 @@ rc_erase_handler( int nb_params, char **params )
     char *_command;
     int _nb_params = get_param(buffer, &_command, _params);
 
-    send_command(_nb_params, _params, 1, 0);
+    send_command(_nb_params, _params, 1, 200);
     
 }
 
