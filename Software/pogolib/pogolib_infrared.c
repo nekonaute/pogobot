@@ -119,7 +119,7 @@ typedef union multi_width_pointer_t
 } multi_width_pointer_t;
 
 uint32_t
-pogobot_infrared_sendMessageOnce( message_t *const message )
+pogobot_infrared_sendRawLongMessage( message_t *const message )
 {
     if ( message->header.payload_length > MAX_PAYLOAD_SIZE_BYTES )
     {
@@ -160,7 +160,7 @@ pogobot_infrared_sendMessageOnce( message_t *const message )
 }
 
 uint32_t 
-pogobot_infrared_sendShortMessageOnce( ir_direction dir, short_message_t *const message )
+pogobot_infrared_sendRawShortMessage( ir_direction dir, short_message_t *const message )
 {
     if ( message->header.payload_length > MAX_PAYLOAD_SIZE_BYTES )
     {
@@ -202,50 +202,44 @@ pogobot_infrared_sendShortMessageOnce( ir_direction dir, short_message_t *const 
 }
 
 uint32_t
-pogobot_infrared_sendMessageOneDirection( ir_direction dir,
-                                          uint16_t receiver_id,
-                                          uint8_t *message,
-                                          uint16_t message_size )
+pogobot_infrared_sendLongMessage_uniSpe( ir_direction dir,
+                                         uint8_t *message,
+                                         uint16_t message_size )
 {
 
     message_t m;
     m.header._emitting_power_list =
         _selected_power << ( pogobot_infrared_emitter_width_bits * dir );
-    m.header.receiver_id = receiver_id;
     m.header.payload_length = message_size;
     m.header._sender_ir_index = dir;
     memcpy( m.payload, message, message_size );
 
-    return pogobot_infrared_sendMessageOnce( &m );
+    return pogobot_infrared_sendRawLongMessage( &m );
 }
 
 uint32_t
-pogobot_infrared_sendMessageAllDirection( uint16_t receiver_id,
-                                          uint8_t *message,
+pogobot_infrared_sendLongMessage_omniGen( uint8_t *message,
                                           uint16_t message_size )
 {
 
     message_t m;
     m.header._emitting_power_list =
         pogobot_infrared_emitting_power_list(_selected_power, _selected_power, _selected_power, _selected_power);
-    m.header.receiver_id = receiver_id;
     m.header.payload_length = message_size;
     m.header._sender_ir_index = ir_all;
     memcpy( m.payload, message, message_size );
 
-    return pogobot_infrared_sendMessageOnce( &m );
+    return pogobot_infrared_sendRawLongMessage( &m );
 }
 
 uint32_t
-pogobot_infrared_sendMessageAllDirectionWithId( uint16_t receiver_id,
-                                                uint8_t *message,
-                                                uint16_t message_size )
+pogobot_infrared_sendLongMessage_omniSpe( uint8_t *message,
+                                          uint16_t message_size )
 {
 
     int i = 0;
     int error = 0;
     message_t m;
-    m.header.receiver_id = receiver_id;
     m.header.payload_length = message_size;
     memcpy( m.payload, message, message_size );
 
@@ -254,35 +248,35 @@ pogobot_infrared_sendMessageAllDirectionWithId( uint16_t receiver_id,
         m.header._emitting_power_list =
             _selected_power << ( pogobot_infrared_emitter_width_bits * i );
         m.header._sender_ir_index = i;
-        error += pogobot_infrared_sendMessageOnce( &m );
+        error += pogobot_infrared_sendRawLongMessage( &m );
     }
 
     return error;
 }
 
 uint32_t
-pogobot_infrared_sendShortMessageOneDirection( ir_direction dir,
-                                               uint8_t *message,
-                                               uint16_t message_size )
+pogobot_infrared_sendShortMessage_uni( ir_direction dir,
+                                       uint8_t *message,
+                                       uint16_t message_size )
 {
 
     short_message_t m;
     m.header.payload_length = message_size;
     memcpy( m.payload, message, message_size );
 
-    return pogobot_infrared_sendShortMessageOnce( dir, &m );
+    return pogobot_infrared_sendRawShortMessage( dir, &m );
 }
 
 uint32_t
-pogobot_infrared_sendShortMessageAllDirection( uint8_t *message,
-                                               uint16_t message_size )
+pogobot_infrared_sendShortMessage_omni( uint8_t *message,
+                                        uint16_t message_size )
 {
 
     short_message_t m;
     m.header.payload_length = message_size;
     memcpy( m.payload, message, message_size );
 
-    return pogobot_infrared_sendShortMessageOnce( ir_all, &m );
+    return pogobot_infrared_sendRawShortMessage( ir_all, &m );
 }
 
 uint8_t
@@ -348,7 +342,6 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
         m.header._emitting_power_list = 0; // power all to 0 shouldn't emit something
         m.header._sender_id = 0xFF; 
         m.header._sender_ir_index = 0xF; // index not possible
-        m.header.receiver_id = 0xFF;
         m.header._receiver_ir_index = (int)tag;
         m.header.payload_length = ms->header.payload_length;
         memcpy( m.payload, ms->payload, m.header.payload_length);

@@ -22,6 +22,7 @@ Pogobot demo short header message.
 
 uint8_t message[34] = "robot A abcdefghijklmnopqrstuvwyz";
 uint8_t messageAll[38] = "robot A all abcdefghijklmnopqrstuvwyz";
+uint8_t messageAllId[41] = "robot A all ID abcdefghijklmnopqrstuvwyz";
 
 time_reference_t mytimer;
 
@@ -58,11 +59,16 @@ int main(void) {
         {
           printf( "TRANS one dir: %d, %d ", ir_emitter, sizeof(message) );
           printf( "%s\n", message);
-          pogobot_infrared_sendShortMessage_uni( ir_emitter, message, sizeof(message) );
+          pogobot_infrared_sendLongMessage_uniSpe( ir_emitter, message, sizeof(message) );
         
-          printf( "TRANS all: %d ", sizeof(messageAll) );
+          printf( "TRANS all without id: %d ", sizeof(messageAll) );
           printf( "%s\n", messageAll);
-          pogobot_infrared_sendShortMessage_omni( messageAll, sizeof(messageAll) );
+          pogobot_infrared_sendLongMessage_omniGen( messageAll, sizeof(messageAll) );
+
+          printf( "TRANS all with id: %d ", sizeof(messageAllId) );
+          printf( "%s\n", messageAllId);
+          pogobot_infrared_sendLongMessage_omniSpe( messageAllId, sizeof(messageAllId) );
+
           counter = counter + 1;
         }
 

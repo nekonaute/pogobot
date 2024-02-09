@@ -118,7 +118,6 @@ static void send_flash_message( char* mPayload, uint32_t size)
     message_t message;
     message.header._emitting_power_list =
         pogobot_infrared_emitting_power_list(3, 3, 3, 3);
-    message.header.receiver_id = 0x42; //not used
     message.header.payload_length = size;
     message.header._sender_ir_index = ir_all;
     memcpy( message.payload, mPayload, size );
@@ -340,7 +339,6 @@ int flash_robot(void)
 	message_t message;
     message.header._emitting_power_list =
         pogobot_infrared_emitting_power_list(3, 3, 3, 3);
-    message.header.receiver_id = 0x42; //not used
     message.header._sender_ir_index = ir_all;
     message.header._packet_type = ir_t_cmd; 
     message.header._sender_id = pogobot_helper_getid();

@@ -254,8 +254,8 @@ int main(void) {
                     }
                 }
                 if( i != (strlen(str_magic)) ) { // Not a recognized special header, print msg
-                    printf("Message received : Destination id %d, on IR %d, sender %d on IR %d, length %d ",
-                            msg.header.receiver_id, msg.header._receiver_ir_index,
+                    printf("Message received : Destination on IR %d, sender %d on IR %d, length %d ",
+                            msg.header._receiver_ir_index,
                             msg.header._sender_id, msg.header._sender_ir_index,
                             msg.header.payload_length);
                     for( i=0; i< msg.header.payload_length; i++) {

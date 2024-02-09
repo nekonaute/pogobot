@@ -838,7 +838,7 @@ ir_looptest_handler( int nb_params, char **params )
             if( IRn_tx_write_msg(1<<ir_i, msg_, size_in_word) != 0 ) {
                 printf("Error sending message");
             }
-            //pogobot_infrared_sendMessageOneDirection( 1<<ir_i, 0, msg_, size_in_word);
+            //pogobot_infrared_sendLongMessage_uniSpe( 1<<ir_i, msg_, size_in_word);
 
             static const int tries_max = 1000;
             uint32_t tries = 0;
@@ -1034,7 +1034,6 @@ static void send_slip_message( char* mPayload, uint32_t size, uint8_t type, uint
     message_t message;
     message.header._emitting_power_list =
         pogobot_infrared_emitting_power_list(3, 3, 3, 3);
-    message.header.receiver_id = 0x42; //not used
     message.header.payload_length = size;
     message.header._sender_ir_index = ir_all;
     memcpy( message.payload, mPayload, size );

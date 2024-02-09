@@ -108,8 +108,8 @@ int main(void) {
         {
           printf( "TRANS: %d, %d ", ir_emitter, message_length_bytes );
           printf( "%s\n", messages[ir_emitter] );
-          pogobot_infrared_sendMessageOneDirection(
-              ir_emitter, 0x1234, messages[ir_emitter], message_length_bytes );
+          pogobot_infrared_sendLongMessage_uniSpe(
+              ir_emitter, messages[ir_emitter], message_length_bytes );
           counter = counter + 1;
         }
 
@@ -125,8 +125,8 @@ int main(void) {
                 const rgb8_t *const color = &( colors[color_index] );
 
                 pogobot_led_setColor( color->r, color->g, color->b );
-                printf( "RECV: receiver %d, on ir %d, sender %d on ir %d ",
-                        mr.header.receiver_id, mr.header._receiver_ir_index,
+                printf( "RECV: receiver on ir %d, sender %d on ir %d ",
+                        mr.header._receiver_ir_index,
                         mr.header._sender_id, mr.header._sender_ir_index );
                 printf( "RECV: len %d [%s]\n", mr.header.payload_length,
                         mr.payload );

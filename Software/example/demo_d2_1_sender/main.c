@@ -71,8 +71,8 @@ int main(void) {
         printf( "TRANS: %d, %d ", ir_emitter, message_length_bytes );
         printf( "%s\n", messages[ir_emitter] );
 
-        pogobot_infrared_sendMessageOneDirection(
-            ir_emitter, 0x1234, messages[ir_emitter], message_length_bytes );
+        pogobot_infrared_sendLongMessage_uniSpe(
+            ir_emitter, messages[ir_emitter], message_length_bytes );
 
         ir_emitter = ( ir_emitter + 1 ) % IR_RX_COUNT;
         msleep( 500 );

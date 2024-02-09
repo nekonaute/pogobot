@@ -41,7 +41,7 @@ int main(void) {
     {
 
 #ifdef SENDER
-		pogobot_infrared_sendMessageAllDirection( 0x1234, (uint8_t *)( data ), SIZE );
+		pogobot_infrared_sendLongMessage_omniGen( (uint8_t *)( data ), SIZE );
 		pogobot_led_setColors( rand()%25, rand()%25, rand()%25, 2);
 		total_send += SIZE;
 		if (total_send%(1000*SIZE) == 0)
@@ -86,7 +86,7 @@ int main(void) {
 					int32_t time = pogobot_stopwatch_get_elapsed_microseconds(&timer);
 					slip_error_counter_s error_counter;
 					pogobot_infrared_get_receiver_error_counter( &error_counter, mr.header._receiver_ir_index );
-					printf("%ld us for 1Ko (%d, %ld, %ld)\n", time, mr.header.receiver_id, error_counter.crc_mismatch_counter, error_counter.overflow_counter);
+					printf("%ld us for 1Ko (%ld, %ld)\n", time, error_counter.crc_mismatch_counter, error_counter.overflow_counter);
 					pogobot_infrared_reset_receiver_error_counter();
 
 					total_receive = 0;
@@ -98,7 +98,7 @@ int main(void) {
 		//msleep(10);
 
 #elif defined BOTH
-		pogobot_infrared_sendMessageAllDirection( 0x1234, (uint8_t *)( data ), SIZE );
+		pogobot_infrared_sendLongMessage_omniGen( (uint8_t *)( data ), SIZE );
 		pogobot_led_setColors( rand()%25, rand()%25, rand()%25, 2);
 		total_send += SIZE;
 		if (total_send%(1000*SIZE) == 0)
@@ -141,7 +141,7 @@ int main(void) {
 					slip_error_counter_s error_counter;
 					pogobot_infrared_get_receiver_error_counter( &error_counter, mr.header._receiver_ir_index );
 					pogobot_infrared_reset_receiver_error_counter();
-					printf("receive %ld us for 1Ko (%d, %ld, %ld)\n", time, mr.header.receiver_id, error_counter.crc_mismatch_counter, error_counter.overflow_counter);
+					printf("receive %ld us for 1Ko (%ld, %ld)\n", time, error_counter.crc_mismatch_counter, error_counter.overflow_counter);
 
 					total_receive = 0;
 					pogobot_stopwatch_reset(&timer);

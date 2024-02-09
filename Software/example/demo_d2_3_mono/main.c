@@ -107,8 +107,8 @@ int main(void) {
         my_message_t my_mes = { .name = robot_name };
         my_mes.color = my_color[counter];
 
-        pogobot_infrared_sendMessageAllDirection( 0xBEEF, (uint8_t *)( &my_mes ),
-                                                sizeof( my_message_t ) );
+        pogobot_infrared_sendLongMessage_omniGen( (uint8_t *)( &my_mes ),
+                                                  sizeof( my_message_t ) );
 
         /* read reception fifo buffer */
         if ( pogobot_infrared_message_available() )

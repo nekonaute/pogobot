@@ -62,7 +62,6 @@ The parameters that begin with "_" are not completed by the user
 - uint8_t _emitting_power_list - used to define the emission power on each IR
 - uint16_t _sender_id          - id of the robot which send the message
 - uint8_t _sender_ir_index     - IR id direction of the sender robot
-- uint16_t receiver_id         - id of the recipient robot
 - uint8_t _receiver_ir_index   - IR id direction that received the message
 - uint16_t payload_length      - size of the payload
 
@@ -201,11 +200,11 @@ set the power level used to send all the next messages
 #### Return
 - none
 
-<a name="line-364"></a><a name="pogobot_infrared_sendMessageOnce"></a>
-### :arrow_right: pogobot_infrared_sendMessageOnce
+<a name="line-364"></a><a name="pogobot_infrared_sendRawLongMessage"></a>
+### :arrow_right: pogobot_infrared_sendRawLongMessage
 
 ```cpp
-uint32_t pogobot_infrared_sendMessageOnce( message_t *const message ) /* line 376 */
+uint32_t pogobot_infrared_sendRawLongMessage( message_t *const message ) /* line 376 */
 ```
 
  Prepare and send one packet, with the specified emitters and
@@ -219,11 +218,11 @@ uint32_t pogobot_infrared_sendMessageOnce( message_t *const message ) /* line 37
 - '1' in case of payload too long
 
 
-<a name="line-378"></a><a name="pogobot_infrared_sendShortMessageOnce"></a>
-### :arrow_right: pogobot_infrared_sendShortMessageOnce
+<a name="line-378"></a><a name="pogobot_infrared_sendRawShortMessage"></a>
+### :arrow_right: pogobot_infrared_sendRawShortMessage
 
 ```cpp
-uint32_t pogobot_infrared_sendShortMessageOnce( ir_direction dir, short_message_t *const message ) /* line 391 */
+uint32_t pogobot_infrared_sendRawShortMessage( ir_direction dir, short_message_t *const message ) /* line 391 */
 ```
 
  Prepare and send one packet, with a short header
@@ -238,19 +237,18 @@ uint32_t pogobot_infrared_sendShortMessageOnce( ir_direction dir, short_message_
 - '1' in case of payload too long
 
 
-<a name="line-393"></a><a name="pogobot_infrared_sendMessageOneDirection"></a>
-### :arrow_right: pogobot_infrared_sendMessageOneDirection
+<a name="line-393"></a><a name="pogobot_infrared_sendLongMessage_uniSpe"></a>
+### :arrow_right: pogobot_infrared_sendLongMessage_uniSpe
 
 ```cpp
-uint32_t pogobot_infrared_sendMessageOneDirection( ir_direction dir, uint16_t receiver_id, uint8_t *message, uint16_t message_size ) /* line 407 */
+uint32_t pogobot_infrared_sendLongMessage_uniSpe( ir_direction dir, uint8_t *message, uint16_t message_size ) /* line 407 */
 ```
 
 Send a message in only direction at defined power
-Use pogobot_infrared_sendMessageOnce
+Use pogobot_infrared_sendRawLongMessage
 
 #### Parameters
 - 'dir' - indicates the direction to send the message
-- 'receiver_id' - is the id of the robot we want to send the message
 - 'message' - the current payload to send
 - 'message_size' - the size of the payload
 
@@ -258,19 +256,18 @@ Use pogobot_infrared_sendMessageOnce
 - '0' in case of success
 - '1' in case of payload too long
 
-<a name="line-409"></a><a name="pogobot_infrared_sendMessageAllDirection"></a>
-### :arrow_right: pogobot_infrared_sendMessageAllDirection
+<a name="line-409"></a><a name="pogobot_infrared_sendLongMessage_omniGen"></a>
+### :arrow_right: pogobot_infrared_sendLongMessage_omniGen
 
 ```cpp
-uint32_t pogobot_infrared_sendMessageAllDirection( uint16_t receiver_id, uint8_t *message, uint16_t message_size ) /* line 423 */
+uint32_t pogobot_infrared_sendLongMessage_omniGen( uint8_t *message, uint16_t message_size ) /* line 423 */
 ```
 
 Send the same message in all direction at defined power
-Use pogobot_infrared_sendMessageOnce
+Use pogobot_infrared_sendRawLongMessage
 Their no infrared sender ID
 
 #### Parameters
-- 'receiver_id' - is the id of the robot we want to send the message
 - 'message' - the current payload to send
 - 'message_size' - the size of the payload
 
@@ -278,19 +275,18 @@ Their no infrared sender ID
 - '0' in case of success
 - '1' in case of payload too long
 
-<a name="line-425"></a><a name="pogobot_infrared_sendMessageAllDirectionWithId"></a>
-### :arrow_right: pogobot_infrared_sendMessageAllDirectionWithId
+<a name="line-425"></a><a name="pogobot_infrared_sendLongMessage_omniSpe"></a>
+### :arrow_right: pogobot_infrared_sendLongMessage_omniSpe
 
 ```cpp
-uint32_t pogobot_infrared_sendMessageAllDirectionWithId( uint16_t receiver_id, uint8_t *message, uint16_t message_size ) /* line 440 */
+uint32_t pogobot_infrared_sendLongMessage_omniSpe( uint8_t *message, uint16_t message_size ) /* line 440 */
 ```
 
 Send successively the same message with the origin infrared ID on each Infrared
 It is 4 times slower that without ID
-Use pogobot_infrared_sendMessageOnce
+Use pogobot_infrared_sendRawLongMessage
 
 #### Parameters
-- 'receiver_id' - is the id of the robot we want to send the message
 - 'message' - the current payload to send
 - 'message_size' - the size of the payload
 
@@ -299,15 +295,15 @@ Use pogobot_infrared_sendMessageOnce
 - '1' in case of payload too long
 
 
-<a name="line-443"></a><a name="pogobot_infrared_sendShortMessageOneDirection"></a>
-### :arrow_right: pogobot_infrared_sendShortMessageOneDirection
+<a name="line-443"></a><a name="pogobot_infrared_sendShortMessage_uni"></a>
+### :arrow_right: pogobot_infrared_sendShortMessage_uni
 
 ```cpp
-uint32_t pogobot_infrared_sendShortMessageOneDirection( ir_direction dir, uint8_t *message, uint16_t message_size ) /* line 456 */
+uint32_t pogobot_infrared_sendShortMessage_uni( ir_direction dir, uint8_t *message, uint16_t message_size ) /* line 456 */
 ```
 
 Send a short header message in only direction at defined power
-Use pogobot_infrared_sendShortMessageOnce
+Use pogobot_infrared_sendRawShortMessage
 
 #### Parameters
 - 'dir' - indicates the direction to send the message
@@ -318,15 +314,15 @@ Use pogobot_infrared_sendShortMessageOnce
 - '0' in case of success
 - '1' in case of payload too long
 
-<a name="line-458"></a><a name="pogobot_infrared_sendShortMessageAllDirection"></a>
-### :arrow_right: pogobot_infrared_sendShortMessageAllDirection
+<a name="line-458"></a><a name="pogobot_infrared_sendShortMessage_omni"></a>
+### :arrow_right: pogobot_infrared_sendShortMessage_omni
 
 ```cpp
-uint32_t pogobot_infrared_sendShortMessageAllDirection( uint8_t *message, uint16_t message_size ) /* line 470 */
+uint32_t pogobot_infrared_sendShortMessage_omni( uint8_t *message, uint16_t message_size ) /* line 470 */
 ```
 
 Send a short header message in all direction at defined power
-Use pogobot_infrared_sendShortMessageOnce
+Use pogobot_infrared_sendRawShortMessage
 
 #### Parameters
 - 'message' - the current payload to send

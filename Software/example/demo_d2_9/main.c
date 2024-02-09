@@ -160,7 +160,7 @@ int main(void) {
     {
         pogobot_infrared_update();
 
-        pogobot_infrared_sendMessageAllDirection( 0x1234, (uint8_t *)( &my_data ),
+        pogobot_infrared_sendLongMessage_omniGen( (uint8_t *)( &my_data ),
                                                   sizeof( my_data ) );
 
         // take the first message
