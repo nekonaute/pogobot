@@ -1055,7 +1055,7 @@
     (property "Reference" "RV1" (id 0) (at 167.64 43.1799 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
-    (property "Value" "R_Potentiometer" (id 1) (at 167.64 45.7199 0)
+    (property "Value" "100" (id 1) (at 167.64 45.7199 0)
       (effects (font (size 1.27 1.27)) (justify right))
     )
     (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical" (id 2) (at 170.18 44.45 0)
@@ -1217,7 +1217,7 @@
       (reference "R7") (unit 1) (value "1OOk") (footprint "Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder")
     )
     (path "/aabf9e25-f19a-483c-b34c-a24443ca1f71"
-      (reference "RV1") (unit 1) (value "R_Potentiometer") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
+      (reference "RV1") (unit 1) (value "100") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
     )
     (path "/dc03aa88-db40-4ba7-9f35-1acc4d16523f"
       (reference "U2") (unit 1) (value "mcp1407") (footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
