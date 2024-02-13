@@ -505,17 +505,17 @@ static void motor_handler(int nb_params, char **params) {
     int8_t m_number=0, incr=0;
 
     printf( "Usage: motor [R|L|B] [value]\n\
-             R for right, L for left and B for middle motor\n\
-            value is the PWM level between 0 (off) and 1023\n");
-    printf(" or motor [R_value] [L_value] [B_value]\n\
-                value is the PWM level between 0 (off) and 1023\n");
+\tR for right, L for left and B for back motor\n\
+\tvalue is the PWM level between 0 (off) and 1023\n");
+    printf( "or motor [R_value] [L_value] [B_value]\n\
+\tvalue is the PWM level between 0 (off) and 1023\n");
     printf("if no argument given: interactive mode\n");
     
     if ( nb_params == 0 ) {
         printf("Interactive mode :\n\
-                press R or r, L or l, B or b to increment or decrement the PWM value\n\
-                press z to zero the values\n\
-                press q to quit\n");
+\tpress R or r, L or l, B or b to increment or decrement the PWM value\n\
+\tpress z to zero the values\n\
+\tpress q to quit\n");
         while( (key != 'q') ) {
             if( uart_read_nonblock() != 0) {
                 key = uart_read();
@@ -593,7 +593,7 @@ Setting PWM for motor %d to value %ld\tPress 'q' to quit\r", m_number, pwm_value
     } 
 }
 
-define_command(motor, motor_handler, "Set PWM for motors", POGO_CMDS);
+define_command(motor, motor_handler, "set motor powers (PWM)", POGO_CMDS);
 
 #ifdef CSR_GPIO_BASE
 static void motor_dir_status_handler(int nb_params, char **params) {
@@ -602,9 +602,9 @@ static void motor_dir_status_handler(int nb_params, char **params) {
     int8_t R = status & 0x1;
     int8_t L = (status>>1) & 0x1;
     int8_t B = (status>>2) & 0x1; 
-    printf(" motors direction current status <%lx> : R:%d L:%d B:%d \n", status, R, L, B);
+    printf(" motors direction current status: R:%d L:%d B:%d \n", R, L, B);
 }
-define_command(motor_dir_current_status, motor_dir_status_handler, "motors direction current status", POGO_CMDS);
+define_command(motor_dir_current_status, motor_dir_status_handler, "get current motor directions", POGO_CMDS);
 
 static void motor_dir_set_handler(int nb_params, char **params) {
 
@@ -614,7 +614,7 @@ static void motor_dir_set_handler(int nb_params, char **params) {
 
     if (( nb_params == 0 ) || ( nb_params > 2 ) ) {
         printf( "Usage: motor_dir_set [R|L|B] [value]\n\
-                 R for right, L for left and B for middle motor\n\
+                 R for right, L for left and B for back motor\n\
                  Value is 0 or 1 \n");
         return;
     }
@@ -641,7 +641,7 @@ static void motor_dir_set_handler(int nb_params, char **params) {
 	pogobot_motor_dir_set(m_number, dir_value[0]);
 
 }
-define_command(motor_dir_set, motor_dir_set_handler, "motors direction set", POGO_CMDS);
+define_command(motor_dir_set, motor_dir_set_handler, "set motor direction", POGO_CMDS);
 
 #ifdef CSR_SPI_CS_BASE
 static void motor_dir_mem_handler(int nb_params, char **params) {
@@ -651,7 +651,7 @@ static void motor_dir_mem_handler(int nb_params, char **params) {
 
     if ( nb_params != 3 ) {
         printf( "Usage: motor_dir_mem_set [valueR] [valueL] [valueB]\n\
-                 R for right, L for left and B for middle motor\n\
+                 R for right, L for left and B for back motor\n\
                  Value is 0 or 1 \n\
                  e.g. motor_dir_mem 1 0 0 \n");
         return;
@@ -663,15 +663,15 @@ static void motor_dir_mem_handler(int nb_params, char **params) {
 	setMotorDirMem(dir_value);
 
 }
-define_command(motor_dir_mem_set, motor_dir_mem_handler, "set memorized motors direction", POGO_CMDS);
+define_command(motor_dir_mem_set, motor_dir_mem_handler, "set memorized motor directions", POGO_CMDS);
 
 static void motor_dir_mem_get_handler(int nb_params, char **params) {
     
     uint8_t data[3] = {0};
     getMotorDirMem(data);
-    printf(" memorized motors direction: R:%d L:%d B:%d \n", data[0], data[1], data[2]);
+    printf(" memorized motor directions: R:%d L:%d B:%d \n", data[0], data[1], data[2]);
 }
-define_command(motor_dir_mem_get, motor_dir_mem_get_handler, "get memorized motors direction", POGO_CMDS);
+define_command(motor_dir_mem_get, motor_dir_mem_get_handler, "get memorized motor directions", POGO_CMDS);
 
 static void motor_power_mem_set_handler(int nb_params, char **params) {
 
@@ -692,7 +692,7 @@ static void motor_power_mem_set_handler(int nb_params, char **params) {
 	setMotorPowerMem(p_value);
 
 }
-define_command(motor_power_mem_set, motor_power_mem_set_handler, "memorize motors power", POGO_CMDS);
+define_command(motor_power_mem_set, motor_power_mem_set_handler, "set memorized motor powers", POGO_CMDS);
 
 static void motor_power_mem_get_handler(int nb_params, char **params) {
     uint16_t m_power[3]={0};
@@ -701,7 +701,7 @@ static void motor_power_mem_get_handler(int nb_params, char **params) {
 
     printf(" motors power status {R %d, L %d, B %d} \n", m_power[0],m_power[1],m_power[2]);
 }
-define_command(motor_power_mem_get, motor_power_mem_get_handler, "motors power status", POGO_CMDS);
+define_command(motor_power_mem_get, motor_power_mem_get_handler, "get memorized motor powers", POGO_CMDS);
 
 #endif
 
@@ -830,7 +830,7 @@ void autotest_motors(void) {
     msleep(1000);
     rgb_set_led(0, 0, 0, 5);
     motor_left_width_write(0);
-    printf("\n Test middle motor...");
+    printf("\n Test back motor...");
     motor_middle_width_write(1023);
     rgb_set_led(0, 0, 255, 3);
     msleep(1000);

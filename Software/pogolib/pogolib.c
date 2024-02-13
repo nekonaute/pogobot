@@ -176,19 +176,19 @@ pogobot_motor_dir_current_status( void )
 }
 
 int8_t
-pogobot_motor_dir_mem_get( uint8_t* data )
+pogobot_motor_dir_mem_get( uint8_t* p_directions )
 {
-    return getMotorDirMem(data);
+    return getMotorDirMem(p_directions);
 }
 
 int8_t
-pogobot_motor_dir_mem_set( uint8_t* data)
+pogobot_motor_dir_mem_set( uint8_t* p_directions)
 {
-    return setMotorDirMem(data);
+    return setMotorDirMem(p_directions);
 }
 
 void 
-pogobot_motor_dir_set( motor_id motor, uint16_t value )
+pogobot_motor_dir_set( motor_id motor, uint8_t value )
 {
     switch(motor)
     {
@@ -212,15 +212,15 @@ pogobot_motor_dir_set( motor_id motor, uint16_t value )
 }
 
 uint8_t
-pogobot_motor_power_mem_get( uint16_t *p_motors )
+pogobot_motor_power_mem_get( uint16_t *p_powers )
 {
-    return getMotorPowerMem(p_motors);
+    return getMotorPowerMem(p_powers);
 }
 
 uint8_t
-pogobot_motor_power_mem_set( uint16_t *p_motors )
+pogobot_motor_power_mem_set( uint16_t *p_powers )
 {
-    return setMotorPowerMem(p_motors);
+    return setMotorPowerMem(p_powers);
 }
 
 /* helper */

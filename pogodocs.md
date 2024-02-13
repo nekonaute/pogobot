@@ -66,7 +66,7 @@ The parameters that begin with "_" are not completed by the user
 - uint16_t payload_length      - size of the payload
 
 
-<a name="line-210"></a>
+<a name="line-208"></a>
 ### IR message header structure
 
 message_t :
@@ -74,7 +74,7 @@ message_t :
 - message_header_t header                  - header of the message
 - uint8_t payload[MAX_PAYLOAD_SIZE_BYTES]  - payload of the message
 
-<a name="line-225"></a>
+<a name="line-223"></a>
 ### IR short message header structure
 
 message_short_header_t :
@@ -85,7 +85,7 @@ The parameters that begin with "_" are not completed by the user
 - uint16_t payload_length      - size of the payload
 
 
-<a name="line-243"></a>
+<a name="line-241"></a>
 ### IR short message header structure
 
 short_message_t :
@@ -93,7 +93,7 @@ short_message_t :
 - message_short_header_t header            - header of the message
 - uint8_t payload[MAX_PAYLOAD_SIZE_BYTES]  - payload of the message
 
-<a name="line-258"></a>
+<a name="line-256"></a>
 ### IR type message list
 
 - ir_t_cmd  : type use to send command to the robot
@@ -101,14 +101,14 @@ short_message_t :
 - ir_t_short : type use to send short message between robot in user space
 - ir_t_user : type use to send message between robot in user space
 
-<a name="line-288"></a>
+<a name="line-286"></a>
 ## Infrared communication API Functions
 
-<a name="line-292"></a><a name="pogobot_infrared_ll_init"></a>
+<a name="line-290"></a><a name="pogobot_infrared_ll_init"></a>
 ### :arrow_right: pogobot_infrared_ll_init
 
 ```cpp
-void pogobot_infrared_ll_init( void ) /* line 303 */
+void pogobot_infrared_ll_init( void ) /* line 301 */
 ```
 
 Initialise Infrared hardware and software struture
@@ -121,11 +121,11 @@ Initialise Infrared hardware and software struture
 - none
 
 
-<a name="line-305"></a><a name="pogobot_infrared_update"></a>
+<a name="line-303"></a><a name="pogobot_infrared_update"></a>
 ### :arrow_right: pogobot_infrared_update
 
 ```cpp
-void pogobot_infrared_update( void ) /* line 315 */
+void pogobot_infrared_update( void ) /* line 313 */
 ```
 
 Infrared checks for received data and send to decode messages
@@ -137,11 +137,11 @@ Decoded messages are placed in a Fifo
 #### Return
 - none
 
-<a name="line-317"></a><a name="pogobot_infrared_message_available"></a>
+<a name="line-315"></a><a name="pogobot_infrared_message_available"></a>
 ### :arrow_right: pogobot_infrared_message_available
 
 ```cpp
-int pogobot_infrared_message_available( void ) /* line 327 */
+int pogobot_infrared_message_available( void ) /* line 325 */
 ```
 
 Infrared new message checks fonction
@@ -153,11 +153,11 @@ Infrared new message checks fonction
 - none
 
 
-<a name="line-329"></a><a name="pogobot_infrared_recover_next_message"></a>
+<a name="line-327"></a><a name="pogobot_infrared_recover_next_message"></a>
 ### :arrow_right: pogobot_infrared_recover_next_message
 
 ```cpp
-void pogobot_infrared_recover_next_message( message_t *mes ) /* line 339 */
+void pogobot_infrared_recover_next_message( message_t *mes ) /* line 337 */
 ```
 
 Recover the next message inside the message queue
@@ -169,11 +169,11 @@ Recover the next message inside the message queue
 - none
 
 
-<a name="line-341"></a><a name="pogobot_infrared_clear_message_queue"></a>
+<a name="line-339"></a><a name="pogobot_infrared_clear_message_queue"></a>
 ### :arrow_right: pogobot_infrared_clear_message_queue
 
 ```cpp
-void pogobot_infrared_clear_message_queue( void ) /* line 351 */
+void pogobot_infrared_clear_message_queue( void ) /* line 349 */
 ```
 
 Clears Infrared message queue
@@ -185,11 +185,11 @@ Clears Infrared message queue
 - none
 
 
-<a name="line-353"></a><a name="pogobot_infrared_set_power"></a>
+<a name="line-351"></a><a name="pogobot_infrared_set_power"></a>
 ### :arrow_right: pogobot_infrared_set_power
 
 ```cpp
-void pogobot_infrared_set_power( uint8_t power ) /* line 362 */
+void pogobot_infrared_set_power( uint8_t power ) /* line 360 */
 ```
 
 set the power level used to send all the next messages
@@ -200,11 +200,11 @@ set the power level used to send all the next messages
 #### Return
 - none
 
-<a name="line-364"></a><a name="pogobot_infrared_sendRawLongMessage"></a>
+<a name="line-362"></a><a name="pogobot_infrared_sendRawLongMessage"></a>
 ### :arrow_right: pogobot_infrared_sendRawLongMessage
 
 ```cpp
-uint32_t pogobot_infrared_sendRawLongMessage( message_t *const message ) /* line 376 */
+uint32_t pogobot_infrared_sendRawLongMessage( message_t *const message ) /* line 374 */
 ```
 
  Prepare and send one packet, with the specified emitters and
@@ -218,11 +218,11 @@ uint32_t pogobot_infrared_sendRawLongMessage( message_t *const message ) /* line
 - '1' in case of payload too long
 
 
-<a name="line-378"></a><a name="pogobot_infrared_sendRawShortMessage"></a>
+<a name="line-376"></a><a name="pogobot_infrared_sendRawShortMessage"></a>
 ### :arrow_right: pogobot_infrared_sendRawShortMessage
 
 ```cpp
-uint32_t pogobot_infrared_sendRawShortMessage( ir_direction dir, short_message_t *const message ) /* line 391 */
+uint32_t pogobot_infrared_sendRawShortMessage( ir_direction dir, short_message_t *const message ) /* line 389 */
 ```
 
  Prepare and send one packet, with a short header
@@ -237,11 +237,11 @@ uint32_t pogobot_infrared_sendRawShortMessage( ir_direction dir, short_message_t
 - '1' in case of payload too long
 
 
-<a name="line-393"></a><a name="pogobot_infrared_sendLongMessage_uniSpe"></a>
+<a name="line-391"></a><a name="pogobot_infrared_sendLongMessage_uniSpe"></a>
 ### :arrow_right: pogobot_infrared_sendLongMessage_uniSpe
 
 ```cpp
-uint32_t pogobot_infrared_sendLongMessage_uniSpe( ir_direction dir, uint8_t *message, uint16_t message_size ) /* line 407 */
+uint32_t pogobot_infrared_sendLongMessage_uniSpe( ir_direction dir, uint8_t *message, uint16_t message_size ) /* line 404 */
 ```
 
 Send a message in only direction at defined power
@@ -256,11 +256,11 @@ Use pogobot_infrared_sendRawLongMessage
 - '0' in case of success
 - '1' in case of payload too long
 
-<a name="line-409"></a><a name="pogobot_infrared_sendLongMessage_omniGen"></a>
+<a name="line-406"></a><a name="pogobot_infrared_sendLongMessage_omniGen"></a>
 ### :arrow_right: pogobot_infrared_sendLongMessage_omniGen
 
 ```cpp
-uint32_t pogobot_infrared_sendLongMessage_omniGen( uint8_t *message, uint16_t message_size ) /* line 423 */
+uint32_t pogobot_infrared_sendLongMessage_omniGen( uint8_t *message, uint16_t message_size ) /* line 419 */
 ```
 
 Send the same message in all direction at defined power
@@ -275,11 +275,11 @@ Their no infrared sender ID
 - '0' in case of success
 - '1' in case of payload too long
 
-<a name="line-425"></a><a name="pogobot_infrared_sendLongMessage_omniSpe"></a>
+<a name="line-421"></a><a name="pogobot_infrared_sendLongMessage_omniSpe"></a>
 ### :arrow_right: pogobot_infrared_sendLongMessage_omniSpe
 
 ```cpp
-uint32_t pogobot_infrared_sendLongMessage_omniSpe( uint8_t *message, uint16_t message_size ) /* line 440 */
+uint32_t pogobot_infrared_sendLongMessage_omniSpe( uint8_t *message, uint16_t message_size ) /* line 435 */
 ```
 
 Send successively the same message with the origin infrared ID on each Infrared
@@ -295,11 +295,11 @@ Use pogobot_infrared_sendRawLongMessage
 - '1' in case of payload too long
 
 
-<a name="line-443"></a><a name="pogobot_infrared_sendShortMessage_uni"></a>
+<a name="line-438"></a><a name="pogobot_infrared_sendShortMessage_uni"></a>
 ### :arrow_right: pogobot_infrared_sendShortMessage_uni
 
 ```cpp
-uint32_t pogobot_infrared_sendShortMessage_uni( ir_direction dir, uint8_t *message, uint16_t message_size ) /* line 456 */
+uint32_t pogobot_infrared_sendShortMessage_uni( ir_direction dir, uint8_t *message, uint16_t message_size ) /* line 451 */
 ```
 
 Send a short header message in only direction at defined power
@@ -314,11 +314,11 @@ Use pogobot_infrared_sendRawShortMessage
 - '0' in case of success
 - '1' in case of payload too long
 
-<a name="line-458"></a><a name="pogobot_infrared_sendShortMessage_omni"></a>
+<a name="line-453"></a><a name="pogobot_infrared_sendShortMessage_omni"></a>
 ### :arrow_right: pogobot_infrared_sendShortMessage_omni
 
 ```cpp
-uint32_t pogobot_infrared_sendShortMessage_omni( uint8_t *message, uint16_t message_size ) /* line 470 */
+uint32_t pogobot_infrared_sendShortMessage_omni( uint8_t *message, uint16_t message_size ) /* line 465 */
 ```
 
 Send a short header message in all direction at defined power
@@ -332,11 +332,11 @@ Use pogobot_infrared_sendRawShortMessage
 - '0' in case of success
 - '1' in case of payload too long
 
-<a name="line-473"></a><a name="pogobot_infrared_get_receiver_error_counter"></a>
+<a name="line-468"></a><a name="pogobot_infrared_get_receiver_error_counter"></a>
 ### :arrow_right: pogobot_infrared_get_receiver_error_counter
 
 ```cpp
-void pogobot_infrared_get_receiver_error_counter( slip_error_counter_s *error_counter, uint8_t ir_index ) /* line 483 */
+void pogobot_infrared_get_receiver_error_counter( slip_error_counter_s *error_counter, uint8_t ir_index ) /* line 478 */
 ```
 
 Get the receiver error counter value
@@ -348,11 +348,11 @@ Get the receiver error counter value
 #### Return
 - none
 
-<a name="line-485"></a><a name="pogobot_infrared_reset_receiver_error_counter"></a>
+<a name="line-480"></a><a name="pogobot_infrared_reset_receiver_error_counter"></a>
 ### :arrow_right: pogobot_infrared_reset_receiver_error_counter
 
 ```cpp
-void pogobot_infrared_reset_receiver_error_counter( void ) /* line 495 */
+void pogobot_infrared_reset_receiver_error_counter( void ) /* line 490 */
 ```
 
 Reset all reveiver error counter
@@ -364,14 +364,14 @@ Reset all reveiver error counter
 - none
 
 
-<a name="line-497"></a>
+<a name="line-492"></a>
 ## RGB LED API
 
-<a name="line-501"></a><a name="pogobot_led_setColor"></a>
+<a name="line-496"></a><a name="pogobot_led_setColor"></a>
 ### :arrow_right: pogobot_led_setColor
 
 ```cpp
-void pogobot_led_setColor( const uint8_t r, const uint8_t g, const uint8_t b ) /* line 514 */
+void pogobot_led_setColor( const uint8_t r, const uint8_t g, const uint8_t b ) /* line 509 */
 ```
 
 Set the value of red, green and blue of the head led in static mode
@@ -386,11 +386,11 @@ each value goes from 0 to 255 to determine the intensity.
 - none
 
 
-<a name="line-517"></a><a name="pogobot_led_setColors"></a>
+<a name="line-512"></a><a name="pogobot_led_setColors"></a>
 ### :arrow_right: pogobot_led_setColors
 
 ```cpp
-void pogobot_led_setColors( const uint8_t r, const uint8_t g, const uint8_t b, uint8_t id ) /* line 532 */
+void pogobot_led_setColors( const uint8_t r, const uint8_t g, const uint8_t b, uint8_t id ) /* line 527 */
 ```
 
 Set the value of red, green and blue of the led with the number (ID) in static mode
@@ -407,23 +407,23 @@ each value goes from 0 to 255 to determine the intensity.
 - none
 
 
-<a name="line-535"></a>
+<a name="line-530"></a>
 ## Photosensors API Values
 
-<a name="line-539"></a>
+<a name="line-534"></a>
 ### Photosensor id definition
 - 0 is the back sensor
 - 1 is the front-left sensor
 - 2 is the front-right sensor
 
-<a name="line-553"></a>
+<a name="line-548"></a>
 ## Photosensors API Functions
 
-<a name="line-557"></a><a name="pogobot_photosensors_read"></a>
+<a name="line-552"></a><a name="pogobot_photosensors_read"></a>
 ### :arrow_right: pogobot_photosensors_read
 
 ```cpp
-int16_t pogobot_photosensors_read( uint8_t sensor_number ) /* line 567 */
+int16_t pogobot_photosensors_read( uint8_t sensor_number ) /* line 562 */
 ```
 
 Read one ambient light sensor.
@@ -435,14 +435,14 @@ Sensor number must be between 0 and 2.
 #### Return
 Return a value proportional to the light
 
-<a name="line-569"></a>
+<a name="line-564"></a>
 ## IMU API
 
-<a name="line-573"></a><a name="pogobot_imu_read"></a>
+<a name="line-568"></a><a name="pogobot_imu_read"></a>
 ### :arrow_right: pogobot_imu_read
 
 ```cpp
-void pogobot_imu_read( float *acc, float *gyro ) /* line 593 */
+void pogobot_imu_read( float *acc, float *gyro ) /* line 588 */
 ```
 
 Read the accelaration on the IMU. <br>
@@ -464,11 +464,11 @@ index :
 #### Return
 - none
 
-<a name="line-595"></a><a name="pogobot_imu_readTemp"></a>
+<a name="line-590"></a><a name="pogobot_imu_readTemp"></a>
 ### :arrow_right: pogobot_imu_readTemp
 
 ```cpp
-float pogobot_imu_readTemp( void ) /* line 604 */
+float pogobot_imu_readTemp( void ) /* line 599 */
 ```
 
 Read the temparature sensor on the IMU.
@@ -479,14 +479,14 @@ Read the temparature sensor on the IMU.
 #### Return
 Returns the temperature in degres celsius
 
-<a name="line-607"></a>
+<a name="line-602"></a>
 ## Battery API
 
-<a name="line-611"></a><a name="pogobot_battery_voltage_read"></a>
+<a name="line-606"></a><a name="pogobot_battery_voltage_read"></a>
 ### :arrow_right: pogobot_battery_voltage_read
 
 ```cpp
-int16_t pogobot_battery_voltage_read( void ) /* line 620 */
+int16_t pogobot_battery_voltage_read( void ) /* line 615 */
 ```
 
 Recovers the value of the battery in mV
@@ -497,17 +497,17 @@ Recovers the value of the battery in mV
 #### Return
 Returns a value in mV
 
-<a name="line-622"></a>
+<a name="line-617"></a>
 ## Motors API Values
 
-<a name="line-626"></a>
+<a name="line-621"></a>
 ### Motor id definition :
 
 - motorR  - 0
 - motorL  - 1
 - motorB  - 2
 
-<a name="line-641"></a>
+<a name="line-636"></a>
 ### Motor range :
 
 - motorStop                   - 0
@@ -515,14 +515,14 @@ Returns a value in mV
 - motorHalfmotorThreeQuarter  - 716
 - motorFull                   - 1023
 
-<a name="line-659"></a>
+<a name="line-654"></a>
 ## Motors API Functions
 
-<a name="line-663"></a><a name="pogobot_motor_power_set"></a>
+<a name="line-658"></a><a name="pogobot_motor_power_set"></a>
 ### :arrow_right: pogobot_motor_power_set
 
 ```cpp
-void pogobot_motor_power_set( motor_id motor, uint16_t value ) /* line 674 */
+void pogobot_motor_power_set( motor_id motor, uint16_t value ) /* line 669 */
 ```
 
 set the value of pwm that commands the motor (active)
@@ -535,11 +535,11 @@ set the value of pwm that commands the motor (active)
 - none
 
 
-<a name="line-677"></a><a name="pogobot_motor_dir_current_status"></a>
+<a name="line-672"></a><a name="pogobot_motor_dir_current_status"></a>
 ### :arrow_right: pogobot_motor_dir_current_status
 
 ```cpp
-uint32_t pogobot_motor_dir_current_status( void ) /* line 687 */
+uint32_t pogobot_motor_dir_current_status( void ) /* line 682 */
 ```
 
 recover the value of the motor direction bit field.
@@ -551,97 +551,99 @@ recover the value of the motor direction bit field.
 - bit field ( XXXX XMLR )
 
 
-<a name="line-689"></a><a name="pogobot_motor_dir_mem_get"></a>
+<a name="line-684"></a><a name="pogobot_motor_dir_mem_get"></a>
 ### :arrow_right: pogobot_motor_dir_mem_get
 
 ```cpp
-int8_t pogobot_motor_dir_mem_get( uint8_t *data ) /* line 700 */
+int8_t pogobot_motor_dir_mem_get( uint8_t *p_directions ) /* line 695 */
 ```
 
 get the value of pwm that commands the motor.
 
 #### Parameters
-- 'data' - is the value of each direction 0:R 1:L 2:B
-           data is an array of size 3.
+- 'p_directions' - is an array of size 3 [R, L, B].
+           Each value is the chosen direction (0 or 1)
 
 #### Return
 - the success or not of the read in memory (0: Ok, -1: NOk)
 
 
-<a name="line-702"></a><a name="pogobot_motor_dir_mem_set"></a>
+<a name="line-697"></a><a name="pogobot_motor_dir_mem_set"></a>
 ### :arrow_right: pogobot_motor_dir_mem_set
 
 ```cpp
-int8_t pogobot_motor_dir_mem_set( uint8_t *data) /* line 713 */
+int8_t pogobot_motor_dir_mem_set( uint8_t *p_directions) /* line 708 */
 ```
 
 set the value of pwm that commands the motor (persistent).
 
 #### Parameters
-- 'data' - is the value of each direction 0:R 1:L 2:B
-           data is an array of size 3.
+- 'p_directions' - is an array of size 3 [R, L, B].
+           Each value is the chosen direction (0 or 1)
 
 #### Return
 - the success or not of the read in memory (0: Ok, -1: NOk)
 
 
-<a name="line-715"></a><a name="pogobot_motor_dir_set"></a>
+<a name="line-710"></a><a name="pogobot_motor_dir_set"></a>
 ### :arrow_right: pogobot_motor_dir_set
 
 ```cpp
-void pogobot_motor_dir_set( motor_id motor, uint16_t value ) /* line 726 */
+void pogobot_motor_dir_set( motor_id motor, uint8_t value ) /* line 721 */
 ```
 
 set the value of pwm that commands the motor (active).
 
 #### Parameters
-- 'motor' - is the id of the motor you want to command
+- 'motor' - is the id of the motor you want to command (motorR, motorL, motorB)
 - 'value' - is the choosen direction (0 or 1)
 
 #### Return
 - none
 
 
-<a name="line-728"></a><a name="pogobot_motor_power_mem_get"></a>
+<a name="line-723"></a><a name="pogobot_motor_power_mem_get"></a>
 ### :arrow_right: pogobot_motor_power_mem_get
 
 ```cpp
-uint8_t pogobot_motor_power_mem_get( uint16_t *p_motors ) /* line 738 */
+uint8_t pogobot_motor_power_mem_get( uint16_t *p_powers ) /* line 734 */
 ```
 
 recover the value of the motor power memorized.
 
 #### Parameters
-- 'p_motors' - is a pointer to a table [R, L, B]
+- 'p_powers' - is an array of size 3 [R, L, B].
+           Each value is the chosen power [0, 1023]
 
 #### Return
-- read status
+- the success or not of the read in memory (0: Ok, -1: NOK)
 
 
-<a name="line-740"></a><a name="pogobot_motor_power_mem_set"></a>
+<a name="line-736"></a><a name="pogobot_motor_power_mem_set"></a>
 ### :arrow_right: pogobot_motor_power_mem_set
 
 ```cpp
-uint8_t pogobot_motor_power_mem_set( uint16_t *p_motors ) /* line 750 */
+uint8_t pogobot_motor_power_mem_set( uint16_t *p_powers ) /* line 747 */
 ```
 
 write the value of the motor power in memory (persistent).
 
 #### Parameters
-- 'p_motors' - is a pointer to a table [R, L, B]
+- 'p_powers' - is an array of size 3 [R, L, B].
+           Each value is the chosen power [0, 1023]
 
 #### Return
-- read status
+- the success or not of the read in memory (0: Ok, -1: NOK)
 
 
-<a name="line-752"></a>
+<a name="line-749"></a>
 ## Helper API
 
-<a name="line-756"></a><a name="pogobot_helper_getid"></a>
+<a name="line-753"></a><a name="pogobot_helper_getid"></a>
 ### :arrow_right: pogobot_helper_getid
 
 ```cpp
-uint16_t pogobot_helper_getid( void ) /* line 766 */
+uint16_t pogobot_helper_getid( void ) /* line 763 */
 ```
 
 gives an unique identifier or an random number if no id is register inside the robot
@@ -653,11 +655,11 @@ gives an unique identifier or an random number if no id is register inside the r
 Returns an unique id on 16bits
 
 
-<a name="line-768"></a><a name="pogobot_helper_getRandSeed"></a>
+<a name="line-765"></a><a name="pogobot_helper_getRandSeed"></a>
 ### :arrow_right: pogobot_helper_getRandSeed
 
 ```cpp
-int16_t pogobot_helper_getRandSeed( void ) /* line 778 */
+int16_t pogobot_helper_getRandSeed( void ) /* line 775 */
 ```
 
 gives an seed base on the ADC read of the battery
@@ -669,11 +671,11 @@ gives an seed base on the ADC read of the battery
 Returns an random id on 16bits
 
 
-<a name="line-780"></a><a name="pogobot_helper_print_version"></a>
+<a name="line-777"></a><a name="pogobot_helper_print_version"></a>
 ### :arrow_right: pogobot_helper_print_version
 
 ```cpp
-void pogobot_helper_print_version( void ) /* line 791 */
+void pogobot_helper_print_version( void ) /* line 788 */
 ```
 
 print the version inside the prompt

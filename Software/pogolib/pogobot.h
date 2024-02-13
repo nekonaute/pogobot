@@ -685,64 +685,66 @@ uint32_t pogobot_motor_dir_current_status( void );
  * get the value of pwm that commands the motor.
  * 
  * # Parameters
- * - 'data' - is the value of each direction 0:R 1:L 2:B
- *            data is an array of size 3.
+ * - 'p_directions' - is an array of size 3 [R, L, B].
+ *            Each value is the chosen direction (0 or 1)
  *
  * # Return
  * - the success or not of the read in memory (0: Ok, -1: NOk)
  *
  */
-int8_t pogobot_motor_dir_mem_get( uint8_t *data );
+int8_t pogobot_motor_dir_mem_get( uint8_t *p_directions );
 
 /** (pogobot_motor_dir_mem_set)
  * set the value of pwm that commands the motor (persistent).
  * 
  * # Parameters
-  * - 'data' - is the value of each direction 0:R 1:L 2:B
- *            data is an array of size 3.
+  * - 'p_directions' - is an array of size 3 [R, L, B].
+ *            Each value is the chosen direction (0 or 1)
  *
  * # Return
  * - the success or not of the read in memory (0: Ok, -1: NOk)
  *
  */
-int8_t pogobot_motor_dir_mem_set( uint8_t *data);
+int8_t pogobot_motor_dir_mem_set( uint8_t *p_directions);
 
 /** (pogobot_motor_dir_set)
  * set the value of pwm that commands the motor (active).
  * 
  * # Parameters
- * - 'motor' - is the id of the motor you want to command
+ * - 'motor' - is the id of the motor you want to command (motorR, motorL, motorB)
  * - 'value' - is the choosen direction (0 or 1)
  *
  * # Return
  * - none
  *
  */
-void pogobot_motor_dir_set( motor_id motor, uint16_t value );
+void pogobot_motor_dir_set( motor_id motor, uint8_t value );
 
 /** (pogobot_motor_power_mem_get)
  * recover the value of the motor power memorized.
  * 
  * # Parameters
- * - 'p_motors' - is a pointer to a table [R, L, B] 
+ * - 'p_powers' - is an array of size 3 [R, L, B].
+ *            Each value is the chosen power [0, 1023]
  *
  * # Return
- * - read status
+ * - the success or not of the read in memory (0: Ok, -1: NOK)
  *
  */
-uint8_t pogobot_motor_power_mem_get( uint16_t *p_motors );
+uint8_t pogobot_motor_power_mem_get( uint16_t *p_powers );
 
 /** (pogobot_motor_power_mem_set)
  * write the value of the motor power in memory (persistent).
  * 
  * # Parameters
- * - 'p_motors' - is a pointer to a table [R, L, B] 
+ * - 'p_powers' - is an array of size 3 [R, L, B].
+ *            Each value is the chosen power [0, 1023]
  *
  * # Return
- * - read status
+ * - the success or not of the read in memory (0: Ok, -1: NOK)
  *
  */
-uint8_t pogobot_motor_power_mem_set( uint16_t *p_motors );
+uint8_t pogobot_motor_power_mem_set( uint16_t *p_powers );
 
 /**
  * ## Helper API
