@@ -15,6 +15,8 @@ The following table gives an overview :
 |        V3        |       V2.1       | reduce header footprint                            |
 |        V3        |       V2.2       | introduce short message and clean the pogobios     |
 |        V3        |      V2.2.1      | fix the IR programation problem                    |
+|        V3        |       V2.3       | API standardization : motor                        |
+|        V3        |       V2.4       | API standardization : IR messaging                 |
 
 ## Git description
 This project is divided into 3 folders :
