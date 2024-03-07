@@ -687,3 +687,240 @@ It is also possible to use the define RELEASE_VERSION in release.h
 #### Return
 - none
 
+
+<a name="line-790"></a>
+## Time API
+
+<a name="line-795"></a>
+This is a simple timer implementation based on the available hardware timer.
+
+The benefit is that the only hardware timer we have is configured only once, and all software that depend on it just works without conflict.
+
+The drawback is that we can't use the interrupt of the hardware timer, if available.
+
+To keep the implementation simple, we only rely on the 32bit timer0 counter.
+This limit the timespan to 2^31/CLOCKRATE, which is 107 seconds with a 20MHz system clock.
+We can extent the implementation by maintaining a rollover count in some function that we promise to call often enough, add a rollover count in time_reference_t, and extend computations accordingly.
+
+Sample code:
+
+
+One time interval, measuring duration, think "get elapsed microseconds".
+
+time_reference_t mystopwatch;
+pogobot_stopwatch_reset( &mystopwatch );
+my long_computation( arguments );
+uint32_t microseconds =
+    pogobot_stopwatch_get_elapsed_microseconds( &mystopwatch );
+printf( "Duration: %u microseconds", milliseconds );
+
+
+Series of events, measuring duration of each, think "stopwatch lap".
+
+time_reference_t mystopwatch;
+pogobot_stopwatch_reset( &mystopwatch );
+while ( 1 )
+{
+    wait_for_some_external_event();
+    uint32_t microseconds = pogobot_stopwatch_lap( &mystopwatch );
+    printf( "Time since previous event: %u microseconds", milliseconds );
+}
+
+
+You want your code to periodically do something.
+
+time_reference_t mytimer;
+uint32_t period_microseconds = 250000;
+pogobot_timer_init( &mytimer, period_microseconds );
+while (1)
+{
+   wait_for_some_external_event();
+   if (pogobot_timer_has_expired())
+   {
+       pogobot_timer_offset_origin_microseconds( &mytimer,
+                                                 period_microseconds );
+       react_do_something();
+   }
+}
+
+
+
+<a name="line-850"></a><a name="pli_timer_sleep_stopwatch_init"></a>
+### :arrow_right: pli_timer_sleep_stopwatch_init
+
+```cpp
+void pli_timer_sleep_stopwatch_init( void ) /* line 861 */
+```
+
+Initialise the timer structure
+(already made inside pogobot_init)
+
+#### Parameters
+- none
+
+#### Return
+- none
+
+
+<a name="line-863"></a>
+### typedef struct time_reference_t
+
+```cpp
+typedef struct time_reference_t /* line 872 */
+```
+
+###### Timer structure
+
+time_reference_t :
+
+- uint32_t hardware_value_at_time_origin - timer reference
+
+
+
+<a name="line-878"></a><a name="pogobot_stopwatch_reset"></a>
+### :arrow_right: pogobot_stopwatch_reset
+
+```cpp
+void pogobot_stopwatch_reset( time_reference_t *stopwatch ) /* line 889 */
+```
+
+reset a time_reference structure.
+To use a time_reference_t as a stopwatch you must reset it using pogobot_stopwatch_reset()
+
+#### Parameters
+- 'stopwatch' - pointer to a time_reference_t structure
+
+#### Return
+- none
+
+
+<a name="line-891"></a><a name="pogobot_stopwatch_lap"></a>
+### :arrow_right: pogobot_stopwatch_lap
+
+```cpp
+int32_t pogobot_stopwatch_lap( time_reference_t *stopwatch ) /* line 901 */
+```
+
+measures time elapsed from origin and offsets so that origin is zero at this point in time.
+
+#### Parameters
+- 'stopwatch' - pointer to a time_reference_t structure
+
+#### Return
+Returns the number of microseconds elapsed on 32 bits (which may be negative if you offset the origin to the future)
+
+
+<a name="line-903"></a><a name="pogobot_stopwatch_get_elapsed_microseconds"></a>
+### :arrow_right: pogobot_stopwatch_get_elapsed_microseconds
+
+```cpp
+int32_t pogobot_stopwatch_get_elapsed_microseconds( time_reference_t *stopwatch ) /* line 913 */
+```
+
+provides the current number of elapsed microseconds without otherwise interfering with the stopwatch state.
+
+#### Parameters
+- 'stopwatch' - pointer to a time_reference_t structure
+
+#### Return
+Returns the number of microseconds elapsed on 32 bits (which may be negative if you offset the origin to the future)
+
+
+<a name="line-915"></a><a name="pogobot_stopwatch_offset_origin_microseconds"></a>
+### :arrow_right: pogobot_stopwatch_offset_origin_microseconds
+
+```cpp
+void pogobot_stopwatch_offset_origin_microseconds( time_reference_t *stopwatch, int32_t microseconds_offset ) /* line 926 */
+```
+
+offsets the origin of the stopwatch by the specified number of microseconds.
+
+#### Parameters
+- 'stopwatch' - pointer to a time_reference_t structure
+- 'microseconds_offset' - number of microsenconds to offset the origin
+
+#### Return
+- none
+
+
+<a name="line-928"></a><a name="pogobot_timer_init"></a>
+### :arrow_right: pogobot_timer_init
+
+```cpp
+void pogobot_timer_init( time_reference_t *timer, int32_t microseconds_to_go ) /* line 939 */
+```
+
+set a timer that will expire in the defined number of microseconds in the future.
+
+#### Parameters
+- 'timer' - pointer to a time_reference_t structure
+- 'microseconds_to_go' - number of microsenconds to go
+
+#### Return
+- none
+
+
+<a name="line-941"></a><a name="pogobot_timer_get_remaining_microseconds"></a>
+### :arrow_right: pogobot_timer_get_remaining_microseconds
+
+```cpp
+int32_t pogobot_timer_get_remaining_microseconds( time_reference_t *timer ) /* line 951 */
+```
+
+provides the current of microseconds until the timer has expired, without otherwise interfering with the timer state.
+
+#### Parameters
+- 'timer' - pointer to a time_reference_t structure
+
+#### Return
+Returns the number of microseconds elapsed on 32 bits. The result is a signed number, positive when the timer has not expired yet, negative when the timer has expired.
+
+
+<a name="line-953"></a><a name="pogobot_timer_has_expired"></a>
+### :arrow_right: pogobot_timer_has_expired
+
+```cpp
+bool pogobot_timer_has_expired( time_reference_t *timer ) /* line 963 */
+```
+
+Returns true when the timer has expired, false when the timer has not expired yet.
+
+#### Parameters
+- 'timer' - pointer to a time_reference_t structure
+
+#### Return
+Returns a bool depending on the status (True: if expired, False: if not expired)
+
+
+<a name="line-965"></a><a name="pogobot_timer_wait_for_expiry"></a>
+### :arrow_right: pogobot_timer_wait_for_expiry
+
+```cpp
+void pogobot_timer_wait_for_expiry( time_reference_t *timer ) /* line 975 */
+```
+
+waits until the timer has expired.
+
+#### Parameters
+- 'timer' - pointer to a time_reference_t structure
+
+#### Return
+- none
+
+
+<a name="line-977"></a><a name="pogobot_timer_offset_origin_microseconds"></a>
+### :arrow_right: pogobot_timer_offset_origin_microseconds
+
+```cpp
+void pogobot_timer_offset_origin_microseconds( time_reference_t *timer, int32_t microseconds_offset ) /* line 988 */
+```
+
+offsets the origin of the timer by the specified number of microseconds.
+
+#### Parameters
+- 'timer' - pointer to a time_reference_t structure
+- 'microseconds_offset' - number of microsenconds to offset the origin
+
+#### Return
+- none
+
