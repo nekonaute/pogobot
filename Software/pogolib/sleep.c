@@ -7,8 +7,7 @@
 **/
 
 
-#include "sleep.h"
-#include "pogobot_timer_sleep_stopwatch.h"
+#include "pogobot.h"
 
 /* clang-format-ok */
 

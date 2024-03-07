@@ -7,13 +7,7 @@
 **/
 
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <generated/csr.h>
-#include <generated/mem.h>
-#include <rgb.h>
-#include <sleep.h>
-#include <pogobot_timer_sleep_stopwatch.h>
+#include <pogobot.h>
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
