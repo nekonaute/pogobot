@@ -359,6 +359,7 @@ int flash_robot(void)
 		slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
 							sizeof( message_header_t ) +
 							message.header.payload_length );
+		msleep(200);
 	}
 	
 	/* Send the serialboot "magic" request to Host and wait for ACK_OK */
@@ -440,7 +441,7 @@ int flash_robot(void)
 
 				send_flash_message((char *)&frame, frame.payload_length + 4);
 				/* to be refined */ 
-				msleep(100);
+				msleep(150);
 				/* Acknowledge and exit */
 				uart_write(SFL_ACK_SUCCESS);
 				return 1;
@@ -453,7 +454,7 @@ int flash_robot(void)
                
 				send_flash_message((char *)&frame, frame.payload_length + 4);
 				/* to be refined */ 
-				msleep(100);
+				msleep(150);
 				/* Acknowledge */
                 uart_write(SFL_ACK_SUCCESS);
 				break;
@@ -464,7 +465,7 @@ int flash_robot(void)
 				failures = 0;
                 send_flash_message((char *)&frame, frame.payload_length + 4);
 				/* to be refined */ 
-				msleep(100);
+				msleep(150);
 				/* Acknowledge and jump */
 				uart_write(SFL_ACK_SUCCESS);
                 return 0;
