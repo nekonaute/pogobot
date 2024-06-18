@@ -129,6 +129,7 @@ pogobot_infrared_sendRawLongMessage( message_t *const message )
     message->header._packet_type = ir_t_user; // User packets have type 16.
 
     message->header._sender_id = pogobot_helper_getid();
+    message->header._receiver_ir_index = 0;
 
     // TODO: this currently emits packet via several IR at the same time (or
     // does it?). What this should to is emit packet several times, via one IR
