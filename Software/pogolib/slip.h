@@ -69,7 +69,7 @@ typedef struct
 
 typedef struct
 {
-    uint16_t crc_seed;
+    uint32_t crc_seed;
     uint8_t ( *write_byte )( uint8_t byte );
 } slip_send_descriptor_s;
 
@@ -79,10 +79,10 @@ typedef struct
     uint32_t size;
     uint8_t *buf;
     uint32_t buf_size;
-    uint16_t crc;
+    uint32_t crc;
     void *tag;
     void ( *recv_message )( uint8_t *data, uint32_t size, void *tag );
-    uint16_t crc_seed;
+    uint32_t crc_seed;
     slip_error_counter_s error_counter;
 } slip_receive_state_s;
 

@@ -35,7 +35,7 @@ static uint8_t buf[IR_RX_COUNT][SLIP_BUF];
 static slip_receive_state_s slip_receive_state[IR_RX_COUNT];
 
 const slip_send_descriptor_s slip_send_descriptor = {
-    .crc_seed = 0xFFFF,
+    .crc_seed = 0xFFFFFFFFul,
     .write_byte = write_byte_via_a_four_byte_word_channel,
 };
 
@@ -57,7 +57,7 @@ pogobot_infrared_ll_init( void )
 
     slip_receive_state_s slip_receive_state_prototype = {
         .recv_message = on_complete_valid_slip_packet_received,
-        .crc_seed = 0xFFFF };
+        .crc_seed = 0xFFFFFFFFul };
 
     for ( int i = 0; i < IR_RX_COUNT; i++ )
     {

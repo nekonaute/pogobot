@@ -105,6 +105,25 @@ int main(void) {
             counter++;
         }*/
 
+        if ( counter == SIZE_TEST )
+        {
+            static int once = 1;
+            slip_error_counter_s e_counter;
+
+            if (once == 1)
+            {
+                for (size_t i = 0; i < 4; i++)
+                {
+                    pogobot_infrared_get_receiver_error_counter(&e_counter, i);
+                    printf(" IR %d, crc mismatch : %ld\n", i, e_counter.crc_mismatch_counter);
+                }
+
+                once = 0;
+            }
+            
+            
+        }
+
         ir_emitter = ( ir_emitter + 1 ) % IR_RX_COUNT;
     }
 
