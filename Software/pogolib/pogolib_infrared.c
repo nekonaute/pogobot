@@ -345,12 +345,16 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
         m.header._sender_ir_index = 0xF; // index not possible
         m.header._receiver_ir_index = (int)tag;
         m.header.payload_length = ms->header.payload_length;
+
+        if (ms->header.payload_length <= MAX_PAYLOAD_SIZE_BYTES )
+        {
         memcpy( m.payload, ms->payload, m.header.payload_length);
 
         /* when a message arrives, it is put into the FIFO */
         if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
         {
             FifoBuffer_write( my_mes_fifo_p, m );
+            }
         }
 
     } else {
