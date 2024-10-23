@@ -95,7 +95,7 @@ slip_receive_init( slip_receive_state_s *const slip_receive_state );
 slip_error_t slip_decode_received_byte( slip_receive_state_s *slip,
                                         uint8_t byte );
 slip_error_t slip_send_message( const slip_send_descriptor_s *const slipdesc,
-                                uint8_t *data, uint32_t size );
+                                uint8_t *data, uint32_t size, uint16_t payload_size);
 
 void slip_dump_state( slip_receive_state_s *slip, char *msg );
 

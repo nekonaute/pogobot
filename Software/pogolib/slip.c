@@ -201,7 +201,8 @@ slip_decode_received_byte( slip_receive_state_s *slip, uint8_t byte )
                 if ( slip->crc == 0 )
                 {
                     //slip_dump_state( slip, "retreived msg" );
-                    slip->recv_message( slip->buf, slip->size - 2, slip->tag );
+                    // size is reduiced of 4 bytes size of the CRC32
+                    slip->recv_message( slip->buf, slip->size - 4, slip->tag );
                     //printf("%2x%2x\n", slip->buf[slip->size -2], slip->buf[slip->size -1] );
                 }
                 else
@@ -284,7 +285,7 @@ write_encoded_byte( const slip_send_descriptor_s *const slipdesc, uint8_t byte )
 
 slip_error_t
 slip_send_message( const slip_send_descriptor_s *const slipdesc, uint8_t *data,
-                   uint32_t size )
+                   uint32_t size, uint16_t payload_size)
 {
     uint32_t i;
     uint8_t byte;
@@ -309,8 +310,17 @@ slip_send_message( const slip_send_descriptor_s *const slipdesc, uint8_t *data,
     }
     //printf("\n");
 
-    //printf("crc before send %lx \n", crc);
+    // Adding the payload size and the end for a double check
+    byte = (payload_size >> 8) & 0xFF;
+    crc = calc_crc_ccitt32( byte, crc );
+    if ( write_encoded_byte( slipdesc, byte ) == 0 )
+        return SLIP_ERROR_BUFFER_OVERFLOW;
+    byte = payload_size & 0xFF;
+    crc = calc_crc_ccitt32( byte, crc );
+    if ( write_encoded_byte( slipdesc, byte ) == 0 )
+        return SLIP_ERROR_BUFFER_OVERFLOW;
 
+    //printf("crc before send %lx \n", crc);
     crc_buf[0] = ( uint8_t )( (crc >> 24) & 0xFF  );
     crc_buf[1] = ( uint8_t )( (crc >> 16) & 0xFF );
     crc_buf[2] = ( uint8_t )( (crc >> 8) & 0xFF );

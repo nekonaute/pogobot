@@ -155,7 +155,7 @@ pogobot_infrared_sendRawLongMessage( message_t *const message )
     ir_tx_conf_tx_mask_write( mask );
     slip_send_message( &( slip_send_descriptor ), (uint8_t *)message,
                        sizeof( message_header_t ) +
-                           message->header.payload_length );
+                           message->header.payload_length, message->header.payload_length );
 
     return 0;
 }
@@ -197,7 +197,7 @@ pogobot_infrared_sendRawShortMessage( ir_direction dir, short_message_t *const m
     ir_tx_conf_tx_mask_write( mask );
     slip_send_message( &( slip_send_descriptor ), (uint8_t *)message,
                        sizeof( message_short_header_t ) +
-                           message->header.payload_length );
+                           message->header.payload_length, message->header.payload_length );
 
     return 0;
 }
@@ -334,6 +334,13 @@ void
 on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
                                         void *tag )
 {
+    // double verification of payload size
+    // the double is placed inside the 2 last bytes of the received data 
+    uint16_t d_payload_size = 0;
+    d_payload_size |= data[size-2] << 8;
+    d_payload_size |= data[size-1];
+    //printf("d_payload_size = %d\n", d_payload_size);
+
     //if the message type is "ir_t_short", we reconstruct a long message to avoid pb after
     //we choose extrem false information 
     if (data[0] == ir_t_short) {
@@ -346,14 +353,17 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
         m.header._receiver_ir_index = (int)tag;
         m.header.payload_length = ms->header.payload_length;
 
-        if (ms->header.payload_length <= MAX_PAYLOAD_SIZE_BYTES )
-        {
-        memcpy( m.payload, ms->payload, m.header.payload_length);
+        //printf("payload_size = %d\n", m.header.payload_length);
 
-        /* when a message arrives, it is put into the FIFO */
-        if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
+        if (ms->header.payload_length <= MAX_PAYLOAD_SIZE_BYTES && ms->header.payload_length == d_payload_size)
         {
-            FifoBuffer_write( my_mes_fifo_p, m );
+            //printf("double verif ok \n");
+            memcpy( m.payload, ms->payload, m.header.payload_length);
+
+            /* when a message arrives, it is put into the FIFO */
+            if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
+            {
+                FifoBuffer_write( my_mes_fifo_p, m );
             }
         }
 
@@ -373,12 +383,18 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
             }
         }
 
-        /* when a message arrives, it is put into the FIFO */
-        if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
-        {
-            FifoBuffer_write( my_mes_fifo_p, *m );
-        }
+        //printf("payload_size = %d\n", m->header.payload_length);
 
+        if (m->header.payload_length == d_payload_size)
+        {
+            //printf("double verif ok \n");
+            /* when a message arrives, it is put into the FIFO */
+            if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
+            {
+                FifoBuffer_write( my_mes_fifo_p, *m );
+            }
+        }
+        
     }
 
 }

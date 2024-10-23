@@ -77,7 +77,7 @@ void pogobot_init( void );
  */
 
 #ifndef MAX_PAYLOAD_SIZE_BYTES
-#define MAX_PAYLOAD_SIZE_BYTES 384
+#define MAX_PAYLOAD_SIZE_BYTES 382
 #endif /* MAX_PAYLOAD_SIZE_BYTES */
 
 /** 
