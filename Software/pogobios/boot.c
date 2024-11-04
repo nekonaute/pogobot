@@ -126,7 +126,7 @@ static void send_flash_message( char* mPayload, uint32_t size)
 
 	slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
 							sizeof( message_header_t ) +
-							message.header.payload_length );
+							message.header.payload_length, message.header.payload_length );
 
 }
 #endif
@@ -358,7 +358,7 @@ int flash_robot(void)
 	{
 		slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
 							sizeof( message_header_t ) +
-							message.header.payload_length );
+							message.header.payload_length, message.header.payload_length );
 		msleep(200);
 	}
 	
@@ -441,7 +441,7 @@ int flash_robot(void)
 
 				send_flash_message((char *)&frame, frame.payload_length + 4);
 				/* to be refined */ 
-				msleep(150);
+				msleep(200);
 				/* Acknowledge and exit */
 				uart_write(SFL_ACK_SUCCESS);
 				return 1;
@@ -454,7 +454,7 @@ int flash_robot(void)
                
 				send_flash_message((char *)&frame, frame.payload_length + 4);
 				/* to be refined */ 
-				msleep(150);
+				msleep(200);
 				/* Acknowledge */
                 uart_write(SFL_ACK_SUCCESS);
 				break;
@@ -465,7 +465,7 @@ int flash_robot(void)
 				failures = 0;
                 send_flash_message((char *)&frame, frame.payload_length + 4);
 				/* to be refined */ 
-				msleep(150);
+				msleep(200);
 				/* Acknowledge and jump */
 				uart_write(SFL_ACK_SUCCESS);
                 return 0;

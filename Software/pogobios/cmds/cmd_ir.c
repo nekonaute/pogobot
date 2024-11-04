@@ -1050,7 +1050,7 @@ static void send_slip_message( char* mPayload, uint32_t size, uint8_t type, uint
         
             slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
                                     sizeof( message_header_t ) +
-                                    message.header.payload_length );
+                                    message.header.payload_length, message.header.payload_length );
             msleep(delay);
         }
         uart_read(); // Dump the caracter sent to stop 
@@ -1058,7 +1058,7 @@ static void send_slip_message( char* mPayload, uint32_t size, uint8_t type, uint
     } else {
         slip_send_message( &( slip_send_descriptor ), (uint8_t *)&message,
                                 sizeof( message_header_t ) +
-                                message.header.payload_length );
+                                message.header.payload_length, message.header.payload_length );
     }
 
 }
