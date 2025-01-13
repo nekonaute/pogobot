@@ -91,7 +91,7 @@
   (net 0 "")
   (net 1 "VCC")
   (net 2 "GND")
-  (net 3 "Net-(Q2-Pad3)")
+  (net 3 "Net-(J2-Pad2)")
   (net 4 "Net-(Q2-Pad1)")
   (net 5 "unconnected-(U2-Pad3)")
   (net 6 "Net-(J1-Pad2)")
@@ -419,7 +419,7 @@
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 5522db9f-1aca-447b-bfa6-83b582827b3c)
     )
-    (fp_text value "ZXMN3A14F" (at 0 2.4) (layer "F.Fab") hide
+    (fp_text value "BSR802NL6327HTSA1" (at 0 2.4) (layer "F.Fab") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 117ce786-ecb6-466b-a002-40137517ca4b)
     )
@@ -445,7 +445,7 @@
     (pad "2" smd roundrect (at -0.9375 0.95) (size 1.475 0.6) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
       (net 2 "GND") (pinfunction "S") (pintype "passive") (tstamp f17a0e7a-958f-4d2d-85a4-07321bbfe150))
     (pad "3" smd roundrect (at 0.9375 0) (size 1.475 0.6) (layers "F.Cu" "F.Paste" "F.Mask") (roundrect_rratio 0.25)
-      (net 3 "Net-(Q2-Pad3)") (pinfunction "D") (pintype "passive") (tstamp 104133f0-01fa-4a7b-a064-8d861ebd61a3))
+      (net 3 "Net-(J2-Pad2)") (pinfunction "D") (pintype "passive") (tstamp 104133f0-01fa-4a7b-a064-8d861ebd61a3))
     (model "${KICAD6_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-23.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -3212,7 +3212,7 @@
     (pad "1" thru_hole rect (at 0 0) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask)
       (net 7 "Net-(J2-Pad1)") (pinfunction "Pin_1") (pintype "passive") (tstamp 7b3a4b15-a2a0-4925-a8f0-b96b18495d82))
     (pad "2" thru_hole oval (at 0 2.54) (size 1.7 1.7) (drill 1) (layers *.Cu *.Mask)
-      (net 3 "Net-(Q2-Pad3)") (pinfunction "Pin_2") (pintype "passive") (tstamp a7de1ed8-f70f-4a19-b5a6-f3a688e4b8e0))
+      (net 3 "Net-(J2-Pad2)") (pinfunction "Pin_2") (pintype "passive") (tstamp a7de1ed8-f70f-4a19-b5a6-f3a688e4b8e0))
     (model "${KICAD6_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x02_P2.54mm_Vertical.wrl"
       (offset (xyz 0 0 0))
       (scale (xyz 1 1 1))
@@ -3405,7 +3405,7 @@
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp de186b29-b796-4ed2-8ed8-28303265d4ab)
     )
-    (fp_text value "Potentiometer" (at -2.75 2.525 180) (layer "F.Fab") hide
+    (fp_text value "100" (at -2.75 2.525 180) (layer "F.Fab") hide
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 79e05db9-e2ce-445b-ae2c-2b4392a5908a)
     )
