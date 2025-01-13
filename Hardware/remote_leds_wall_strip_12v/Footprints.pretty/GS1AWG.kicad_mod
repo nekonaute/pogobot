@@ -1,0 +1,37 @@
+(footprint "GS1AWG" (version 20211014) (generator pcbnew)
+  (layer "F.Cu")
+  (tedit 0)
+  (attr smd)
+  (fp_text reference "REF**" (at 0 -2.05 unlocked) (layer "F.SilkS")
+    (effects (font (size 0.8 0.8) (thickness 0.1)))
+    (tstamp 66b2c6b4-ebff-4ed2-9013-f5f59f938b08)
+  )
+  (fp_text value "GS1AWG" (at 0 3.5 unlocked) (layer "F.Fab")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp 4b937bc8-0b96-4ed1-b28a-d0f318ed846b)
+  )
+  (fp_text user "${REFERENCE}" (at 0 -2.05 unlocked) (layer "F.Fab")
+    (effects (font (size 1 1) (thickness 0.15)))
+    (tstamp 27a3cc79-8f85-4b03-9f67-a25080e15878)
+  )
+  (fp_line (start -0.25 2) (end -0.25 2.5) (layer "F.SilkS") (width 0.12) (tstamp 082810b4-323f-4741-8f24-9c15ed1e0e3f))
+  (fp_line (start 0.5 1.5) (end 0.5 2.5) (layer "F.SilkS") (width 0.12) (tstamp 0feb25c6-2e71-47e8-af14-06819aa15ab8))
+  (fp_line (start -0.25 1.5) (end -0.25 2) (layer "F.SilkS") (width 0.12) (tstamp 212233f2-6963-45bc-8362-05a781596846))
+  (fp_line (start 0.5 2.5) (end -0.25 2) (layer "F.SilkS") (width 0.12) (tstamp 2edd6949-6b6d-4421-96f5-127affe3ea4e))
+  (fp_line (start 0.5 2) (end 1.25 2) (layer "F.SilkS") (width 0.12) (tstamp 510ec58f-c586-41a2-84f9-b213b1216cd7))
+  (fp_line (start -0.25 2) (end 0.5 1.5) (layer "F.SilkS") (width 0.12) (tstamp 93a837e4-771c-4e60-b003-5d992ed96a00))
+  (fp_line (start -0.25 2) (end -1 2) (layer "F.SilkS") (width 0.12) (tstamp e3cdd234-e7a9-4955-9e68-51e8ae33409e))
+  (pad "1" smd rect (at -1.865 0) (size 2.07 2.06) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp b0c4cec4-2b5d-4d2c-8ccb-1e91ef874517))
+  (pad "2" smd rect (at 1.865 0) (size 2.07 2.06) (layers "F.Cu" "F.Paste" "F.Mask") (tstamp df071a43-d2aa-4c87-aea6-b1d5dbfed0a4))
+  (group "Logo diode" (id 4a39f451-48af-40c1-aaff-72136cf8a412)
+    (members
+      082810b4-323f-4741-8f24-9c15ed1e0e3f
+      0feb25c6-2e71-47e8-af14-06819aa15ab8
+      212233f2-6963-45bc-8362-05a781596846
+      2edd6949-6b6d-4421-96f5-127affe3ea4e
+      510ec58f-c586-41a2-84f9-b213b1216cd7
+      93a837e4-771c-4e60-b003-5d992ed96a00
+      e3cdd234-e7a9-4955-9e68-51e8ae33409e
+    )
+  )
+)
