@@ -329,7 +329,8 @@ Execute :
 
     iceprog build/bootloader_pogobotv3/bootloader.bin
 
-:warning: If iceprog can't find the board but dsmesg show that everything is ok.
+:warning: If iceprog can't find the board but dsmesg show that everything is ok.  
+"Can't find iCE FTDI USB device (vendor_id 0x0403, device_id 0x6010 or 0x6014)"
 
 Create a file /etc/udev/rules.d/53-lattice-ftdi.rules with the following line in it to allow uploading bit-streams to a Lattice iCEstick and/or a Lattice iCE40-HX8K Breakout Board as unprivileged user:
 
