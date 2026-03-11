@@ -79,10 +79,21 @@ Create dependencies directory
 
 The list is adapted for Ubuntu distribution
 
-    sudo apt-get -y install bison build-essential clang clang-format cmake flex gawk git graphviz libboost-all-dev libboost-dev libboost-filesystem-dev libboost-iostreams-dev libboost-program-options-dev libboost-python-dev libboost-system-dev libboost-thread-dev libeigen3-dev libffi-dev libftdi-dev libreadline-dev mercurial pkg-config python python3 python3-dev python3-pip python3-setuptools qt5-default tcl-dev xdot zlib1g-dev
+    sudo apt-get -y install wget bison build-essential clang clang-format cmake flex gawk git graphviz libboost-all-dev libboost-dev libboost-filesystem-dev libboost-iostreams-dev libboost-program-options-dev 
+    
+    sudo apt-get -y install libboost-python-dev libboost-system-dev libboost-thread-dev libeigen3-dev libffi-dev libftdi-dev libreadline-dev mercurial pkg-config python3 python3-dev python3-pip python3-setuptools qt5-default tcl-dev xdot zlib1g-dev
 
     sudo pip3 install meson==0.64.1 ninja
     echo "export PATH=\"\$PATH:~/.local/bin\"" >>~/.bashrc
+
+Configure the environnement 
+
+    export LC_ALL=LC.UTF-8
+    export LANG=LC.UTF-8
+    export PATH =\$PATH:/pogobot/dependencies/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin
+
+Add user to dialout ( to get access to peripherals )
+    sudo adduser $USER dialout
 
 **litex + migen**
 
@@ -106,6 +117,8 @@ Recover the Cross Compiler
     export GCC_RISCV=$PWD/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin/
     echo "export PATH=\"\$PATH:$GCC_RISCV\"" >>~/.bashrc
 
+    export PATH=$HOME/.local/bin:$PATH
+
 
 Notice the option `update` of litex_setup.py have a high probability to break the project.
 
@@ -114,43 +127,39 @@ Notice the option `update` of litex_setup.py have a high probability to break th
 From [Icestorm installation
 instructions](http://www.clifford.at/icestorm/#install):
 
-
-    mkdir -p dependencies
     cd dependencies
     git clone https://github.com/cliffordwolf/icestorm.git icestorm
     cd icestorm
     git checkout 2bc541743ada3542c6da36a50e66303b9cbd2059
     NPROC=$(  grep -i "^processor" /proc/cpuinfo | wc -l )
     make -j${NPROC} 
-    sudo make install
+    make install PREFIX=$HOME/.local
 
 **yosys**
 
 From [Yosys
 Setup](https://github.com/YosysHQ/yosys#user-content-setup "GitHub - YosysHQ/yosys: Yosys Open SYnthesis Suite"):
 
-    mkdir -p dependencies
     cd dependencies
     git clone https://github.com/YosysHQ/yosys
     cd yosys
     git checkout tags/yosys-0.18
     NPROC=$(  grep -i "^processor" /proc/cpuinfo | wc -l )
     make -j${NPROC}
-    sudo make install
+    make install PREFIX=$HOME/.local
 
 **nextpnr**
 
 From nextpnr/README.md :
 
-    mkdir -p dependencies
     cd dependencies
     git clone https://github.com/YosysHQ/nextpnr
     cd nextpnr
     git checkout 8d063d38b148b1e7095a032ffc9cf957c2407f32
-    cmake . -DARCH=ice40
+    cmake . -DARCH=ice40 -DCMAKE_INSTALL_PREFIX=$HOME/.local
     NPROC=$(  grep -i "^processor" /proc/cpuinfo | wc -l )
     make -j${NPROC}
-    sudo make install
+    make install
 
 **Tests**
 
@@ -256,7 +265,7 @@ If you want or need to change the bootloader, you need to execute the folowing c
 :warning: These commands can break your pogobot
 
     ./pogosoc.py --target=pogobotv3 --cpu-variant=lite --build --bootloader
-    ./litex_term.py --serial-boot --images images.json --safe /dev/ttyUSBX
+    ./litex_term.py --serial-boot --kernel=build/bootloader_pogobotv3/bootloader.bin --kernel-adr=0x200000 --safe /dev/ttyUSBX
 
     You have to change X for the correct number 
 
@@ -460,6 +469,11 @@ You can do the following workaround.
 Comments the line "cmake policy(SET CMP0079 NEW)" in the file "pogobot/dependencies/nextpnr/CMakeLists.txt". 
 (This line is at the begining of the file)
 
+### <a name='egg-link'></a>nextpnr
 
+During yosys installation.
 
+Note : Egg-link : fill used by setuptools when a Python package is installed and defined as editable (dev mode). It points to the user local folder.
 
+Suppress egg-info files using (on Ubuntu):
+rm -f ~/.local/lib/python*/site-packages/*-link .

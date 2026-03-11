@@ -22,6 +22,11 @@
 
 uint8_t _selected_power = pogobot_infrared_emitter_power_oneThird;
 
+/**
+ * Force robot to not emit IR message  (mute if 1)
+ */
+uint8_t _master_mute = 0;
+
 /* ******************************** ******************************** */
 
 /* slip */
@@ -51,6 +56,8 @@ void
 pogobot_infrared_ll_init( void )
 {
     ir_init();
+    _master_mute = 0;
+
     FifoBuffer_init( my_mes_fifo_p, NUMEL, message_t, bufmem_mes );
 
     slip_send_init( &slip_send_descriptor );
@@ -121,6 +128,11 @@ typedef union multi_width_pointer_t
 uint32_t
 pogobot_infrared_sendRawLongMessage( message_t *const message )
 {
+    if( _master_mute)
+    {
+        return 1;
+    }
+
     if ( message->header.payload_length > MAX_PAYLOAD_SIZE_BYTES )
     {
         return 1;
@@ -163,6 +175,12 @@ pogobot_infrared_sendRawLongMessage( message_t *const message )
 uint32_t 
 pogobot_infrared_sendRawShortMessage( ir_direction dir, short_message_t *const message )
 {
+
+    if( _master_mute)
+    {
+        return 1;
+    }
+
     if ( message->header.payload_length > MAX_PAYLOAD_SIZE_BYTES )
     {
         return 1;
@@ -381,6 +399,22 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
             {
                 reboot_ctrl_write(0xac);
             }
+
+
+            //if mute_ir message mute on pogobios
+            ret = strncmp("DEADCAFE", (char*)(m->payload), 8);
+            if (ret == 0)
+            {
+                _master_mute=1;
+            }
+
+
+            //if unmute_ir message mute on pogobios
+            ret = strncmp("BASECAFE", (char*)(m->payload), 8);
+            if (ret == 0)
+            {
+                _master_mute=0;
+            }
         }
 
         //printf("payload_size = %d\n", m->header.payload_length);
@@ -447,6 +481,10 @@ pogobot_infrared_update( void )
             }
         }
     }
+}
+
+int void is_muted(void) {
+    return _master_mute;
 }
 
 void 

@@ -69,7 +69,7 @@ pogobot_init( void )
      
 #ifdef CSR_IR_TX_BASE
     ir_uart_init();
-    ir_init(); // Uses usleep()
+    //ir_init(); Uses usleep()
 #endif
 #ifdef CSR_SPI_CS_BASE
     IMU_Init();

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <generated/csr.h>
 #include <spiflash.h>
+#include "pogobot.h"
 
 #include <spi.h>
 
@@ -416,3 +417,59 @@ void spiUnhold(void) {
 	spiEnd();
 }
 
+/* NEW PART : WRITE IN FLASH */
+/* Write authorized section in flash */
+/* writable by pages of 256 bytes */
+/* section size : 64kB */
+
+const int START_WRITE_SECTION = 0x290000;
+const int SIZE_WRITE_SECTION  = 0x10000;
+const int END_WRITE_SECTION   = START_WRITE_SECTION + SIZE_WRITE_SECTION;
+const int PAGE_SIZE           = 256;
+
+/* 
+Erase the whole section (64 kB)
+Write 0xFF. 
+*/
+void erase_write_section_flash(void) {
+	spiBeginErase64(START_WRITE_SECTION);
+}
+
+/* 
+Write 256 bytes .
+Args :
+  page : uint8_t : in 0-255 range : page to write in
+  data : pointer to array of data 
+*/
+void write_page_flash(uint8_t page, const void *data)
+{
+	spiflash_bitbang_en_write(1);       // Enable bit-bang mode
+	spiBeginWrite(START_WRITE_SECTION + 256*page, data, PAGE_SIZE);
+	wait_for_device_ready();
+	spiflash_bitbang_en_write(0);       // Enable memory-mapped mode
+}
+
+/* 
+Read 256 bytes.
+Args :
+  page : uint8_t : in 0-256 range : select page to write in
+  data : char* 
+*/
+void read_page_flash(uint8_t page, char *buf)
+{
+	int addr = START_WRITE_SECTION + 256*page;
+
+	spiflash_bitbang_en_write(1);       // Enable bit-bang mode
+	spiBegin();
+	spi_single_tx(0x03);
+	spi_single_tx(addr >> 16);
+	spi_single_tx(addr >> 8);
+	spi_single_tx(addr >> 0);
+	// No dummy byte
+	for(int i=0; i<256; i++) {
+		buf[i] = spi_single_rx();
+	}
+	spiEnd();
+	spiflash_bitbang_en_write(0);       // Enable memory-mapped mode
+
+}

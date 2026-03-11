@@ -1168,23 +1168,64 @@ rc_start_handler( int nb_params, char **params )
 define_command( rc_start, rc_start_handler,
                 "Start all pogobots available through infrared", POGO_CMDS );
 
+
 /**
- * Command "rc_stop"
+ * Command "rc_mute_ir"
  *
- * Stop the user code of the robots through infrared.
+ * Stop the IR emissions of all the pogobots.
  * It sends a specific message to the user code.
  * This message is intercepted by the de pilling message system.
  *
  */
 static void
-rc_stop_handler( int nb_params, char **params )
+rc_mute_ir_handler( int nb_params, char **params )
 {
-    printf("Stoping...\n");
-    char cmd2send[8] = "DEADBEEF"; // special message to reboot the robot
-    send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 200);
+    printf("Mute emissions...\n");
+    char cmd2send[8] = "DEADCAFE"; // special message to reboot the robot
+    send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 500);
 }
 
-define_command( rc_stop, rc_stop_handler,
+define_command( rc_mute_ir, rc_mute_ir_handler,
+                "Stop all IR emissions through infrared", POGO_CMDS );
+
+/**
+ * Command "rc_unmute_ir"
+ *
+ * Unmute the IR emissions of all the pogobots.
+ * It sends a specific message to the user code.
+ * This message is intercepted by the de pilling message system.
+ *
+ */
+static void
+rc_unmute_ir_handler( int nb_params, char **params )
+{
+    printf("Unmute emissions...\n");
+    char cmd2send[8] = "BASECAFE"; // special message to reboot the robot
+    send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 500);
+}
+
+define_command( rc_unmute_ir, rc_unmute_ir_handler,
+                "Restart IR emissions through infrared", POGO_CMDS );
+
+
+/**
+ * Command "rc_reboot"
+ *
+ * Stop the user code of the robots through infrared.
+ * It sends a specific message to the user code.
+ * This message is intercepted by the de pilling message system.
+ *
+ * Replace rc_stop.
+ */
+static void
+rc_reboot_handler( int nb_params, char **params )
+{
+    printf("Rebooting...\n");
+    char cmd2send[8] = "DEADBEEF"; // special message to reboot the robot
+    send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 500);
+}
+
+define_command( rc_reboot, rc_reboot_handler,
                 "Stop all pogobots available through infrared", POGO_CMDS );
 
 

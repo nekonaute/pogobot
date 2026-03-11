@@ -15,6 +15,8 @@
 #include "ts4231.h"
 #include "ir_uart.h"
 
+#include "pogobot.h"
+
 #ifdef CSR_IR_RX0_BASE
 
 /* clang-format-ok */
@@ -48,9 +50,51 @@ ir_init( void )
             ( bit_mask == IR_RX_BITMASK_ALL )
                 ? "PERFECT"
                 : "WARN: some non-functional IR" );
-	*/			
+	*/	
+    
+    IR_reset_interrupt_flags();
+    
     return bit_mask;
 }
+
+/* 
+Lower IR interrupt flags.
+*/
+#ifndef REMOCON
+void
+IR_reset_interrupt_flags(void)
+{
+
+    #ifdef CSR_IR_RX0_BASE
+    while(!ir_rx0_rxempty_read()) {
+        ir_rx0_rx_read();
+        ir_rx0_ev_pending_write(1);
+    }
+    #endif
+
+    #ifdef CSR_IR_RX1_BASE
+    while(!ir_rx1_rxempty_read()) {
+        ir_rx1_rx_read();
+        ir_rx1_ev_pending_write(1);
+    }
+    #endif
+
+    #ifdef CSR_IR_RX2_BASE
+    while(!ir_rx2_rxempty_read()) {
+        ir_rx2_rx_read();
+        ir_rx2_ev_pending_write(1);
+    }
+    #endif
+
+    #ifdef CSR_IR_RX3_BASE
+    while(!ir_rx3_rxempty_read()) {
+        ir_rx3_rx_read();
+        ir_rx3_ev_pending_write(1);
+    }
+    #endif
+
+}
+#endif
 
 #define TIMEOUT 10000
 uint8_t

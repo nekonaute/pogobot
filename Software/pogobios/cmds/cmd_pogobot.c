@@ -953,3 +953,22 @@ static void autotest_handler(int nb_params, char **params) {
 }
 define_command(autotest, autotest_handler, "Launch Auto Test", POGO_CMDS);
 
+/**
+ * Command "is_muted"
+ *
+ * Return Mute if IR emissions are stopped otherwise Unmute.
+ *
+ */
+
+extern uint8_t _master_mute;
+
+static void is_muted_handler(void) {
+
+    if(_master_mute == 1 ){
+        printf("Mute\n");
+    }
+    else{
+        printf("Unmute\n");
+    }
+}
+define_command(is_muted, is_muted_handler, "Check whether the PogoBot is muted or not", POGO_CMDS);

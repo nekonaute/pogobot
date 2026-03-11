@@ -3,6 +3,7 @@
 ./pythondata-cpu-blackparrot/  : ba50883f12d33e1d834640640c84ddc9329bb68a
 ./litejesd204b/  : 2b07d2c61425c32318667822b34940947002c7f5
 ./pythondata-software-picolibc/  : a9057f5f859f7cb7a9e8e6a2d13398c1a53035cf
+./pythondata-software-picolibc/pythondata_software_picolibc/data/  : ce7bd3ba2761497ba380cb131d1493eb7c2bcaab
 ./litepcie/  : 89d86ba38e6df18bf0d192be908a761466342418
 ./pythondata-cpu-naxriscv/  : 2f6fd32e62d5196b412c6aac92136165af2948a4
 ./litevideo/  : 41f30143075ece3fff5c33a332ed067d1837cbb3

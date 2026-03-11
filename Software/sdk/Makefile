@@ -44,7 +44,7 @@ sdk: $(POGOLIB_BUILDDIR)/libpogobot.a
 	cp -r $(LIBBASE_DIRECTORY)/* $(BUILD_SDK_DIR)/tools/include/litex/soc/software/libbase
 	find $(BUILD_SDK_DIR)/tools/include/ -type f ! \( -name "*.h" -or -name "*.ld" \) -delete
 	find $(BUILD_SDK_DIR)/tools/include/ -type d -empty -delete
-	find $(SOC_DIRECTORY)/cores/cpu/* -type d ! -name "vexriscv" -exec rm -r {} +
+	find $(SOC_DIRECTORY)/cores/cpu/* -type d ! -name "vexriscv" -exec rm -rf {} +
 	cp $(POGOLIB_DIR)/*.h $(BUILD_SDK_DIR)/includes
 	cp $(POGOBIOS_DIR)/linker.ld $(BUILD_SDK_DIR)/tools
 	cp ../litex_term.py $(BUILD_SDK_DIR)/tools
