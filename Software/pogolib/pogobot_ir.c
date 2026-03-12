@@ -60,7 +60,6 @@ ir_init( void )
 /* 
 Lower IR interrupt flags.
 */
-#ifndef REMOCON
 void
 IR_reset_interrupt_flags(void)
 {
@@ -92,9 +91,7 @@ IR_reset_interrupt_flags(void)
         ir_rx3_ev_pending_write(1);
     }
     #endif
-
 }
-#endif
 
 #define TIMEOUT 10000
 uint8_t

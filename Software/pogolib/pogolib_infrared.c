@@ -483,7 +483,7 @@ pogobot_infrared_update( void )
     }
 }
 
-int void is_muted(void) {
+int is_muted(void) {
     return _master_mute;
 }
 

@@ -7,6 +7,8 @@ gerber/
 _autosave*
 *-backups
 *.bak
+*auto_saved*
+*.lck
 
 // Software
 .idea

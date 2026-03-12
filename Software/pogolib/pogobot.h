@@ -345,7 +345,7 @@ void pogobot_infrared_recover_next_message( message_t *mes );
  * - '_master_mute" - 1 if muted, 0 if unmuted.
  *
  */
-int void is_muted(void)
+int is_muted(void);
 
 /** (pogobot_infrared_clear_message_queue)
  * Clears Infrared message queue
