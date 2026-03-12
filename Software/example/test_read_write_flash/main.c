@@ -8,7 +8,7 @@
 
 #include "pogobot.h"
 
-/* Erase 64kB in flash in RW authorized space */.
+/* Erase 64kB in flash in RW authorized space */
 /* Write and Read in each page (256 bytes)*/
 
 int main(void) 
