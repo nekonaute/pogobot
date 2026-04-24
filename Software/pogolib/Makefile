@@ -20,6 +20,7 @@ OBJECTS = $(POGOLIB_BUILDDIR)/adc.o					\
 		$(POGOLIB_BUILDDIR)/slip.o						\
 	    $(POGOLIB_BUILDDIR)/uart.o                     \
 	    $(POGOLIB_BUILDDIR)/console.o                  \
+		$(POGOLIB_BUILDDIR)/magnetometer.o                  \
 
 OBJECTS += $(POGOLIB_BUILDDIR)/crt0.o
 

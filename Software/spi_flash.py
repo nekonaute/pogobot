@@ -153,10 +153,10 @@ class SpiFlashSingle(SpiFlashCommon, AutoCSR):
             hw_read_logic += [
                 If((bus.adr>=flashsize),
                     pads.cs_n.eq(1),
-                    ram_pad.ce_n.eq(cs_n)
+                    ram_pad.eq(cs_n)
                 ).Else(
                     pads.cs_n.eq(cs_n),
-                    ram_pad.ce_n.eq(1)
+                    ram_pad.eq(1)
                 )
             ]
         else:
@@ -173,7 +173,7 @@ class SpiFlashSingle(SpiFlashCommon, AutoCSR):
                 pads.mosi.eq(self.bitbang.storage[0]),
             ]
             if with_ram:
-                bitbang_logic += [ram_pad.ce_n.eq(self.bitbang.storage[3])]
+                bitbang_logic += [ram_pad.eq(self.bitbang.storage[3])]
 
             self.comb += [
                 If(self.bitbang_en.storage,

@@ -22,7 +22,7 @@ void IMUBegin(void)
 {
 	spiflash_bitbang_en_write(1);       // Enable bit-bang mode
 
-    spi_cs_spi_cs_n_write(2);           // IMU_CS_n low (bit 0)
+    spi_cs_spi_cs_n_write(6);           // IMU_CS_n low (bit 0)
 	spiflash_bitbang_write((0 << PIN_CLK) | (1 << PIN_CS)); // Ensure CLK is low
 }
 
@@ -30,14 +30,14 @@ void ADCBegin(void)
 {
 	spiflash_bitbang_en_write(1);       // Enable bit-bang mode
 
-    spi_cs_spi_cs_n_write(1);           // ADC_CS_n low (bit 1)
+    spi_cs_spi_cs_n_write(5);           // ADC_CS_n low (bit 1)
 	spiflash_bitbang_write((0 << PIN_CLK) | (1 << PIN_CS)); // Ensure CLK is low
 }
 
 void IMUADCEnd(void)
 {
 	spiflash_bitbang_write((0 << PIN_CLK) | (1 << PIN_CS));
-    spi_cs_spi_cs_n_write(3);           // Both CS_n bit high
+    spi_cs_spi_cs_n_write(7);           // Both CS_n bit high
 
 	spiflash_bitbang_en_write(0);       // Enable memory-mapped mode
 }
@@ -45,16 +45,22 @@ void IMUADCEnd(void)
 
 void spi_single_tx(uint8_t out) {
 	int bit;
-
+	int in;
 	for (bit = 7; bit >= 0; bit--) {    // Get MSB first (7 bits only)
 		if (out & (1 << bit)) {
 			spiflash_bitbang_write((0 << PIN_CLK) | (1 << PIN_MOSI));
+			in = (in << 1) | spiflash_miso_read();
 			spiflash_bitbang_write((1 << PIN_CLK) | (1 << PIN_MOSI));
+			in = (in << 1) | spiflash_miso_read();
 			spiflash_bitbang_write((0 << PIN_CLK) | (1 << PIN_MOSI));
+			in = (in << 1) | spiflash_miso_read();
 		} else {
 			spiflash_bitbang_write((0 << PIN_CLK) | (0 << PIN_MOSI));
+			in = (in << 1) | spiflash_miso_read();
 			spiflash_bitbang_write((1 << PIN_CLK) | (0 << PIN_MOSI));
+			in = (in << 1) | spiflash_miso_read();
 			spiflash_bitbang_write((0 << PIN_CLK) | (0 << PIN_MOSI));
+			in = (in << 1) | spiflash_miso_read();
 		}
 	}
 }
@@ -392,7 +398,7 @@ int spiInit(void) {
 	// Ensure CS is deasserted and the clock is high
 	spiflash_bitbang_write((0 << PIN_CLK) | (1 << PIN_CS));
 #ifdef CSR_SPI_CS_BASE
-    spi_cs_spi_cs_n_write(3);           // Both CS_n bits high
+    spi_cs_spi_cs_n_write(7);           // Both CS_n bits high
 #endif
 	
 	// Reset the SPI flash, which will return it to SPI mode even

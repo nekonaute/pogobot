@@ -1063,4 +1063,17 @@ void write_page_flash(uint8_t page, const void *data);
 **/
 void read_page_flash(uint8_t page, char *buf);
 
+/**
+ * ## MAGNETOMETER API 
+ */
+
+/** This is a simple magnetometer configure, read and calibrate implementation.
+ * The magnetometer is located on the SRAM footprint on the head.
+ *.
+ * The LIS2MDL communicate through SPI with a defined configuration
+ * Measured data must be multiplied by 1.5mG to convert the measured values into physical quantities.
+*/
+
+
+
 #endif /* __POGOBOT_H__ */

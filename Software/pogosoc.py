@@ -67,7 +67,10 @@ class SPI_CS(Module, AutoCSR):
                   ("1", "DISABLED", "IMU not available")]),
                 CSRField("adc_cs_n", reset=1, size=1, description="IMU CS", values=[
                   ("0", "ENABLED", "ADC available"),
-                  ("1", "DISABLED", "ADC not available")])
+                  ("1", "DISABLED", "ADC not available")]),
+                CSRField("ram_cs_n", reset=1, size=1, description="IMU CS", values=[
+                  ("0", "ENABLED", "RAM available"),
+                  ("1", "DISABLED", "RAM not available")])
                 ]
             )
 
@@ -206,7 +209,8 @@ class BaseSoC(SoCCore, AutoCSR):
         # IMU & ADC ------------------------------------------------------------------------------
         self.submodules.spi_cs = SPI_CS()
         self.comb += [ platform.request("imu_cs_n").eq(self.spi_cs.spi_cs_n.fields.imu_cs_n),
-                        platform.request("adc_cs_n").eq(self.spi_cs.spi_cs_n.fields.adc_cs_n)]
+                        platform.request("adc_cs_n").eq(self.spi_cs.spi_cs_n.fields.adc_cs_n),
+                        platform.request("ram_cs_n").eq(self.spi_cs.spi_cs_n.fields.ram_cs_n)]
 
         # How many IR modules ?
         if remocon:
