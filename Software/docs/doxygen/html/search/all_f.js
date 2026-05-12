@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['r2_286',['r2',['../boot_8h.html#a4ebaa0327eeaad134d1c6c2b9fa99e6d',1,'boot.h']]],
+  ['r3_287',['r3',['../boot_8h.html#a127360f392762151ea98a644653e8d36',1,'boot.h']]],
+  ['readacc_288',['readAcc',['../imu_8h.html#a8af53c6e7cc2a7faca3bd24acade01b1',1,'imu.h']]],
+  ['readgyro_289',['readGyro',['../imu_8h.html#af7edcc985395276e3a26ff8a68a82006',1,'imu.h']]],
+  ['readtemp_290',['readTemp',['../imu_8h.html#ada109bb0cdc12131465dfe7a74f93b1e',1,'imu.h']]],
+  ['recv_5fmessage_291',['recv_message',['../structslip__receive__state__s.html#a766bfdeb02755a2cc32fed51bde00896',1,'slip_receive_state_s']]],
+  ['release_2eh_292',['release.h',['../release_8h.html',1,'']]],
+  ['release_5fversion_293',['RELEASE_VERSION',['../pogobot_8h.html#a280ed0c62e7fc496ec56053e34a69381',1,'release.h']]],
+  ['rgb_2eh_294',['rgb.h',['../rgb_8h.html',1,'']]],
+  ['rgb_5ffixed_295',['rgb_fixed',['../rgb_8h.html#aeaa15d5fee171f027fe35a172d6a6532',1,'rgb.h']]],
+  ['rgb_5fin_5ftime_296',['rgb_in_time',['../rgb_8h.html#ae727c8e98361c6856865277c1f6cd328',1,'rgb.h']]],
+  ['rgb_5finit_297',['rgb_init',['../rgb_8h.html#a5aa509ed3a4cfe6f812692e248618a51',1,'rgb.h']]],
+  ['rgb_5foff_5ftime_298',['rgb_off_time',['../rgb_8h.html#a629ee09a60ba67a938d8c03de9037787',1,'rgb.h']]],
+  ['rgb_5fon_5ftime_299',['rgb_on_time',['../rgb_8h.html#a549fc3017a7c30b08dbfdf2dacd77fad',1,'rgb.h']]],
+  ['rgb_5fout_5ftime_300',['rgb_out_time',['../rgb_8h.html#aeb1ad537f48d1afb34d537f9b21e8087',1,'rgb.h']]],
+  ['rgb_5fset_301',['rgb_set',['../rgb_8h.html#a65581561a00eacabee0d1d282a2fc5e4',1,'rgb.h']]],
+  ['rgb_5fset_5fu32_302',['rgb_set_u32',['../rgb_8h.html#a0c947e07e9f5665cddea7552df796fdd',1,'rgb.h']]],
+  ['right_303',['right',['../unionemitting__power__list__t.html#a3f5b19763e72e31cc195f1733eeedf76',1,'emitting_power_list_t']]]
+];

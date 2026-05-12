@@ -54,7 +54,7 @@ Please seriously consider to start by the simple mode to avoid difficult install
 
 
 ## <a name='software-api'></a>Software API
-The robot API is described inside [pogodocs.md](../pogodocs.md). <br> 
+The robot API is described with Doxygen [here](docs/doxygen/html/index.html). <br> 
 Most of the information is contained inside pogolib/pogobot.h but if you want to go deeper, the best is to browse pogolib and pogobios. 
 
 
@@ -412,30 +412,6 @@ singularity exec ../../../../pogobot.sif make clean all
 ### <a name='version_creation_litex.sh'></a>version_creation_litex.sh
 This script is used to identify the state of all folders from litex.<br>
 You have to execute the script inside the 'litex' folder to generate a file.
-
-### <a name='doc-generation'></a>Doc generation
-
-To generate the docs, we used a opensource project that transform .h to .md. <br>
-(Requires node.js and npm to be installed on computer.)
-
-    git https://github.com/ah01/h2md
-    npm install
-    cd h2md
-    git checkout 21a7918a888084c20a27a9a0a8645a4e988d1bb5
-
-Copy the custom pattern "pogobot/tools/pogobot.js" inside h2md/lib/patterns/
-
-Add a return carrier to be understand by the tools
-    
-    awk '{printf "%s\r\n", $0}' /path/to/pogobot.h > pogobot.crlf
-
-Generate docs using our own pattern
-
-    node h2md.js pogobot.crlf -o /path/to/pogodocs.md -p pogobot -l
-
-Remove tempory file
-
-    rm  pogobot.crlf
 
 ## <a name='kwown-issues'></a>Kwown Issues
 This section descibes some isolated issues and the woraround used.

@@ -1,0 +1,4 @@
+<map id="message_t" name="message_t">
+<area shape="rect" id="node1" title="Full infrared message." alt="" coords="28,95,115,121"/>
+<area shape="rect" id="node2" href="$structmessage__header__t.html" title="Infrared message header." alt="" coords="5,5,137,32"/>
+</map>

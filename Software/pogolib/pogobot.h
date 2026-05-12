@@ -44,30 +44,19 @@
 /* API part */
 
 /**
- * # POGODOCS 
- *
- * This document presents the simple API available to control the differents functions of the robot
- */
-
-/**
  * ## Global API
  */
 
-/** (pogobot_init)
- * Global API Initialisation
- * This function is mandatory inside your program
- * 
- * # Parameters
- * - none
- * 
- * # Return
- * - none
- * 
+/**
+ * @brief Global API initialization.
+ * This function is mandatory inside your program.
+ *
+ * @return None
  */
 void pogobot_init( void );
 
 
-/** 
+/**
  * ## Infrared communication API Values
  */
 
@@ -159,15 +148,14 @@ typedef union emitting_power_list_t
 } emitting_power_list_t;
 
 /**
- * ### IR direction id list
+ * @brief Infrared direction identifiers.
  *
- * - ir_front - 0
- * - ir_right - 1
- * - ir_back  - 2 
- * - ir_left  - 3
- * - ir_all   - 4
+ * - ir_front: 0
+ * - ir_right: 1
+ * - ir_back: 2
+ * - ir_left: 3
+ * - ir_all: 4
  */
-
 typedef enum
 {
     ir_front = 0,
@@ -180,21 +168,18 @@ typedef enum
 /* ******************************** ******************************** */
 
 /**
- * ### IR message header structure
- * 
- * message_header_t :
+ * @brief Infrared message header.
  *
- * The parameters that begin with "_" are not completed by the user
+ * The fields prefixed with '_' are filled by the infrared stack and should
+ * not be modified by user code.
  *
- * - uint8_t _packet_type         - allows to give type of a packet (fixed for now)
- * - uint8_t _emitting_power_list - used to define the emission power on each IR
- * - uint16_t _sender_id          - id of the robot which send the message 
- * - uint8_t _sender_ir_index     - IR id direction of the sender robot  
- * - uint8_t _receiver_ir_index   - IR id direction that received the message
- * - uint16_t payload_length      - size of the payload
- *
+ * @param _packet_type Packet type identifier.
+ * @param _emitting_power_list Emission power list for each IR emitter.
+ * @param _sender_id Sender robot identifier.
+ * @param _sender_ir_index Sender IR direction index.
+ * @param _receiver_ir_index Receiver IR direction index.
+ * @param payload_length Payload size in bytes.
  */
-
 typedef struct message_header_t
 {
     uint8_t _packet_type;
@@ -206,14 +191,10 @@ typedef struct message_header_t
 } message_header_t;
 
 /**
- * ### IR message header structure
- *  
- * message_t :
+ * @brief Full infrared message.
  *
- * - message_header_t header                  - header of the message
- * - uint8_t payload[MAX_PAYLOAD_SIZE_BYTES]  - payload of the message
+ * Contains a message header and an associated payload buffer.
  */
-
 typedef struct message_t
 {
     message_header_t header;
@@ -221,17 +202,13 @@ typedef struct message_t
 } message_t;
 
 /**
- * ### IR short message header structure
- * 
- * message_short_header_t :
+ * @brief Short infrared message header.
  *
- * The parameters that begin with "_" are not completed by the user
+ * The fields prefixed with '_' are filled by the infrared stack.
  *
- * - uint8_t _packet_type         - allows to give type of a packet (fixed for now)
- * - uint16_t payload_length      - size of the payload
- *
+ * @param _packet_type Packet type identifier.
+ * @param payload_length Payload size in bytes.
  */
-
 typedef struct message_short_header_t
 {
     uint8_t _packet_type;
@@ -239,14 +216,10 @@ typedef struct message_short_header_t
 } message_short_header_t;
 
 /**
- * ### IR short message header structure
- *  
- * short_message_t :
+ * @brief Short infrared message.
  *
- * - message_short_header_t header            - header of the message
- * - uint8_t payload[MAX_PAYLOAD_SIZE_BYTES]  - payload of the message
+ * Contains a short message header and an associated payload buffer.
  */
-
 typedef struct short_message_t
 {
     message_short_header_t header;
@@ -254,14 +227,13 @@ typedef struct short_message_t
 } short_message_t;
 
 /**
- * ### IR type message list
+ * @brief Infrared message types.
  *
- * - ir_t_cmd  : type use to send command to the robot
- * - ir_t_flash : type use to send part of a program
- * - ir_t_short : type use to send short message between robot in user space
- * - ir_t_user : type use to send message between robot in user space
+ * - ir_t_cmd: Command message.
+ * - ir_t_flash: Program transfer message.
+ * - ir_t_short: Short user-space message.
+ * - ir_t_user: User-space message.
  */
-
 typedef enum
 {
     ir_t_cmd = 1,   // only to send command to the robot
@@ -287,205 +259,138 @@ extern Messagefifo *my_mes_fifo_p;
  * ## Infrared communication API Functions
  */
 
-/** (pogobot_infrared_ll_init)
- * Initialise Infrared hardware and software struture
- * (already made inside pogobot_init)
- * 
- * # Parameters
- * - none
- * 
- * # Return
- * - none
+/**
+ * @brief Initialize infrared hardware and software structures.
+ * This is already done inside pogobot_init().
  *
+ * @return None
  */
 void pogobot_infrared_ll_init( void );
 
-/** (pogobot_infrared_update)
- * Infrared checks for received data and send to decode messages
- * Decoded messages are placed in a Fifo
- * 
- * # Parameters
- * - none
+/**
+ * @brief Check infrared reception and decode any received messages.
+ * Decoded messages are placed in a FIFO.
  *
- * # Return
- * - none
+ * @return None
  */
 void pogobot_infrared_update( void );
 
-/** (pogobot_infrared_message_available)
- * Infrared new message checks fonction
+/**
+ * @brief Check whether a new infrared message is available.
  *
- * # Parameters
- * - none
- *
- * # Return
- * - none
- *
+ * @return Non-zero if a message is available, zero otherwise.
  */
 int pogobot_infrared_message_available( void );
 
-/** (pogobot_infrared_recover_next_message)
- * Recover the next message inside the message queue
+/**
+ * @brief Recover the next message from the infrared message queue.
  *
- * # Parameters
- * - 'mes' - Allocated structure of type 'message_t'
- *
- * # Return
- * - none
- *
+ * @param mes Allocated structure of type message_t.
+ * @return None
  */
 void pogobot_infrared_recover_next_message( message_t *mes );
 
-/** (pogobot_infrared_clear_message_queue)
- * Clears Infrared message queue
+/**
+ * @brief Clears the infrared message queue.
  *
- * # Parameters
- * - none
- *
- * # Return
- * - none
- *
+ * @return None
  */
 void pogobot_infrared_clear_message_queue( void );
 
-/** (pogobot_infrared_set_power)
- * set the power level used to send all the next messages
+/**
+ * @brief Set the infrared emitter power for subsequent messages.
  *
- * # Parameters
- * - 'power' - use the pogobot_infrared_emitter_power_* or the values {0,1,2,3}
- *
- * # Return
- * - none
+ * @param power Use pogobot_infrared_emitter_power_* or values {0,1,2,3}.
+ * @return None
  */
 void pogobot_infrared_set_power( uint8_t power );
 
-/** (pogobot_infrared_sendRawLongMessage)
- *  Prepare and send one packet, with the specified emitters and
- *  powers, to the recipient, containing the specified message.
+/**
+ * @brief Prepare and send a raw long infrared message.
  *
- * # Parameters
- * - 'message' - fully filled message_t variable
- *
- * # Return
- * - '0' in case of success
- * - '1' in case of payload too long
- *
+ * @param message Fully filled message_t variable.
+ * @return 0 on success, 1 if the payload is too long.
  */
 uint32_t pogobot_infrared_sendRawLongMessage( message_t *const message );
 
-/** (pogobot_infrared_sendRawShortMessage)
- *  Prepare and send one packet, with a short header
- *  containing the specified message.
+/**
+ * @brief Prepare and send a raw short infrared message.
  *
- * # Parameters
- * - 'dir' - indicates the direction to send the message
- * - 'message' - fully filled short_message_t variable
- *
- * # Return
- * - '0' in case of success
- * - '1' in case of payload too long
- *
+ * @param dir Direction to send the message.
+ * @param message Fully filled short_message_t variable.
+ * @return 0 on success, 1 if the payload is too long.
  */
 uint32_t pogobot_infrared_sendRawShortMessage( ir_direction dir, short_message_t *const message );
 
-/** (pogobot_infrared_sendLongMessage_uniSpe)
- * Send a message in only direction at defined power
- * Use pogobot_infrared_sendRawLongMessage
+/**
+ * @brief Send a long infrared message in a single direction at the current power.
+ * Uses pogobot_infrared_sendRawLongMessage().
  *
- * # Parameters
- * - 'dir' - indicates the direction to send the message
- * - 'message' - the current payload to send
- * - 'message_size' - the size of the payload
- *
- * # Return
- * - '0' in case of success
- * - '1' in case of payload too long
+ * @param dir Direction to send the message.
+ * @param message Payload buffer.
+ * @param message_size Payload size.
+ * @return 0 on success, 1 if the payload is too long.
  */
 uint32_t pogobot_infrared_sendLongMessage_uniSpe( ir_direction dir, uint8_t *message, uint16_t message_size );
 
-/** (pogobot_infrared_sendLongMessage_omniGen)
- * Send the same message in all direction at defined power
- * Use pogobot_infrared_sendRawLongMessage
- * Their no infrared sender ID
+/**
+ * @brief Send the same long infrared message on all directions at the current power.
+ * Uses pogobot_infrared_sendRawLongMessage().
+ * No sender ID is encoded.
  *
- * # Parameters
- * - 'message' - the current payload to send
- * - 'message_size' - the size of the payload
- *
- * # Return
- * - '0' in case of success
- * - '1' in case of payload too long
+ * @param message Payload buffer.
+ * @param message_size Payload size.
+ * @return 0 on success, 1 if the payload is too long.
  */
 uint32_t pogobot_infrared_sendLongMessage_omniGen( uint8_t *message, uint16_t message_size );
 
-/** (pogobot_infrared_sendLongMessage_omniSpe)
- * Send successively the same message with the origin infrared ID on each Infrared
- * It is 4 times slower that without ID
- * Use pogobot_infrared_sendRawLongMessage
+/**
+ * @brief Send the same long infrared message successively with the sender infrared ID encoded per direction.
+ * This is approximately four times slower than omniGen.
+ * Uses pogobot_infrared_sendRawLongMessage().
  *
- * # Parameters
- * - 'message' - the current payload to send
- * - 'message_size' - the size of the payload
- *
- * # Return
- * - '0' in case of success
- * - '1' in case of payload too long
- *
+ * @param message Payload buffer.
+ * @param message_size Payload size.
+ * @return 0 on success, 1 if the payload is too long.
  */
 uint32_t pogobot_infrared_sendLongMessage_omniSpe( uint8_t *message, uint16_t message_size );
 
 
-/** (pogobot_infrared_sendShortMessage_uni)
- * Send a short header message in only direction at defined power
- * Use pogobot_infrared_sendRawShortMessage
+/**
+ * @brief Send a short header infrared message in a single direction.
+ * Uses pogobot_infrared_sendRawShortMessage().
  *
- * # Parameters
- * - 'dir' - indicates the direction to send the message
- * - 'message' - the current payload to send
- * - 'message_size' - the size of the payload
- *
- * # Return
- * - '0' in case of success
- * - '1' in case of payload too long
+ * @param dir Direction to send the message.
+ * @param message Payload buffer.
+ * @param message_size Payload size.
+ * @return 0 on success, 1 if the payload is too long.
  */
 uint32_t pogobot_infrared_sendShortMessage_uni( ir_direction dir, uint8_t *message, uint16_t message_size );
 
-/** (pogobot_infrared_sendShortMessage_omni)
- * Send a short header message in all direction at defined power
- * Use pogobot_infrared_sendRawShortMessage
+/**
+ * @brief Send a short header infrared message to all directions.
+ * Uses pogobot_infrared_sendRawShortMessage().
  *
- * # Parameters
- * - 'message' - the current payload to send
- * - 'message_size' - the size of the payload
- *
- * # Return
- * - '0' in case of success
- * - '1' in case of payload too long
+ * @param message Payload buffer.
+ * @param message_size Payload size.
+ * @return 0 on success, 1 if the payload is too long.
  */
 uint32_t pogobot_infrared_sendShortMessage_omni( uint8_t *message, uint16_t message_size );
 
 
-/** (pogobot_infrared_get_receiver_error_counter)
- * Get the receiver error counter value
+/**
+ * @brief Get the receiver error counter value for a specific IR receiver.
  *
- * # Parameters
- * - 'error_counter' - allocated structure 'slip_error_counter_s'
- * - 'ir_index' - index of the ir receiver (0 to 3)
- *
- * # Return
- * - none
+ * @param error_counter Allocated slip_error_counter_s structure.
+ * @param ir_index Index of the IR receiver (0 to 3).
+ * @return None
  */
 void pogobot_infrared_get_receiver_error_counter( slip_error_counter_s *error_counter, uint8_t ir_index );
 
-/** (pogobot_infrared_reset_receiver_error_counter)
- * Reset all reveiver error counter
+/**
+ * @brief Reset all receiver error counters.
  *
- * # Parameters
- * - none
- *
- * # Return
- * - none
- *
+ * @return None
  */
 void pogobot_infrared_reset_receiver_error_counter( void );
 
@@ -493,51 +398,38 @@ void pogobot_infrared_reset_receiver_error_counter( void );
  * ## RGB LED API
  */
 
-/** (pogobot_led_setColor)
- * Set the value of red, green and blue of the head led in static mode
- * each value goes from 0 to 255 to determine the intensity.
+/**
+ * @brief Set the head RGB LED color in static mode.
+ * Each component is in the range 0..255.
  *
- * # Parameters
- * - 'r' - value of the RED part
- * - 'g' - value of the GREEN part
- * - 'b' - value of the BLUE part
- *
- * # Return
- * - none
- *
+ * @param r Red component.
+ * @param g Green component.
+ * @param b Blue component.
+ * @return None
  */
 void pogobot_led_setColor( const uint8_t r, const uint8_t g, const uint8_t b );
 
 #ifdef RGB_LEDS
-/** (pogobot_led_setColors)
- * Set the value of red, green and blue of the led with the number (ID) in static mode
- * each value goes from 0 to 255 to determine the intensity.
- * (only available with a belly with multiple LEDs)
+/**
+ * @brief Set the RGB color of a specific LED by ID in static mode.
+ * Only available when the belly has multiple LEDs.
  *
- * # Parameters
- * - 'r' - value of the RED part
- * - 'g' - value of the GREEN part
- * - 'b' - value of the BLUE part
- * - 'id' - Led ID (0 = head, 1 = belly front, 2 = belly right, 3 = belly back, 4 = belly left)
- *
- * # Return
- * - none
- *
+ * @param r Red component.
+ * @param g Green component.
+ * @param b Blue component.
+ * @param id LED ID (0=head, 1=belly front, 2=belly right, 3=belly back, 4=belly left).
+ * @return None
  */
 void pogobot_led_setColors( const uint8_t r, const uint8_t g, const uint8_t b, uint8_t id );
 #endif
 
-/** 
- * ## Photosensors API Values
- */
-
 /**
- * ### Photosensor id definition
- * - 0 is the back sensor
- * - 1 is the front-left sensor
- * - 2 is the front-right sensor
+ * @brief Photosensor identifiers.
+ *
+ * - p_B: Back sensor (0)
+ * - p_FL: Front-left sensor (1)
+ * - p_FR: Front-right sensor (2)
  */
-
 typedef enum
 {
     p_FL = 1,
@@ -549,15 +441,12 @@ typedef enum
  * ## Photosensors API Functions
  */
 
-/** (pogobot_photosensors_read)
- * Read one ambient light sensor.
+/**
+ * @brief Read one ambient light sensor.
  * Sensor number must be between 0 and 2.
  *
- * # Parameters
- * - 'sensor_number' - id of the sensor (Photosensor definition)
- *
- * # Return
- * Return a value proportional to the light
+ * @param sensor_number ID of the sensor (Photosensor definition).
+ * @return A value proportional to the light.
  */
 int16_t pogobot_photosensors_read( uint8_t sensor_number );
 
@@ -565,36 +454,28 @@ int16_t pogobot_photosensors_read( uint8_t sensor_number );
  * ## IMU API 
  */
 
-/** (pogobot_imu_read)
- * Read the accelaration on the IMU. <br>
- * Returns in acc and gyro the IMU values. 
+/**
+ * @brief Read acceleration and gyro values from the IMU.
+ * Results are returned in acc and gyro.
  *
- * usage : <br>
+ * Usage:
  * float acc[3], gyro[3];
  *
- * index : 
+ * Index:
+ * - 0: X axis
+ * - 1: Y axis
+ * - 2: Z axis
  *
- * - 0 - X axis
- * - 1 - Y axis
- * - 2 - Z axis
- * 
- * # Parameters
- * - 'acc' - allocated float table (size 3)
- * - 'gyro' - allocated float table (size 3)
- *
- * # Return
- * - none
+ * @param acc Allocated float array of size 3.
+ * @param gyro Allocated float array of size 3.
+ * @return None
  */
 void pogobot_imu_read( float *acc, float *gyro );
 
-/** (pogobot_imu_readTemp)
- * Read the temparature sensor on the IMU.
- * 
- * # Parameters
- * - none 
+/**
+ * @brief Read the IMU temperature sensor.
  *
- * # Return
- * Returns the temperature in degres celsius
+ * @return Temperature in degrees Celsius.
  */
 float pogobot_imu_readTemp( void );
 
@@ -603,14 +484,10 @@ float pogobot_imu_readTemp( void );
  * ## Battery API 
  */
 
-/** (pogobot_battery_voltage_read)
- * Recovers the value of the battery in mV
+/**
+ * @brief Read the battery voltage.
  *
- * # Parameters
- * - none
- *
- * # Return
- * Returns a value in mV
+ * @return Battery voltage in millivolts.
  */
 int16_t pogobot_battery_voltage_read( void );
 
@@ -619,13 +496,12 @@ int16_t pogobot_battery_voltage_read( void );
  */
 
 /**
- * ### Motor id definition :
+ * @brief Motor identifiers.
  *
- * - motorR  - 0
- * - motorL  - 1
- * - motorB  - 2
+ * - motorR: Right motor (0)
+ * - motorL: Left motor (1)
+ * - motorB: Back motor (2)
  */
-
 typedef enum
 {
     motorR = 0, // Right
@@ -634,14 +510,14 @@ typedef enum
 } motor_id;
 
 /**
- * ### Motor range :
+ * @brief Standard motor power range values.
  *
- * - motorStop                   - 0
- * - motorQuarter                - 256
- * - motorHalfmotorThreeQuarter  - 716
- * - motorFull                   - 1023
+ * - motorStop: 0
+ * - motorQuarter: 256
+ * - motorHalf: 512
+ * - motorThreeQuarter: 716
+ * - motorFull: 1023
  */
-
 typedef enum
 {
     motorStop = 0,
@@ -655,94 +531,61 @@ typedef enum
  * ## Motors API Functions
  */
 
-/** (pogobot_motor_power_set)
- * set the value of pwm that commands the motor (active)
- * 
- * # Parameters
- * - 'motor' - is the id of the motor you want to command
- * - 'value' - is PWM ratio apply to the motor (between 0 and 1023)
+/**
+ * @brief Set the PWM power for the given motor.
  *
- * # Return
- * - none
- *
+ * @param motor Motor ID to command.
+ * @param value PWM ratio applied to the motor (0..1023).
+ * @return None
  */
 void pogobot_motor_power_set( motor_id motor, uint16_t value );
 void pogobot_motor_set ( motor_id motor, uint16_t value );
 
-/** (pogobot_motor_dir_current_status)
- * recover the value of the motor direction bit field.
- * 
- * # Parameters
- * - none
+/**
+ * @brief Read the current motor direction bit field.
  *
- * # Return
- * - bit field ( XXXX XMLR )
- *
+ * @return Bit field representing motor direction status.
  */
 uint32_t pogobot_motor_dir_current_status( void );
 
-/** (pogobot_motor_dir_mem_get)
- * get the value of pwm that commands the motor.
- * 
- * # Parameters
- * - 'p_directions' - is an array of size 3 [R, L, B].
- *            Each value is the chosen direction (0 or 1)
+/**
+ * @brief Read the stored motor direction values from memory.
  *
- * # Return
- * - the success or not of the read in memory (0: Ok, -1: NOk)
- *
+ * @param p_directions Array of size 3 [R, L, B]. Each value is 0 or 1.
+ * @return 0 on success, -1 on failure.
  */
 int8_t pogobot_motor_dir_mem_get( uint8_t *p_directions );
 
-/** (pogobot_motor_dir_mem_set)
- * set the value of pwm that commands the motor (persistent).
- * 
- * # Parameters
-  * - 'p_directions' - is an array of size 3 [R, L, B].
- *            Each value is the chosen direction (0 or 1)
+/**
+ * @brief Store motor direction values persistently in memory.
  *
- * # Return
- * - the success or not of the read in memory (0: Ok, -1: NOk)
- *
+ * @param p_directions Array of size 3 [R, L, B]. Each value is 0 or 1.
+ * @return 0 on success, -1 on failure.
  */
 int8_t pogobot_motor_dir_mem_set( uint8_t *p_directions);
 
-/** (pogobot_motor_dir_set)
- * set the value of pwm that commands the motor (active).
- * 
- * # Parameters
- * - 'motor' - is the id of the motor you want to command (motorR, motorL, motorB)
- * - 'value' - is the choosen direction (0 or 1)
+/**
+ * @brief Set the active direction for the given motor.
  *
- * # Return
- * - none
- *
+ * @param motor Motor ID to command (motorR, motorL, motorB).
+ * @param value Direction value, 0 or 1.
+ * @return None
  */
 void pogobot_motor_dir_set( motor_id motor, uint8_t value );
 
-/** (pogobot_motor_power_mem_get)
- * recover the value of the motor power memorized.
- * 
- * # Parameters
- * - 'p_powers' - is an array of size 3 [R, L, B].
- *            Each value is the chosen power [0, 1023]
+/**
+ * @brief Read stored motor power values from memory.
  *
- * # Return
- * - the success or not of the read in memory (0: Ok, -1: NOK)
- *
+ * @param p_powers Array of size 3 [R, L, B]. Each value is 0..1023.
+ * @return 0 on success, -1 on failure.
  */
 uint8_t pogobot_motor_power_mem_get( uint16_t *p_powers );
 
-/** (pogobot_motor_power_mem_set)
- * write the value of the motor power in memory (persistent).
- * 
- * # Parameters
- * - 'p_powers' - is an array of size 3 [R, L, B].
- *            Each value is the chosen power [0, 1023]
+/**
+ * @brief Store motor power values persistently in memory.
  *
- * # Return
- * - the success or not of the read in memory (0: Ok, -1: NOK)
- *
+ * @param p_powers Array of size 3 [R, L, B]. Each value is 0..1023.
+ * @return 0 on success, -1 on failure.
  */
 uint8_t pogobot_motor_power_mem_set( uint16_t *p_powers );
 
@@ -750,40 +593,25 @@ uint8_t pogobot_motor_power_mem_set( uint16_t *p_powers );
  * ## Helper API
  */
 
-/** (pogobot_helper_getid)
- * gives an unique identifier or an random number if no id is register inside the robot
+/**
+ * @brief Return a unique identifier, or a random number if none is registered.
  *
- * # Parameters
- * - none
- *
- * # Return
- * Returns an unique id on 16bits
- *
+ * @return Unique 16-bit ID.
  */
 uint16_t pogobot_helper_getid( void );
 
-/** (pogobot_helper_getRandSeed)
- * gives an seed base on the ADC read of the battery 
+/**
+ * @brief Return a seed based on the ADC battery reading.
  *
- * # Parameters
- * - none
- *
- * # Return
- * Returns an random id on 16bits
- *
+ * @return Random 16-bit seed.
  */
 int16_t pogobot_helper_getRandSeed( void );
 
-/** (pogobot_helper_print_version)
- * print the version inside the prompt
- * It is also possible to use the define RELEASE_VERSION in release.h
+/**
+ * @brief Print the library version to the console.
+ * It is also possible to use RELEASE_VERSION from release.h.
  *
- * # Parameters
- * - none
- *
- * # Return
- * - none
- *
+ * @return None
  */
 void pogobot_helper_print_version( void );
 
@@ -853,27 +681,18 @@ void pogobot_helper_print_version( void );
  *
  */
 
-/** (pli_timer_sleep_stopwatch_init)
- * Initialise the timer structure
- * (already made inside pogobot_init)
- * 
- * # Parameters
- * - none
- * 
- * # Return
- * - none
+/**
+ * @brief Initialise timer and stopwatch support.
+ * This is already done inside pogobot_init().
  *
+ * @return None
  */
 void pli_timer_sleep_stopwatch_init( void );
 
 /**
- * ### Timer structure
- * 
- * time_reference_t :
+ * @brief Timer reference structure.
  *
- * - uint32_t hardware_value_at_time_origin - timer reference
- * 
- *
+ * Contains the hardware timer counter value at the reference origin.
  */
 typedef struct time_reference_t
 {
@@ -881,115 +700,79 @@ typedef struct time_reference_t
 } time_reference_t;
 
 
-/** (pogobot_stopwatch_reset)
- * reset a time_reference structure. 
- * To use a time_reference_t as a stopwatch you must reset it using pogobot_stopwatch_reset()
+/**
+ * @brief Reset a stopwatch origin reference.
+ * To use a time_reference_t as a stopwatch, call this first.
  *
- * # Parameters
- * - 'stopwatch' - pointer to a time_reference_t structure
- *
- * # Return
- * - none
- *
+ * @param stopwatch Pointer to a time_reference_t structure.
+ * @return None
  */
 void pogobot_stopwatch_reset( time_reference_t *stopwatch );
 
-/** (pogobot_stopwatch_lap)
- * measures time elapsed from origin and offsets so that origin is zero at this point in time.  
+/**
+ * @brief Measure elapsed time and reset the stopwatch origin to now.
  *
- * # Parameters
- * - 'stopwatch' - pointer to a time_reference_t structure
- *
- * # Return
- * Returns the number of microseconds elapsed on 32 bits (which may be negative if you offset the origin to the future)
- *
+ * @param stopwatch Pointer to a time_reference_t structure.
+ * @return Elapsed microseconds as a signed 32-bit value.
  */
 int32_t pogobot_stopwatch_lap( time_reference_t *stopwatch );
 
-/** (pogobot_stopwatch_get_elapsed_microseconds)
- * provides the current number of elapsed microseconds without otherwise interfering with the stopwatch state.
+/**
+ * @brief Get elapsed microseconds without modifying stopwatch state.
  *
- * # Parameters
- * - 'stopwatch' - pointer to a time_reference_t structure
- *
- * # Return
- * Returns the number of microseconds elapsed on 32 bits (which may be negative if you offset the origin to the future)
- *
+ * @param stopwatch Pointer to a time_reference_t structure.
+ * @return Elapsed microseconds as a signed 32-bit value.
  */
 int32_t pogobot_stopwatch_get_elapsed_microseconds( time_reference_t *stopwatch );
 
-/** (pogobot_stopwatch_offset_origin_microseconds)
- * offsets the origin of the stopwatch by the specified number of microseconds.
+/**
+ * @brief Offset the stopwatch origin by a number of microseconds.
  *
- * # Parameters
- * - 'stopwatch' - pointer to a time_reference_t structure
- * - 'microseconds_offset' - number of microsenconds to offset the origin
- *
- * # Return
- * - none
- *
+ * @param stopwatch Pointer to a time_reference_t structure.
+ * @param microseconds_offset Number of microseconds to offset the origin.
+ * @return None
  */
 void pogobot_stopwatch_offset_origin_microseconds( time_reference_t *stopwatch, int32_t microseconds_offset );
 
-/** (pogobot_timer_init)
- * set a timer that will expire in the defined number of microseconds in the future.
+/**
+ * @brief Set a timer to expire after the specified number of microseconds.
  *
- * # Parameters
- * - 'timer' - pointer to a time_reference_t structure
- * - 'microseconds_to_go' - number of microsenconds to go
- *
- * # Return
- * - none
- *
+ * @param timer Pointer to a time_reference_t structure.
+ * @param microseconds_to_go Number of microseconds until expiry.
+ * @return None
  */
 void pogobot_timer_init( time_reference_t *timer, int32_t microseconds_to_go );
 
-/** (pogobot_timer_get_remaining_microseconds)
- * provides the current of microseconds until the timer has expired, without otherwise interfering with the timer state.
+/**
+ * @brief Get the remaining microseconds until timer expiry.
  *
- * # Parameters
- * - 'timer' - pointer to a time_reference_t structure
- *
- * # Return
- * Returns the number of microseconds elapsed on 32 bits. The result is a signed number, positive when the timer has not expired yet, negative when the timer has expired.
- *
+ * @param timer Pointer to a time_reference_t structure.
+ * @return Signed microseconds remaining; positive before expiry, negative after expiry.
  */
 int32_t pogobot_timer_get_remaining_microseconds( time_reference_t *timer );
 
-/** (pogobot_timer_has_expired)
- * Returns true when the timer has expired, false when the timer has not expired yet.
+/**
+ * @brief Test whether the timer has expired.
  *
- * # Parameters
- * - 'timer' - pointer to a time_reference_t structure
- *
- * # Return
- * Returns a bool depending on the status (True: if expired, False: if not expired)
- * 
+ * @param timer Pointer to a time_reference_t structure.
+ * @return true if expired, false otherwise.
  */
 bool pogobot_timer_has_expired( time_reference_t *timer );
 
-/** (pogobot_timer_wait_for_expiry)
- * waits until the timer has expired.
+/**
+ * @brief Wait until the timer expires.
  *
- * # Parameters
- * - 'timer' - pointer to a time_reference_t structure
- *
- * # Return
- * - none
- *
+ * @param timer Pointer to a time_reference_t structure.
+ * @return None
  */
 void pogobot_timer_wait_for_expiry( time_reference_t *timer );
 
-/** (pogobot_timer_offset_origin_microseconds)
- * offsets the origin of the timer by the specified number of microseconds.
+/**
+ * @brief Offset the timer origin by a specified number of microseconds.
  *
- * # Parameters
- * - 'timer' - pointer to a time_reference_t structure
- * - 'microseconds_offset' - number of microsenconds to offset the origin
- *
- * # Return
- * - none
- *
+ * @param timer Pointer to a time_reference_t structure.
+ * @param microseconds_offset Number of microseconds to offset the origin.
+ * @return None
  */
 void pogobot_timer_offset_origin_microseconds( time_reference_t *timer, int32_t microseconds_offset );
 
