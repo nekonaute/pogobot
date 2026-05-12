@@ -32,10 +32,10 @@ Scripts corresponds to the differents scripts used around the robot.
 ## Shortcuts to
 
 - [Robot Assembly for Users](./docs/RobotAssembly.md)
-- [Software documentation for Users](./3d-addons/Readme.md)
+- [Software documentation for Users](./docs/SoftwareUserGuide.md)
 - [Software documentation for Experts](./Software/readme.md)
 - [Pogobot Remote Tool](./docs/IR-Remote.md)
-- [Pogobot Charger Tool](./docs/Charger.md)
+- [Pogobot Charger Tool](./Hardware/readme.md#charger)
 - [Pogobot Wall Tool](./Software/pogoWallApp/Readme.md)
 - [Pogobject Tool](./Software/pogobject/readme.md)
 - [Hardware documentation](./Hardware/readme.md)
