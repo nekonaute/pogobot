@@ -462,4 +462,6 @@ Comments the line "cmake policy(SET CMP0079 NEW)" in the file "pogobot/dependenc
 
 
 
+# Pogobios LED Status
 
+<img src="docs/Images/pogobot_led_status.png" alt="pogobios leds status" width="800"/>
