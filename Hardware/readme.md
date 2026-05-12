@@ -9,8 +9,6 @@ Here you can find the description and information for each part developped.
     - [What's needed for 1 robot](#whats-needed-for-1-robot)
     - [Motor information](#motor-information)
     - [3d printed parts](#3d-printed-parts)
-      - [Printing info](#printing-info)
-      - [Assembly](#assembly)
   - [USB UART progboard](#usb-uart-progboard)
   - [Charger](#charger)
   - [IR remote](#ir-remote)
@@ -27,7 +25,6 @@ Here you can find the description and information for each part developped.
 In this folder, you can find 3d models and kicad files.
 
 The folder :
-- "3d-addons" contains all the STL files to build the different object.
 - "3Dmodels" contains the 3D models for Kicad
 - 'Belly" contains the kicad files for the belly
 - "Charger" contains the kicad files for the charger
@@ -65,24 +62,8 @@ https://www.ebay.com/itm/115374108208
 <img src="../docs/Images/motors.jpg" alt="motor" width="400"/>
 
 ### <a name='dprintedparts'></a>3d printed parts
-All the parts are available inside the folder 'Hardware/3d-addons'.
+All the parts are available inside the folder '3d-addons', along with [assembly instructions](../3d-addons/Readme.md).
 
-#### <a name='Printinginfo'></a>Printing info
-The different models have been printed in PLA with an Ultimaker2+ with a layer height of 0.2mm without support or brim.
-
-To assemble a robot, you need to print a skirt, a capsule and a hat for the version of your belly. <br>
-After printed the capsule, you have to set free the tabs by gently cut under.
-
-<img src="../docs/Images/cut_tab.jpg" alt="cut_tab" width="400"/>
-
-HINT: The hat has to be returned to be printed without support.
-
-#### <a name='Assembly'></a>Assembly
-- First, place the motors inside the 3 holes.
-- Then, place the robot inside the capsule.
-- Finally, place the robot+capsule inside the skirt.
-
-<img src="../docs/Images/assembly.jpg" alt="assembly" width="400"/>
 
 ## <a name='USBUARTprogboard'></a>USB UART progboard
 In order to program the robot by cable, you need a USB to UART device connected between your computor and the FFC/FPC connector on the head. 
