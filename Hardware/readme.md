@@ -47,7 +47,7 @@ The folder :
 ### <a name='Hardwareschematic'></a>Hardware schematic
 Here you can find the global view of the hardware.
 
-<img src="../Images/pogobot_diagram.jpg" alt="diagram" width="800"/>
+<img src="../docs/Images/pogobot_diagram.jpg" alt="diagram" width="800"/>
 
 ### <a name='Whatsneededfor1robot'></a>What's needed for 1 robot
 
@@ -62,7 +62,7 @@ All the models are designed for the motors available here:
 <!-- https://www.aliexpress.com/item/32918768766.html old ref -->
 https://www.ebay.com/itm/115374108208
 
-<img src="../Images/motors.jpg" alt="motor" width="400"/>
+<img src="../docs/Images/motors.jpg" alt="motor" width="400"/>
 
 ### <a name='dprintedparts'></a>3d printed parts
 All the parts are available inside the folder 'Hardware/3d-addons'.
@@ -73,7 +73,7 @@ The different models have been printed in PLA with an Ultimaker2+ with a layer h
 To assemble a robot, you need to print a skirt, a capsule and a hat for the version of your belly. <br>
 After printed the capsule, you have to set free the tabs by gently cut under.
 
-<img src="../Images/cut_tab.jpg" alt="cut_tab" width="400"/>
+<img src="../docs/Images/cut_tab.jpg" alt="cut_tab" width="400"/>
 
 HINT: The hat has to be returned to be printed without support.
 
@@ -82,7 +82,7 @@ HINT: The hat has to be returned to be printed without support.
 - Then, place the robot inside the capsule.
 - Finally, place the robot+capsule inside the skirt.
 
-<img src="../Images/assembly.jpg" alt="assembly" width="400"/>
+<img src="../docs/Images/assembly.jpg" alt="assembly" width="400"/>
 
 ## <a name='USBUARTprogboard'></a>USB UART progboard
 In order to program the robot by cable, you need a USB to UART device connected between your computor and the FFC/FPC connector on the head. 
@@ -100,7 +100,7 @@ There is two ways to recharge a pogobot:
 
 In order to charge multiple robot at once, we develop a charger using pogopins that connect the plus and minus on the head of the robot by flipping the robot.
 
-<img src="../Images/charger.jpg" alt="pogobot charger" width="800"/>
+<img src="../docs/Images/charger.jpg" alt="pogobot charger" width="800"/>
 
 The PCB cad files are available in the folder.
 The pogopin used are these : https://www.digikey.fr/en/products/detail/preci-dip/90224-AS/5451911
@@ -115,13 +115,13 @@ Both 3d designs are available in the folder "3d-addons" (pogocharger*).
 
 The small one is combination of a pogobot head + usb-uart-progboard + 3D structure (pogoremote_down.stl + pogoremote_up.stl) + 2 M3x10mm screws.
 
-<img src="../Images/ir_remote.jpg" alt="IR_ Remote" width="800"/>
+<img src="../docs/Images/ir_remote.jpg" alt="IR_ Remote" width="800"/>
 
 The big one is combination of a pogobot head + remote + remote_Leds_strip + 3D structure
 
 The leds are TSAL6200.
 
-<img src="../Images/ir_remote_shower.jpg" alt="IR_ Remote" width="800"/>
+<img src="../docs/Images/ir_remote_shower.jpg" alt="IR_ Remote" width="800"/>
 
 This version can use the USB alimentation or an external one (up to 12v) to extend the range of the remote. The jumper near the power jack determine the origin of the tension for the Leds.
 
@@ -131,7 +131,7 @@ This version can use the USB alimentation or an external one (up to 12v) to exte
 The IR wall is a modified remote that can connect a long strip of Leds.
 We didn't manage to find the correct Led strip for our application so we designed a strip led (remote_leds_wall_strip) that was produiced on flexible pcb. 
 
-<img src="../Images/remote_wall.jpg" alt="IR_ Remote" width="800"/>
+<img src="../docs/Images/remote_wall.jpg" alt="IR_ Remote" width="800"/>
 
 To produice a IR wall, you need a pogobot head + remote + remote_leds_wall_ctrl + remote_leds_wall_strip. 
 
@@ -141,7 +141,7 @@ The leds are VSM3940x01.
 
 The pogobject is composed of a dfrobot firebeatle + pogobot head + pogo_object PCB. Through WIFI, it can be possible to send command to the pogobot head and so to change the message send by the object.
 
-<img src="../Images/pogobject.jpg" alt="IR_ Remote" width="800"/>
+<img src="../docs/Images/pogobject.jpg" alt="IR_ Remote" width="800"/>
 
 The pogobject is a large PCB that contains all the electronics. It is placed inside a 3d printed structure. This structure is placed on 4 caster with metal ball (pololu item 953) in order to be pushed by the robot. To make it fixed a aluminum weight is used to held it in place. 
 

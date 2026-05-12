@@ -53,7 +53,7 @@ Tools corresponds to the differents tools used around the robot.
 
 ## Pogobios LED Status
 
-<img src="Images/pogobot_led_status.png" alt="pogobios leds status" width="800"/>
+<img src="docs/Images/pogobot_led_status.png" alt="pogobios leds status" width="800"/>
 
 
 

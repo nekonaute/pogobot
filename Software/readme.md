@@ -323,7 +323,7 @@ Prog SPI flash with FTDI (lattice ice40 Ultraplus Breakout board) :
 - Connect RST=>GND or press the RESET button on top during upload.
 - Connect the DEBUG USB (White board) only for the power
 
-<img src="Images/lattice_board_connection.jpg" alt="full connect" width="800"/>
+<img src="docs/Images/lattice_board_connection.jpg" alt="full connect" width="800"/>
 
 Execute :
 
