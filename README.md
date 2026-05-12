@@ -48,7 +48,7 @@ Tools corresponds to the differents tools used around the robot.
 - [Ir Remote software](/readme-irRemote.md)
 - [Charger](/Hardware/readme.md)
 - [Pogobject](/Software/pogobject/readme.md)
-- [PogoWallApp](/Software/pogoWallApp/readme.md)
+- [PogoWallApp](/Software/pogoWallApp/Readme.md)
 
 
 ## Pogobios LED Status
