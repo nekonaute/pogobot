@@ -7,10 +7,12 @@ The head is plugged on a belly (under) which composed of even more LEDs, the mot
 
 
 ## Git description
-This project is divided into 3 folders :
+This project is divided into 4 folders :
+
+- docs
 - Hardware
 - Software
-- Tools
+- Scripts
 
 Hardware contains the schematics and other files to build your own robot from scratch. 
 
@@ -25,7 +27,7 @@ It exists 2 softwares inside the robot.
 - The user space is called by a command inside the bootloader. It contains your code and a gateware. <br>
 /!\ If you plan to use the pogobot in the user space please use the sdk [here](https://github.com/nekonaute/pogobot-sdk).
   
-Tools corresponds to the differents tools used around the robot.
+Scripts corresponds to the differents scripts used around the robot.
 
 ## Shortcuts to
 
