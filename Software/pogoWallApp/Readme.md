@@ -8,6 +8,10 @@ Now you have each device interface identified with the name of the Wall.
 
 Autocompletion is available for the most used command.
 
+## Hardware
+
+This app is meant to be used on Pogobot Walls, see [the corresponding hardware documentation](../../Hardware/readme.md#ir-wall).
+
 ## installation
 ```
 sudo apt-get install nodejs

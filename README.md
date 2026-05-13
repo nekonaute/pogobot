@@ -39,7 +39,8 @@ Scripts corresponds to the differents scripts used around the robot.
 - [Software documentation for Experts](./Software/readme.md)
 - [Pogobot Remote Tool](./docs/IR-Remote.md)
 - [Pogobot Charger Tool](./Hardware/readme.md#charger)
-- [Pogobot Wall Tool](./Software/pogoWallApp/Readme.md)
+- [Pogobot Wall Tool](./Hardware/readme.md#ir-wall)
+- [Pogobot Wall App](./Software/pogoWallApp/Readme.md)
 - [Pogobject Tool](./Software/pogobject/readme.md)
 - [Hardware documentation](./Hardware/readme.md)
 
