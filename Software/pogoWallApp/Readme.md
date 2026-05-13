@@ -10,7 +10,7 @@ Autocompletion is available for the most used command.
 
 ## Hardware
 
-This app is meant to be used on Pogobot Walls, see [the corresponding hardware documentation](../../Hardware/readme.md#ir-wall).
+This app is meant to be used on Pogobot Walls, see [the corresponding hardware documentation](../../Hardware/Readme.md#ir-wall).
 
 ## installation
 ```

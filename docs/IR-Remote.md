@@ -3,7 +3,7 @@ To control each robot, two ways are possible: by cable (debug mode) or by IR.
 In order to control robots by IR, you need to create a IR remote.
 
 ## Hardware
-Please refer to the section "IR Remote" [here](/Hardware/readme.md). 
+Please refer to the section "IR Remote" [here](/Hardware/Readme.md). 
 
 ## Software
 In order to turn a head into a remote control, we need to put a special user code.

@@ -36,13 +36,13 @@ Scripts corresponds to the differents scripts used around the robot.
 
 - [Robot Assembly for Users](./docs/RobotAssembly.md)
 - [Software documentation for Users](./docs/SoftwareUserGuide.md)
-- [Software documentation for Experts](./Software/readme.md)
+- [Software documentation for Experts](./Software/Readme.md)
 - [Pogobot Remote Tool](./docs/IR-Remote.md)
-- [Pogobot Charger Tool](./Hardware/readme.md#charger)
-- [Pogobot Wall Tool](./Hardware/readme.md#ir-wall)
+- [Pogobot Charger Tool](./Hardware/Readme.md#charger)
+- [Pogobot Wall Tool](./Hardware/Readme.md#ir-wall)
 - [Pogobot Wall App](./Software/pogoWallApp/Readme.md)
-- [Pogobject Tool](./Software/pogobject/readme.md)
-- [Hardware documentation](./Hardware/readme.md)
+- [Pogobject Tool](./Software/pogobject/Readme.md)
+- [Hardware documentation](./Hardware/Readme.md)
 
 # Pogobot Extended Universe
 
