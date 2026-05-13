@@ -7,12 +7,15 @@ The head is plugged on a belly (under) which composed of even more LEDs, the mot
 
 
 ## Git description
-This project is divided into 4 folders :
+This project is divided into 5 folders :
 
+- 3d-addons
 - docs
 - Hardware
 - Software
 - Scripts
+
+3d-addons contains the 3d printable mesh necessary to assemble a complete robot. 
 
 Hardware contains the schematics and other files to build your own robot from scratch. 
 
