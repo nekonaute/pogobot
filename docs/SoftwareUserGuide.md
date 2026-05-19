@@ -646,7 +646,6 @@ depending on the device.
 * Power down robots before charging.
 * Never leave robots charging unattended overnight.
 * Do not leave robots on the arena after experiments.
-* Turn on nearby lights while charging.
 * Fully charging takes about 2 hours.
 * Avoid resetting robots during IR communication.
 
