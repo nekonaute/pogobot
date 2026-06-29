@@ -13,6 +13,9 @@
 
 int main(void) 
 {
+
+    /* Read LIS2MDL magnetometer X,Y,Z axis*/
+
     int16_t mag_x = 0;
     int16_t mag_y = 0;
     int16_t mag_z = 0;  
