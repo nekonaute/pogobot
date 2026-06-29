@@ -1019,3 +1019,80 @@ Reads 256 bytes on a page in the user writable section.
 
 #### Return
 - none
+
+<a name="line-1066"></a>
+## MAGNETOMETER API
+
+<a name="line-1070"></a>
+The magnetometer is located on the SRAM footprint on the head.
+*.
+The LIS2MDL communicate through SPI with a defined configuration
+Measured data must be multiplied by 1.5mG to convert the measured values into physical quantities.
+
+<a name="line-1077"></a><a name="magn_begin"></a>
+### :arrow_right: magn_begin
+
+```cpp
+void magn_begin(void) /* line 1086 */
+```
+
+Starts the communication with the magnetometer through the SPI bus.
+
+#### Parameters
+- none
+
+#### Return
+- none
+
+<a name="line-1088"></a><a name="magn_end"></a>
+### :arrow_right: magn_end
+
+```cpp
+void magn_end(void) /* line 1097 */
+```
+
+Stops the communication with the magnetometer through the SPI bus.
+
+#### Parameters
+- none
+
+#### Return
+- none
+
+<a name="line-1099"></a><a name="magn_read_XYZ"></a>
+### :arrow_right: magn_read_XYZ
+
+```cpp
+int magn_read_XYZ(int16_t* x, int16_t* y, int16_t* z, uint16_t timeout_ms) /* line 1109 */
+```
+
+Measures the magnetic field on the x,y and z axis.
+
+#### Parameters :
+x, y, z    - x, y and z axis coordinates measured by the magnetometer (needs calibration)
+timeout_ms - measurement timeout in ms.
+
+#### Returns :
+- 1 if successfull else 0
+
+<a name="line-1111"></a><a name="magn_check"></a>
+### :arrow_right: magn_check
+
+```cpp
+uint8_t magn_check(void) /* line 1127 */
+```
+
+Check the magnetometer availability on the SPI bus and configures it.
+Configuration :
+- Temperature Compensation - ON
+- ODR = 50 Hz, MD = continuous mode
+- Digital LPF - ON
+- Offset cancellation - ON
+- 4WSPI - ON
+- BDU - ON
+
+#### Parameters
+- None
+
+#### Return
+- 1 if successfully detected the magnetometer, else 0
