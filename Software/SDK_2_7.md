@@ -38,3 +38,15 @@ Updates in pogobot_ir.c :
 
 New function in pogobot_ir.c :
 - IR_reset_interrupt_flags : Clear all IR RX interrupt flags manually.
+
+
+### Read magnetometer output
+
+Added a magnetometer on the previous SRAM slot on the Head.
+Configured with 50 Hz output data rate.
+
+New functions in magnetometer.c :
+- magn_begin    : Starts communication with the magnetometer on the SPI bus,
+- magn_end      : Stops communcation with the magnetometer on the SPI bus,
+- magn_check    : Check the magnetometer availability on the SPI bus and configure it,
+- magn_read_XYZ : Measures magnetic field on the X, Y and Z axis

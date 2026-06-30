@@ -1181,7 +1181,7 @@ static void
 rc_mute_ir_handler( int nb_params, char **params )
 {
     printf("Mute emissions...\n");
-    char cmd2send[8] = "DEADCAFE"; // special message to reboot the robot
+    char cmd2send[8] = "DEADCAFE"; // special message to mute the robot
     send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 500);
 }
 
@@ -1200,7 +1200,7 @@ static void
 rc_unmute_ir_handler( int nb_params, char **params )
 {
     printf("Unmute emissions...\n");
-    char cmd2send[8] = "BASECAFE"; // special message to reboot the robot
+    char cmd2send[8] = "BASECAFE"; // special message to un-mute the robot
     send_slip_message(cmd2send, sizeof(cmd2send), ir_t_cmd, 1, 500);
 }
 

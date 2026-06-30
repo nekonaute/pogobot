@@ -8,18 +8,18 @@ The head is plugged on a belly (under) which composed of even more LEDs, the mot
 To help the understanding, there is two version names used inside the project, one for the hardware and one for the software. <br> 
 The following table gives an overview :
 
-| hardware version | software version | comments                                           |
-|:----------------:|:----------------:|----------------------------------------------------|
-|        V3        |        V1        | initial version                                    |
-|        V3        |        V2        | reduce communication speed to increase reliability |
-|        V3        |       V2.1       | reduce header footprint                            |
-|        V3        |       V2.2       | introduce short message and clean the pogobios     |
-|        V3        |      V2.2.1      | fix the IR programation problem                    |
-|        V3        |       V2.3       | API standardization : motor                        |
-|        V3        |       V2.4       | API standardization : IR messaging                 |
-|        V3        |       V2.5       | new API standardization : IR messaging             |
-|        V3        |       V2.6       | new API standardization : IR messaging             |
-|        V3        |       V2.7       | fix IR saturation at startup                       |
+| hardware version | software version | comments                                                                             |
+|:----------------:|:----------------:|--------------------------------------------------------------------------------------|
+|        V3        |        V1        | initial version                                                                      |
+|        V3        |        V2        | reduce communication speed to increase reliability                                   |
+|        V3        |       V2.1       | reduce header footprint                                                              |
+|        V3        |       V2.2       | introduce short message and clean the pogobios                                       |
+|        V3        |      V2.2.1      | fix the IR programation problem                                                      |
+|        V3        |       V2.3       | API standardization : motor                                                          |
+|        V3        |       V2.4       | API standardization : IR messaging                                                   |
+|        V3        |       V2.5       | new API standardization : IR messaging                                               |
+|        V3        |       V2.6       | new API standardization : IR messaging                                               |
+|        V3        |       V2.7       | fix IR saturation at startup, add user access to the flash memory, add magnetometer  |
 
 ## Git description
 This project is divided into 3 folders :
