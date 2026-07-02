@@ -1108,7 +1108,7 @@ void magn_end(void);
 **/
 int magn_read_XYZ(int16_t* x, int16_t* y, int16_t* z, uint16_t timeout_ms);
 
-/** (magn_check)
+/** (magn_init)
  * Check the magnetometer availability on the SPI bus and configures it.
  * Configuration :
  * - Temperature Compensation - ON
@@ -1124,7 +1124,7 @@ int magn_read_XYZ(int16_t* x, int16_t* y, int16_t* z, uint16_t timeout_ms);
  * # Return
  * - 1 if successfully detected the magnetometer, else 0
 **/
-uint8_t magn_check(void);
+uint8_t magn_init(void);
 
 
 #endif /* __POGOBOT_H__ */

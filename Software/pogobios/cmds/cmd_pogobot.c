@@ -26,6 +26,7 @@
 #ifdef CSR_IR_RX0_BASE
 #include <pogobot.h>
 #include <spi.h>
+#include "magnetometer.h"
 #endif
 
 /*
@@ -116,9 +117,9 @@ static void spi_sr_read_handler(int nb_params, char **params) {
     uint32_t i, length=256;
     if( ( nb_params > 3  ) || ( nb_params == 0 ) ) {
         printf( "Usage: spi_sr_read [reg_number] [address] [length]\n\
-       [reg_number] can be 1, 2 or 3\n\
-       [address] can be zero to 255\n\
-       [length] can be one to 256\n\
+       [reg_number] 1, 2 or 3\n\
+       [address] 0 to 255\n\
+       [length] 1 to 256\n\
        If no argument is given, the first register is displayed\n");
     }
     if ( nb_params >= 1 ) {
@@ -157,8 +158,8 @@ static void spi_sr_write_handler(int nb_params, char **params) {
 	char *c;
     if ( nb_params != 3 ) {
         printf( "Usage: spi_sr_write [reg_number] [address] [data]\n\
-       [reg_number] must be 1, 2 or 3\n\
-       [address] can be zero to 255\n\
+       [reg_number] 1, 2 or 3\n\
+       [address] 0 to 255\n\
        [data] can be 256 bytes long at maximum" );
         return;
     }
@@ -393,7 +394,7 @@ static void adc_read_loop_handler(int nb_params, char **params) {
     uint32_t channel;
 
         printf("type something to quit\n");
-        printf("# photosensor Back (0), photosensor Front-Left (1), photosensor Front-Right (2), batery level, CH4, CH5, CH6, CH7\n");
+        printf("# photosensor Back (0), Front-Left (1), = Front-Right (2), batery level, CH4, CH5, CH6, CH7\n");
        
     while(uart_read_nonblock() == 0) {
         for(channel=0; channel<8; channel++) {
@@ -465,7 +466,7 @@ static void battery_reading_handler(int nb_params, char **params) {
     }
 
 }
-define_command(bat_life, battery_reading_handler, "give a color corresponding of the voltage (paramater to activate debug)", POGO_CMDS);
+define_command(bat_life, battery_reading_handler, "give a color corresponding of the voltage", POGO_CMDS);
 
 static void voltage_mode_handler(int nb_params, char **params) {
     extern uint8_t voltage_status;
@@ -504,11 +505,7 @@ static void motor_handler(int nb_params, char **params) {
     int32_t pwm_values[3]={0, 0, 0};
     int8_t m_number=0, incr=0;
 
-    printf( "Usage: motor [R|L|B] [value]\n\
-\tR for right, L for left and B for back motor\n\
-\tvalue is the PWM level between 0 (off) and 1023\n");
-    printf( "or motor [R_value] [L_value] [B_value]\n\
-\tvalue is the PWM level between 0 (off) and 1023\n");
+    printf("Usage: motor [R|L|B] [0-1023]\n\ ");
     printf("if no argument given: interactive mode\n");
     
     if ( nb_params == 0 ) {
@@ -651,8 +648,7 @@ static void motor_dir_mem_handler(int nb_params, char **params) {
 
     if ( nb_params != 3 ) {
         printf( "Usage: motor_dir_mem_set [valueR] [valueL] [valueB]\n\
-                 R for right, L for left and B for back motor\n\
-                 Value is 0 or 1 \n\
+                 Value [0;1] \n\
                  e.g. motor_dir_mem 1 0 0 \n");
         return;
     }
@@ -680,7 +676,6 @@ static void motor_power_mem_set_handler(int nb_params, char **params) {
 
     if ( nb_params != 3 ) {
         printf( "Usage: motor_power_mem_set [valueR] [valueL] [valueB]\n\
-                 R for right, L for left and B for back motor\n\
                  Value [0;1023] \n\
                  e.g. motor_power_mem_set 512 650 0\n");
         return;
@@ -720,12 +715,11 @@ static void rgb_set_handler(int nb_params, char **params) {
     if (( nb_params == 0 ) || ( nb_params > 2 ) ) {
         printf( "Usage: set_led [color in hex] [LED_id]\n\
        no [LED_id] means 0, -1 means all, {0,4}\n\
-       color is a 24bit value in Red Green Blue MSB to LSB.\n\
-       Example : Set RED color : rgb_set 0xFF0000 0\n\
-       You can specify which LED to control as last argument\n\
-       LED 0 is the LED on head board\n\
-       LED 1 is the LED in front of belly board\n\
-       LED 2 is on the right, 3 back, 4 left\n" );
+       color is a 24bit value, RGB, MSB to LSB.\n\
+       e.g. : Set RED color : rgb_set 0xFF0000 0\n\
+       LED 0 - head board\n\
+       LED 1 - front of belly board\n\
+       LED 2 right, 3 back, 4 left\n" );
         return;
     }
     if ( nb_params == 2 ) {
@@ -814,23 +808,43 @@ void autotest_imu(void) {
 #endif
 }
 
+void autotest_magnetometer(void);
+void autotest_magnetometer(void) {
+#ifdef CSR_SPI_CS_BASE
+    printf(BOLD_T"Magneto test... "STOP_T);
+    
+    uint8_t buf = 0x00;
+    magn_begin();
+    spi_single_tx(LIS2MDL_WHO_AM_I | LIS2MDL_SPI_READ_MASK);
+    buf = spi_single_rx(); 
+    magn_end();
+
+    if(buf == LIS2MDL_WHO_AM_I_VALUE){ 
+        printf(GREEN_T"OK\n"STOP_T);
+    }
+    else{
+        printf(RED_T"NOK\n"STOP_T);
+    }
+#endif
+}
+
 void autotest_motors(void);
 void autotest_motors(void) {
 #ifdef CSR_MOTOR_RIGHT_BASE
     printf(BOLD_T "Motor test\n"STOP_T);
-    printf(" Test right motor...");
+    printf(" Right...");
     motor_right_width_write(1023);
     rgb_set_led(0, 0, 255, 2);
     msleep(1000);
     rgb_set_led(0, 0, 0, 2);
     motor_right_width_write(0);
-    printf("\n Test left motor...");
+    printf("\n Left...");
     motor_left_width_write(1023);
     rgb_set_led(0, 0, 255, 5);
     msleep(1000);
     rgb_set_led(0, 0, 0, 5);
     motor_left_width_write(0);
-    printf("\n Test back motor...");
+    printf("\n Back...");
     motor_middle_width_write(1023);
     rgb_set_led(0, 0, 255, 3);
     msleep(1000);
@@ -928,12 +942,13 @@ void autotest_ir(void) {
 
 static void autotest_handler(int nb_params, char **params) {
     if ( nb_params == 0 ) {
-        printf("Usage : autotest [autotest_name]\n  autotest_name can be : led, imu, motors, ir\n");
+        printf("Usage : autotest [autotest_name]\n  autotest_name can be : led, imu, motors, ir, magneto\n");
         autotest_leds();
         autotest_imu();
         autotest_adc();
         autotest_motors();
         autotest_ir();
+        autotest_magnetometer();
     }
     if ( nb_params == 1 ) {
         if (strcmp(params[0], "led") == 0) {
@@ -946,8 +961,10 @@ static void autotest_handler(int nb_params, char **params) {
             autotest_motors();
         } else if (strcmp(params[0], "ir") == 0) {
             autotest_ir();
+        } else if (strcmp(params[0], "magneto") == 0) {
+            autotest_magnetometer();
         } else {
-            printf("Usage : autotest [autotest_name]\n  autotest_name can be : led, imu, motors, ir\n");
+            printf("Usage : autotest [autotest_name]\n  autotest_name can be : led, imu, motors, ir, magneto\n");
         }
     }
 }
@@ -971,4 +988,4 @@ static void is_muted_handler(void) {
         printf("Unmute\n");
     }
 }
-define_command(is_muted, is_muted_handler, "Check whether the PogoBot is muted or not", POGO_CMDS);
+define_command(is_muted, is_muted_handler, "Check if the PogoBot is muted or not", POGO_CMDS);

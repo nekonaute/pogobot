@@ -434,6 +434,8 @@ To generate the docs, we used a opensource project that transform .h to .md. <br
 
 Copy the custom pattern "pogobot/tools/pogobot.js" inside h2md/lib/patterns/
 
+Generate docs using our own pattern
+
 Add a return carrier to be understand by the tools
     
     awk '{printf "%s\r\n", $0}' /path/to/pogobot.h > pogobot.crlf

@@ -82,7 +82,7 @@ int magn_read_XYZ(int16_t* x, int16_t* y, int16_t* z, uint16_t timeout_ms)
 // Returns :
 // - 1 if successfully detected the magnetometer, 0 else
 // ******
-uint8_t magn_check(void)
+uint8_t magn_init(void)
 {
     magn_begin();
     spi_single_tx(LIS2MDL_CFG_REG_A);
@@ -118,7 +118,8 @@ uint8_t magn_check(void)
     buf = spi_single_rx(); 
     magn_end();
 
-    if(buf == LIS2MDL_WHO_AM_I_VALUE){ 
+    if(buf != LIS2MDL_WHO_AM_I_VALUE){ 
+        printf("Error : Magnetometer not avaible on the SPI bus.\n");
         return 0; 
     }
 

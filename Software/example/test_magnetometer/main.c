@@ -21,11 +21,6 @@ int main(void)
     int16_t mag_z = 0;  
 
     pogobot_init();
-
-    if (magn_check() != 0) {
-        printf("Erreur : Magnetometre non detecte ou erreur SPI.\n");
-        return 1;
-    }
     
     while (1) {
         

@@ -62,7 +62,7 @@
 // ---------------------------------------------------------
 void magn_begin(void);
 void magn_end(void);
-uint8_t magn_check(void);
+uint8_t magn_init(void);
 int magn_read_XYZ(int16_t* x, int16_t* y, int16_t* z, uint16_t timeout_ms);
 
 #endif

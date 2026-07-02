@@ -1075,11 +1075,11 @@ timeout_ms - measurement timeout in ms.
 #### Returns :
 - 1 if successfull else 0
 
-<a name="line-1111"></a><a name="magn_check"></a>
-### :arrow_right: magn_check
+<a name="line-1111"></a><a name="magn_init"></a>
+### :arrow_right: magn_init
 
 ```cpp
-uint8_t magn_check(void) /* line 1127 */
+uint8_t magn_init(void) /* line 1127 */
 ```
 
 Check the magnetometer availability on the SPI bus and configures it.

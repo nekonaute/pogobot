@@ -73,6 +73,7 @@ pogobot_init( void )
 #endif
 #ifdef CSR_SPI_CS_BASE
     IMU_Init();
+    magn_init();
 #endif
 
     rgb_init(); // Clear the LEDs
