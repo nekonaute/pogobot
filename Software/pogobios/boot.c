@@ -143,8 +143,8 @@ int serialboot(void)
 	uintptr_t ptr=0;    // last flashed mem address
 
 #ifdef REMOCON
-		printf("Serialboot is desactivate.\n");
-		printf("To programm the robots use rc_flash_robot.\n");
+		printf("Serialboot is deactivated.\n");
+		printf("To program the robots use rc_flash_robot.\n");
 		return 1;
 #endif
 
@@ -284,7 +284,7 @@ int serialboot(void)
 				/* Acknowledge and jump */
 				uart_write(SFL_ACK_SUCCESS);
 
-				printf(" execute 'run' to start the programm \n ");
+				printf(" execute 'run' to start the program \n ");
 				/* removing auto boot after a programmation
 				jump_addr = get_uint32(&frame.payload[0]);
                 if(jump_addr <= (SPIFLASH_BASE + 0x40000) ) {
