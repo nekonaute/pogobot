@@ -57,7 +57,7 @@ sdk: $(POGOLIB_BUILDDIR)/libpogobot.a
 	make -C $(BUILD_SDK_DIR)/examples/ clean
 	./version_creation.sh ./build_sdk/includes
 	cp Readme.md $(BUILD_SDK_DIR)
-	cp ../../pogodocs.md  $(BUILD_SDK_DIR)
+	cp -r ../docs $(BUILD_SDK_DIR)/docs
 
 
 
