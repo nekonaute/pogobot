@@ -1095,4 +1095,4 @@ Configuration :
 - None
 
 #### Return
-- 1 if successfully detected the magnetometer, else 0
+- 0 if successfully detected the magnetometer, else 1
