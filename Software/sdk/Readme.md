@@ -30,7 +30,8 @@ This SDK allows you to compile and upload code on the robot.
 The updated v2.7.1 library checks IR payload lengths before copying and waits
 for FIFO space before each transmitted byte. It also corrects full
 security-register writes and signed timer conversions. Rebuild applications
-with this SDK to include these fixes. Public function signatures are unchanged.
+with this SDK to include these fixes. The raw flash-page APIs now take uint16_t page IDs; rebuild applications
+against the updated declarations. The other existing signatures are unchanged.
 
 PFFS v4 file and append-log APIs are now included in `libpogobot.a` and
 exposed by `<pogobot.h>`, `<pffs/flash_file.h>` and `<pffs/flash_log.h>`.
@@ -48,6 +49,14 @@ files use the remaining 1,408 KiB. Raw page writes can overwrite files. Creation
 can format unformatted/corrupt catalogs: check `pogo_flash_file_check()` first
 when preserving data. Operations require serialized access; writes and defrag
 are not power-failure atomic. BIOS commands require explicit `format YES`.
+
+PFFS-enabled BIOS also offers `ir_send_file <id|name> [passes] [--replace]`
+on robots and `rc_send_file` on remotes. These broadcast a stored ordinary file
+into neighboring robots' PFFS with 16+4 parity, without a PC data stream or
+receiver acknowledgements. Receivers need the updated BIOS; `load`/`run` remain
+separate. Replacement keeps the receiver's ID and requires the same format and
+allocated page count. Pending reception reserves storage until completion or
+UART `ir_file_abort`. Existing PFFS application function signatures are unchanged.
 
 Please visit : https://github.com/nekonaute/pogobot-sdk or https://github.com/nekonaute/pogobot
 

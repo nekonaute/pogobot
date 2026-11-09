@@ -20,6 +20,7 @@ The following table gives an overview :
 |        V3        |       V2.5       | new API standardization : IR messaging                                               |
 |        V3        |       V2.6       | new API standardization : IR messaging                                               |
 |        V3        |       V2.7       | fix IR saturation at startup, add user access to the flash memory, add magnetometer  |
+|        V3        |      V2.7.1      | reliable IR firmware upload and full v3 user-flash page access                     |
 
 ## Git description
 This project is divided into 3 folders :
@@ -57,7 +58,6 @@ Tools corresponds to the differents tools used around the robot.
 ## Pogobios LED Status
 
 <img src="Images/pogobot_led_status.png" alt="pogobios leds status" width="800"/>
-
 
 
 
