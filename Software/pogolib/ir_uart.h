@@ -6,6 +6,8 @@
  * Please refer to file LICENCE for details.
 **/
 
+#include <stdint.h>
+
 #undef INTERFACE
 #if defined(CSR_IR_TX_BASE)
 void ir_uart_sync(void);
@@ -15,6 +17,7 @@ int ir_uart_read_nonblock(uint8_t);
 char ir_uart_read(uint8_t);
 void ir_uart_tx_isr(void);
 void ir_uart_rx_isr(void);
+uint32_t ir_uart_rx_drop_count(uint8_t channel);
 #endif
 
 #ifdef CSR_IR_RX3_BASE
@@ -38,5 +41,4 @@ void ir_uart_rx_isr(void);
 #ifndef IR_RX3_INTERRUPT
 #define IR_RX3_INTERRUPT 0
 #endif
-
 
