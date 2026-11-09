@@ -858,6 +858,52 @@ void pogo_flash_file_write_abort(pogo_flash_file_writer_t *writer) {
     if (writer != NULL) writer->mode = 0u;
 }
 
+/* An indexed writer is prepared by the ordinary checked begin API. Keep its
+ * progress at zero until all externally received chunks have been verified. */
+static bool indexed_writer_valid(const pogo_flash_file_writer_t *w) {
+    return w != NULL && (w->mode == 1u || w->mode == 2u) &&
+        w->file_id > 0u && w->file_id <= POGO_FLASH_FILE_MAX_FILES &&
+        w->size_bytes <= POGO_FLASH_FILE_MAX_BYTES &&
+        w->page_count == pogo_flash_file_internal_pages_for_bytes(w->size_bytes) &&
+        w->first_page >= POGO_FLASH_FILE_DATA_FIRST_PAGE &&
+        w->first_page % POGO_FLASH_FILE_ERASE_SECTOR_PAGES == 0u &&
+        (unsigned)w->first_page + w->page_count <= POGO_FLASH_FILE_USER_PAGES &&
+        w->next_page == 0u;
+}
+
+pogo_flash_file_status_t pogo_flash_file_internal_prepare_indexed(
+    pogo_flash_file_writer_t *w, void (*service)(void)) {
+    if (!indexed_writer_valid(w)) return POGO_FLASH_FILE_INVALID_ARGUMENT;
+    for (unsigned page = 0u; page < w->page_count;
+         page += POGO_FLASH_FILE_ERASE_SECTOR_PAGES) {
+        if (!erase_sector_verified((uint16_t)(w->first_page + page))) {
+            w->mode = 0u;
+            return POGO_FLASH_FILE_VERIFY_FAILED;
+        }
+        if (service != NULL) service();
+    }
+    return POGO_FLASH_FILE_OK;
+}
+
+pogo_flash_file_status_t pogo_flash_file_internal_finish_indexed(
+    pogo_flash_file_writer_t *w, uint8_t scratch[POGO_FLASH_FILE_PAGE_SIZE]) {
+    if (!indexed_writer_valid(w) || scratch == NULL)
+        return POGO_FLASH_FILE_INVALID_ARGUMENT;
+    uint32_t crc = UINT32_MAX;
+    for (uint16_t page = 0u; page < w->page_count; ++page) {
+        read_page_flash((uint16_t)(w->first_page + page), (char *)scratch);
+        if (page + 1u == w->page_count) {
+            uint32_t used = w->size_bytes - (uint32_t)page * 256u;
+            for (uint32_t byte = used; byte < 256u; ++byte)
+                if (scratch[byte] != 0xffu) return POGO_FLASH_FILE_BAD_CHECKSUM;
+        }
+        crc = crc32_update(crc, scratch, 256u);
+    }
+    w->crc = crc;
+    w->next_page = w->page_count;
+    return pogo_flash_file_write_finish(w);
+}
+
 enum {
     DEFRAG_SELECT = 1, DEFRAG_VALIDATE = 2,
     DEFRAG_COPY = 3, DEFRAG_COMMIT = 4, DEFRAG_DONE = 5

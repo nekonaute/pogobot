@@ -113,4 +113,13 @@ pogo_flash_file_status_t pogo_flash_file_internal_create_log(
     uint8_t file_id, const char *name, uint16_t page_count, bool *formatted);
 pogo_flash_file_status_t pogo_flash_file_internal_clear_log(uint8_t file_id);
 
+/* BIOS indexed reception owns the filesystem exclusively between begin and
+ * finish/abort. Erase the unpublished extent before any out-of-order writes;
+ * publish only after the caller verifies all chunks and the wire-content CRC.
+ * These private helpers do not change the sequential application API. */
+pogo_flash_file_status_t pogo_flash_file_internal_prepare_indexed(
+    pogo_flash_file_writer_t *writer, void (*service)(void));
+pogo_flash_file_status_t pogo_flash_file_internal_finish_indexed(
+    pogo_flash_file_writer_t *writer, uint8_t scratch[POGO_FLASH_FILE_PAGE_SIZE]);
+
 #endif /* POGO_UTILS_FLASH_FILE_INTERNAL_H */

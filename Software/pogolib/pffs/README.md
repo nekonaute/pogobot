@@ -25,3 +25,8 @@ refused. Replacement and defrag are not power-failure atomic.
 Pogobios keeps its console policy and UART protocol in
 [the BIOS adapter](../../pogobios/pffs/README.md). Its commands require an
 explicit `format YES`. See [usage and persistence limits](../../readme.md#pffs-file-commands).
+
+The private indexed-writer helpers support BIOS IR reception. Their caller must
+use a checked begin operation, serialize all filesystem mutations until
+finish/abort, and verify chunk completeness plus the content CRC before
+publication. They do not add an indexed application API or alter v4 catalogs.

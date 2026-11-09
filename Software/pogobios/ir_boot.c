@@ -23,6 +23,9 @@
 #include <ir_boot.h>
 #include <ir_upload_v2.h>
 #include <ir_uart.h>
+#include "ir_file.h"
+#include <pffs/flash_file_internal.h>
+#include <pffs/flash_log.h>
 #include <libbase/crc.h>
 #include <libbase/spiflash.h>
 #include <pogobot.h>
@@ -70,9 +73,44 @@ static struct {
     uint8_t bitmap[(IR_V2_MAX_CHUNKS + 7) / 8];
 } v2_upload;
 
+/* File reception shares the existing decoder, but reserves PFFS independently
+ * of firmware validity. No file packet may touch application/boot markers. */
+#ifndef REMOCON
+static struct {
+    pogo_flash_file_writer_t writer;
+    uint16_t sender;
+    uint8_t mode, flags;
+    uint8_t bitmap[(IR_FILE_MAX_CHUNKS + 7u) / 8u];
+} file_rx;
+static time_reference_t file_erase_timer;
+#endif
+static uint16_t rx_sender;
+static uint8_t *v2_bitmap(void) {
+#ifndef REMOCON
+    if (file_rx.mode) return file_rx.bitmap;
+#endif
+    return v2_upload.bitmap;
+}
+bool ir_file_busy(void) {
+#ifndef REMOCON
+    return file_rx.mode && v2_upload.active && !v2_upload.complete;
+#else
+    return false;
+#endif
+}
+void ir_file_abort(void) {
+#ifndef REMOCON
+    if (file_rx.mode) {
+        pogo_flash_file_write_abort(&file_rx.writer);
+        memset(&file_rx, 0, sizeof(file_rx));
+        memset(&v2_upload, 0, sizeof(v2_upload));
+    }
+#endif
+}
+
 /* Cauchy matrix c[row][data] = inverse(data XOR (16 + row)) in GF(256).
  * The primitive polynomial is x^8+x^4+x^3+x^2+1 (0x11d). */
-static const uint8_t fec_coefficients[IR_V2_FEC_PARITY_COUNT][IR_V2_FEC_DATA_COUNT] = {
+const uint8_t fec_coefficients[IR_V2_FEC_PARITY_COUNT][IR_V2_FEC_DATA_COUNT] = {
     {0xd8, 0x72, 0xc0, 0x58, 0xe0, 0x3e, 0x4c, 0x66,
      0x90, 0xde, 0x55, 0x80, 0xa0, 0x83, 0x4b, 0x2a},
     {0x72, 0xd8, 0x58, 0xc0, 0x3e, 0xe0, 0x66, 0x4c,
@@ -123,7 +161,7 @@ static const uint8_t fec_gf_log[256] = {
     0x4f, 0xae, 0xd5, 0xe9, 0xe6, 0xe7, 0xad, 0xe8, 0x74, 0xd6, 0xf4, 0xea, 0xa8, 0x50, 0x58, 0xaf
 };
 
-static uint8_t fec_gf_multiply(uint8_t a, uint8_t b)
+uint8_t fec_gf_multiply(uint8_t a, uint8_t b)
 {
     if (!a || !b)
         return 0;
@@ -192,7 +230,7 @@ static void time_write(uint32_t addr, unsigned char *data, uint32_t length)
     (*(volatile const uint8_t *)(uintptr_t)(SPIFLASH_BASE + (offset)))
 #endif
 
-static uint32_t v2_flash_crc32(uint32_t offset, uint32_t length)
+uint32_t ir_flash_crc32(uint32_t offset, uint32_t length)
 {
     // Reflected CRC-32/ISO-HDLC, matching Python's zlib.crc32 over exact image bytes.
     uint32_t crc = 0xffffffffu;
@@ -206,7 +244,7 @@ static uint32_t v2_flash_crc32(uint32_t offset, uint32_t length)
 
 static uint8_t v2_command(uint8_t cmd)
 {
-    return cmd >= IR_V2_CMD_START && cmd <= IR_V2_CMD_PARITY;
+    return cmd >= IR_V2_CMD_START && cmd <= IR_FILE_PARITY;
 }
 
 static void v2_try_fec_recover(void)
@@ -226,7 +264,7 @@ static void v2_try_fec_recover(void)
     for (uint8_t local = 0; local < IR_V2_FEC_DATA_COUNT &&
                             first + local < v2_upload.chunks; local++) {
         uint16_t index = first + local;
-        if (!(v2_upload.bitmap[index >> 3] & (1u << (index & 7u)))) {
+        if (!(v2_bitmap()[index >> 3] & (1u << (index & 7u)))) {
             if (missing_count == IR_V2_FEC_PARITY_COUNT)
                 return;  // More than four erasures need a later pass.
             missing[missing_count++] = local;
@@ -254,7 +292,7 @@ static void v2_try_fec_recover(void)
         for (uint8_t local = 0; local < IR_V2_FEC_DATA_COUNT &&
                                 first + local < v2_upload.chunks; local++) {
             uint16_t index = first + local;
-            if (!(v2_upload.bitmap[index >> 3] & (1u << (index & 7u))))
+            if (!(v2_bitmap()[index >> 3] & (1u << (index & 7u))))
                 continue;
             uint32_t relative = (uint32_t)index * IR_V2_CHUNK_SIZE;
             uint32_t available = v2_upload.length - relative;
@@ -332,7 +370,7 @@ static void v2_try_fec_recover(void)
                 return;
             }
         }
-        v2_upload.bitmap[index >> 3] |= 1u << (index & 7u);
+        v2_bitmap()[index >> 3] |= 1u << (index & 7u);
         v2_upload.received++;
         upload_stats.accepted++;
         upload_stats.fec_recovered++;
@@ -340,12 +378,143 @@ static void v2_try_fec_recover(void)
     v2_upload.fec_mask = 0;
 }
 
+#ifndef REMOCON
+static void file_service_rx(void) {
+    /* The callback follows each verified 4 KiB erase. Measure per sector so
+     * large preparations do not span the hardware timer's signed half-range. */
+    uint32_t elapsed = pogobot_stopwatch_get_elapsed_microseconds(&file_erase_timer);
+    upload_stats.erases++;
+    upload_stats.erase_us += elapsed;
+    if (elapsed > upload_stats.erase_max_us) upload_stats.erase_max_us = elapsed;
+    pogobot_infrared_update();
+    /* The sender is still in its size-dependent preparation allowance. Drain
+     * redundant STARTs rather than fill the message queue over many erases.
+     * Early payloads cannot be written until this extent is fully erased. */
+    while (pogobot_infrared_message_available()) {
+        message_t ignored;
+        pogobot_infrared_recover_next_message(&ignored);
+    }
+    rgb_blink();
+    pogobot_stopwatch_reset(&file_erase_timer);
+}
+
+/* A completed matching broadcast is consumed without re-entering the receive
+ * loop. This keeps finished robots usable during other receivers' later passes. */
+static bool file_matches_start(const uint8_t *p, uint16_t sender) {
+    return file_rx.mode && p[0] == 1u && v2_upload.id == ir_v2_read_u32(p + 2) &&
+        v2_upload.length == ir_v2_read_u32(p + 6) &&
+        v2_upload.expected_crc == ir_v2_read_u32(p + 10) &&
+        file_rx.sender == sender && file_rx.flags == (p[1] & (1u | IR_FILE_REPLACE)) &&
+        file_rx.writer.format_version == ir_v2_read_u16(p + 14) &&
+        p[16] <= 32u && strlen(file_rx.writer.name) == p[16] &&
+        memcmp(file_rx.writer.name, p + 17, 32u) == 0;
+}
+
+/* START contains version, flags, hash ID, exact length/content CRC, ordinary
+ * payload format, and a canonical zero-padded 32-byte name. No flash address
+ * is accepted from the air. Each receiver allocates its own local stable ID. */
+static uint8_t file_start(const struct sfl_frame *frame) {
+    const uint8_t *p = frame->payload;
+    char name[33];
+    if (frame->payload_length != IR_FILE_START_LENGTH || p[0] != 1u ||
+        !(p[1] & 1u) || (p[1] & ~(1u | IR_FILE_REPLACE | IR_FILE_RESTART)) ||
+        ir_v2_read_u32(p + 2) == 0u ||
+        p[16] == 0u || p[16] > 32u ||
+        ir_v2_read_u32(p + 6) > POGO_FLASH_FILE_MAX_BYTES ||
+        ir_v2_read_u16(p + 14) == POGO_FLASH_LOG_FORMAT_VERSION ||
+        rx_sender == pogobot_helper_getid()) return 0;
+    for (unsigned i = 0; i < 32u; ++i) {
+        if (i < p[16] ? (p[17 + i] < 33u || p[17 + i] > 126u) : p[17 + i] != 0u)
+            return 0;
+    }
+    memcpy(name, p + 17, p[16]); name[p[16]] = 0;
+    uint32_t id = ir_v2_read_u32(p + 2), length = ir_v2_read_u32(p + 6);
+    uint32_t crc = ir_v2_read_u32(p + 10);
+    uint16_t format = ir_v2_read_u16(p + 14);
+    bool same = file_matches_start(p, rx_sender);
+    /* Completed data stays immutable while BIOS owns the file. Local PFFS
+     * commands discard this cache before accessing storage. Repeated keepalives
+     * must not rescan a multi-megabyte file and stall the receive queue. */
+    if (same && v2_upload.complete) return 2;
+    if (ir_file_busy()) {
+        if (!same) return 0; /* Explicit local abort is needed for another file. */
+        if (!v2_upload.failed) return 0; /* Resume without another erase. */
+        if (!(p[1] & IR_FILE_RESTART)) return 0;
+    } else if (!file_rx.mode && v2_upload.active && !v2_upload.failed &&
+               !v2_upload.complete) return 0;
+    if (pogo_flash_file_check() != POGO_FLASH_FILE_OK) {
+        puts("IR file refused: invalid catalog"); return 0;
+    }
+    pogo_flash_file_info_t info;
+    pogo_flash_file_writer_t writer = {0};
+    uint8_t scratch[256];
+    bool identical = false;
+    pogo_flash_file_status_t status = pogo_flash_file_find_by_name(name, &info);
+    if (status == POGO_FLASH_FILE_OK) {
+        identical = info.format_version == format && info.size_bytes == length &&
+            pogo_flash_file_read_page_secure(info.id, 0u, scratch, NULL) == POGO_FLASH_FILE_OK &&
+            ir_flash_crc32(POGOBOT_USER_FLASH_START_OFFSET +
+                          (uint32_t)info.first_page * 256u, length) == crc;
+        if (!identical && (!(p[1] & IR_FILE_REPLACE) ||
+            info.format_version != format || info.format_version == POGO_FLASH_LOG_FORMAT_VERSION ||
+            info.page_count != (length == 0u ? 1u : (length + 255u) / 256u))) {
+            puts("IR file refused: existing name/type/allocation"); return 0;
+        }
+        if (identical) {
+            writer.file_id = info.id; writer.first_page = info.first_page;
+            writer.format_version = format;
+            memcpy(writer.name, name, p[16] + 1u);
+        } else status = pogo_flash_file_write_begin_replace_bytes(&writer, info.id, length);
+    } else if (status == POGO_FLASH_FILE_NOT_FOUND) {
+        for (unsigned candidate = 1u; candidate <= POGO_FLASH_FILE_MAX_FILES; ++candidate) {
+            status = pogo_flash_file_write_begin_create_bytes(&writer, (uint8_t)candidate,
+                                                              name, length, format, NULL);
+            if (status != POGO_FLASH_FILE_ALREADY_EXISTS) break;
+        }
+    }
+    if (status != POGO_FLASH_FILE_OK) {
+        printf("IR file allocation failed: %s\n", pogo_flash_file_status_string(status)); return 0;
+    }
+    memset(&v2_upload, 0, sizeof(v2_upload));
+    memset(&file_rx, 0, sizeof(file_rx));
+    file_rx.writer = writer; file_rx.mode = 1u;
+    file_rx.flags = p[1] & (1u | IR_FILE_REPLACE); file_rx.sender = rx_sender;
+    v2_upload.id = id; v2_upload.length = length; v2_upload.expected_crc = crc;
+    v2_upload.offset = POGOBOT_USER_FLASH_START_OFFSET + (uint32_t)writer.first_page * 256u;
+    v2_upload.chunks = (uint16_t)((length + 63u) / 64u);
+    v2_upload.active = v2_upload.fec_enabled = 1u;
+    if (identical) {
+        v2_upload.complete = 1u; v2_upload.received = v2_upload.chunks;
+        puts("IR file already verified"); return 2;
+    }
+    printf("IR file START: name=%s bytes=%lu replace=%u\n", name,
+           (unsigned long)length, (unsigned)((p[1] & IR_FILE_REPLACE) != 0));
+    pogobot_stopwatch_reset(&file_erase_timer);
+    status = pogo_flash_file_internal_prepare_indexed(&file_rx.writer, file_service_rx);
+    if (status != POGO_FLASH_FILE_OK) {
+        v2_upload.failed = 1u;
+        printf("IR file erase failed: %s\n", pogo_flash_file_status_string(status));
+    }
+    return 0;
+}
+#endif
+
 static uint8_t exec_v2_frame(struct sfl_frame *frame)
 {
     const uint8_t *p = frame->payload;
     uint32_t id;
+    uint8_t cmd = frame->cmd;
+#ifndef REMOCON
+    if (cmd == IR_FILE_START) return file_start(frame);
+    if (cmd >= IR_FILE_START && cmd <= IR_FILE_PARITY) {
+        if (!file_rx.mode || rx_sender != file_rx.sender) return 0;
+        cmd = (uint8_t)(IR_V2_CMD_START + cmd - IR_FILE_START);
+    } else if (ir_file_busy()) {
+        return 0; /* Pending file owns its unpublished extent and PFFS lock. */
+    }
+#endif
 
-    if (frame->cmd == IR_V2_CMD_START) {
+    if (cmd == IR_V2_CMD_START) {
         uint32_t address, offset, length, expected_crc;
         if (frame->payload_length != IR_V2_START_LENGTH ||
             p[0] != IR_V2_VERSION ||
@@ -382,6 +551,9 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
             return 0;
         }
 
+#ifndef REMOCON
+        file_rx.mode = 0;
+#endif
         memset(&v2_upload, 0, sizeof(v2_upload));
         if (!time_erase_marker()) {
             printf("IR v2 validity erase failed; image unchanged\n");
@@ -413,7 +585,7 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
     if (!v2_upload.active || id != v2_upload.id)
         return 0;  // Stale frames must not affect an active image.
 
-    if (frame->cmd == IR_V2_CMD_DATA) {
+    if (cmd == IR_V2_CMD_DATA) {
         uint16_t index;
         uint32_t relative, length, offset;
         uint8_t mask;
@@ -436,7 +608,7 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
             return 0;
         }
         mask = 1u << (index & 7u);
-        if (v2_upload.bitmap[index >> 3] & mask) {
+        if (v2_bitmap()[index >> 3] & mask) {
             upload_stats.duplicates++;
             return 0;
         }
@@ -446,7 +618,7 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
         // Leave the OK marker erased until END verifies the whole image. The
         // separate partial marker survives a timeout or power loss and lets
         // completion write OK without another marker-sector erase.
-        if (v2_upload.received == 0) {
+        if (v2_upload.received == 0 && !ir_file_busy()) {
             time_write(FLASH_V2_PARTIAL_OFFSET,
                        (unsigned char *)FLASH_IS_PARTIAL, strlen(FLASH_IS_PARTIAL));
         }
@@ -460,7 +632,7 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
                 return 0;
             }
         }
-        v2_upload.bitmap[index >> 3] |= mask;
+        v2_bitmap()[index >> 3] |= mask;
         v2_upload.received++;
         upload_stats.accepted++;
         if (v2_upload.fec_mask &&
@@ -469,7 +641,7 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
         return 0;
     }
 
-    if (frame->cmd == IR_V2_CMD_PARITY) {
+    if (cmd == IR_V2_CMD_PARITY) {
         uint16_t group;
         uint8_t row;
         if (frame->payload_length != IR_V2_PARITY_LENGTH ||
@@ -505,7 +677,7 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
         upload_stats.malformed++;
         return 0;
     }
-    if (frame->cmd == IR_V2_CMD_ABORT) {
+    if (cmd == IR_V2_CMD_ABORT) {
         // Q closes the current remote broadcast; keep the invalid image and
         // its bitmap so another rc_flash_robot can send a repair copy.
         printf("IR v2 broadcast stopped; %u of %u chunks retained\n",
@@ -515,6 +687,9 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
     if (v2_upload.fec_mask)
         v2_try_fec_recover();
     if (v2_upload.complete) {
+#ifndef REMOCON
+        if (file_rx.mode) return 1;
+#endif
         if (check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET))
             return 1;  // Repeated END has no flash side effects.
         v2_upload.complete = 0;  // Retry a damaged or missing marker below.
@@ -528,13 +703,30 @@ static uint8_t exec_v2_frame(struct sfl_frame *frame)
                (unsigned int)v2_upload.received, (unsigned int)v2_upload.chunks);
         return 0;
     }
-    uint32_t actual_crc = v2_flash_crc32(v2_upload.offset, v2_upload.length);
+    uint32_t actual_crc = ir_flash_crc32(v2_upload.offset, v2_upload.length);
     if (actual_crc != v2_upload.expected_crc) {
         v2_upload.failed = 1;
         printf("IR v2 image CRC mismatch: %08lx != %08lx; restart required\n",
                (unsigned long)actual_crc, (unsigned long)v2_upload.expected_crc);
         return 1;
     }
+#ifndef REMOCON
+    if (file_rx.mode) {
+        uint8_t scratch[POGO_FLASH_FILE_PAGE_SIZE];
+        pogo_flash_file_status_t status =
+            pogo_flash_file_internal_finish_indexed(&file_rx.writer, scratch);
+        if (status != POGO_FLASH_FILE_OK) {
+            v2_upload.failed = 1;
+            printf("IR file publish failed: %s\n", pogo_flash_file_status_string(status));
+            return 1;
+        }
+        v2_upload.complete = 1;
+        printf("IR file verified: id=%u name=%s bytes=%lu\n",
+               (unsigned)file_rx.writer.file_id, file_rx.writer.name,
+               (unsigned long)v2_upload.length);
+        return 1;
+    }
+#endif
     // A failed marker write may have left zero bits that cannot be repaired
     // by programming again. Erase only its sector and retain the image bitmap.
     if (!check_flash_state(FLASH_ERASED_MARKER, FLASH_OK_OFFSET) &&
@@ -633,8 +825,8 @@ static void ir_boot_loop_with_initial(const message_t *initial) {
             } else {
                 pogobot_infrared_recover_next_message(&msg);
             }
-            if (msg.header._packet_type != ir_t_flash)
-                continue;
+            if (msg.header._packet_type != ir_t_flash &&
+                msg.header._packet_type != ir_t_user) continue;
 
             pogobot_timer_init(&mytimer, timeout);
             upload_stats.frames++;
@@ -653,6 +845,11 @@ static void ir_boot_loop_with_initial(const message_t *initial) {
                 upload_stats.crc_errors++;
                 continue;
             }
+            /* File frames use the ordinary user-message transport, firmware
+             * frames retain their dedicated type. Never cross the two sinks. */
+            if ((frame->cmd >= IR_FILE_START) !=
+                (msg.header._packet_type == ir_t_user)) continue;
+            rx_sender = msg.header._sender_id;
             if (v2_command(frame->cmd)) {
                 time_reference_t process_timer;
                 uint8_t finished;
@@ -726,19 +923,33 @@ void ir_boot_reset_v2_upload(void)
 {
     // Called by erase_userprog before its marker/flash erase takes effect.
     memset(&v2_upload, 0, sizeof(v2_upload));
+#ifndef REMOCON
+    memset(&file_rx, 0, sizeof(file_rx));
+#endif
 }
 
 uint8_t ir_boot_try_v2_start(const message_t *message)
 {
     // The normal Pogobios loop may miss the separate ir_flash command.
     // A complete START frame is an independent, CRC-protected entry point.
-    if (message->header._packet_type != ir_t_flash ||
-        message->header.payload_length != IR_V2_START_LENGTH + 4u)
-        return 0;
+    if (message->header.payload_length < 4u) return 0;
     struct sfl_frame *frame = (struct sfl_frame *)message->payload;
-    if (frame->cmd != IR_V2_CMD_START ||
-        frame->payload_length != IR_V2_START_LENGTH || !check_crc(frame))
-        return 0;
+    bool file = message->header._packet_type == ir_t_user &&
+                frame->cmd == IR_FILE_START;
+    if ((!file && (message->header._packet_type != ir_t_flash ||
+                   frame->cmd != IR_V2_CMD_START)) ||
+        message->header.payload_length !=
+            (file ? IR_FILE_START_LENGTH : IR_V2_START_LENGTH) + 4u ||
+        frame->payload_length != message->header.payload_length - 4u ||
+        !check_crc(frame)) return 0;
+#ifndef REMOCON
+    if (file && message->header._sender_id == pogobot_helper_getid()) return 0;
+    if (file && v2_upload.complete &&
+        file_matches_start(frame->payload, message->header._sender_id)) return 1;
+    if (ir_file_busy() && (!file ||
+        message->header._sender_id != file_rx.sender ||
+        ir_v2_read_u32(frame->payload + 2) != v2_upload.id)) return 0;
+#endif
     ir_boot_loop_with_initial(message);
     return 1;
 }

@@ -23,13 +23,6 @@ static unsigned programs, erases, dangerous_calls;
 static bool torn;
 static uint32_t now_us;
 static const char *input;
-static unsigned controller_starts;
-static uint8_t led_color[3], blink_color[3];
-void reboot_ctrl_write(uint32_t value) {
-    assert(value == 0xadu && check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET));
-    ++controller_starts;
-}
-
 /* NOR faults exercise the real controller installer, not a duplicate copy of
  * its state machine. All source/user pages remain guarded separately below. */
 static unsigned controller_erases, controller_programs, marker_erases, ir_resets;
@@ -53,6 +46,23 @@ uint8_t flash_invalidate_user_image(void) {
     return 1;
 }
 void ir_boot_reset_v2_upload(void) { ++ir_resets; }
+/* File-radio transport is covered by the real IR receiver/sender harness.
+ * These doubles keep console-only fixtures independent of radio timing. */
+static bool radio_pending;
+static unsigned controller_starts;
+static uint8_t led_color[3], blink_color[3];
+/* A boot request is observable only after the production installer has
+ * committed its marker. Tests continue instead of resetting the CPU. */
+void reboot_ctrl_write(uint32_t value) {
+    assert(value == 0xadu && check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET));
+    ++controller_starts;
+}
+bool ir_file_busy(void) { return radio_pending; }
+void ir_file_abort(void) { radio_pending = false; }
+bool ir_file_send(uint8_t id, unsigned passes, bool replace, uint8_t *scratch) {
+    (void)id; (void)passes; (void)replace; (void)scratch;
+    return false;
+}
 void erase_flash_sector(unsigned address) {
     assert(address >= POGOBIOS_CONTROLLER_OFFSET &&
            address + SPIFLASH_SECTOR_SIZE <=
@@ -383,10 +393,17 @@ static void selftest(void) {
     command("df", true);
     command("touch 2 later 257", true);
     command("rm renamed", true);
-    /* Compaction stays in maintenance applications; BIOS must not move files. */
-    assert(!bios_pffs_busy());
+    /* BIOS compaction is unavailable; the shared library still supports
+     * maintenance applications. Rejecting the old command must not move data. */
+    assert(pogo_flash_file_find(2, &info) == POGO_FLASH_FILE_OK);
+    uint16_t original_page = info.first_page;
+    unsigned before_programs = programs;
+    before = erases;
     char *defrag_args[] = {"YES"};
     assert(bios_console_dispatch("defrag", 1, defrag_args, true) == NULL);
+    assert(!bios_pffs_busy() && erases == before && programs == before_programs);
+    assert(pogo_flash_file_find(2, &info) == POGO_FLASH_FILE_OK &&
+           info.first_page == original_page);
     assert(pogo_flash_file_read_page_secure(2, 1, page, NULL) ==
            POGO_FLASH_FILE_OK);
     (void)bios_pffs_input_reset();
@@ -437,6 +454,8 @@ static void selftest(void) {
      * The editor must discard the partial prefix AND its later tail. */
     command("put 12345678 10 binary 48 00000000 raw", true);
     assert(bios_pffs_busy());
+    command("load_run binary", false);
+    assert(controller_starts == 0u && bios_pffs_busy());
     command("serialboot", true);
     assert(dangerous_calls == 1);
     command("format YES", true);
@@ -471,6 +490,19 @@ static void selftest(void) {
     assert(!bios_pffs_busy());
     for (unsigned i = 0; i < POGOBOT_USER_FLASH_START_OFFSET; ++i)
         assert(flash[i] == 0xa5);
+    /* A timed-out radio reservation continues to exclude UART writers and
+     * controller installation until the explicit local abort releases it. */
+    radio_pending = true;
+    before = erases;
+    assert(bios_pffs_busy());
+    command("format YES", true);
+    command("serialboot", true);
+    command("load 2", true);
+    command("load_run later", false);
+    assert(controller_starts == 0u);
+    assert(erases == before && dangerous_calls == 1u && bios_pffs_busy());
+    command("ir_file_abort", true);
+    assert(!bios_pffs_busy());
     controller_selftest();
     controller_start_selftest();
     puts("PFFS BIOS console/NOR integration: PASS");

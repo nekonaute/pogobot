@@ -27,6 +27,8 @@ STUB_HEADERS = (
     "libbase/progress.h",
     "libbase/jsmn.h",
     "helpers.h",
+    "spi.h",
+    "uart.h",
 )
 
 
@@ -39,6 +41,17 @@ def main():
             header = temp_dir / name
             header.parent.mkdir(parents=True, exist_ok=True)
             header.write_text("#pragma once\n")
+        # Separate canonical PFFS translation units need only the raw flash HAL;
+        # the device fixture supplies their implementations, not a simulator.
+        (temp_dir / "pogobot.h").write_text('''#pragma once
+#include <stdint.h>
+#define POGOBOT_USER_FLASH_START_OFFSET 0x90000u
+#define POGOBOT_USER_FLASH_PAGE_SIZE 256u
+#define POGOBOT_USER_FLASH_PAGE_COUNT 5888u
+void read_page_flash(uint16_t, char *);
+void write_page_flash(uint16_t, const void *);
+''')
+        (temp_dir / "spi.h").write_text("#include <stdint.h>\nint spiBeginErase4(uint32_t);\n")
 
         executable = temp_dir / "ir_upload_fault_test"
         # Feed actual Python uploader payloads through the C receiver harness.
@@ -132,6 +145,7 @@ def main():
                 "-I", str(TEST_DIR.parent / "pogobios"),
                 "-I", str(TEST_DIR.parent / "pogolib"),
                 str(TEST_DIR / "ir_upload_fault_test.c"),
+                *(str(p) for p in sorted((TEST_DIR.parent / "pogolib/pffs").glob("flash_*.c"))),
                 "-o", str(executable),
             ],
             check=True,
@@ -139,6 +153,20 @@ def main():
         subprocess.run([str(executable), str(fixture),
                         *(str(path) for path in fec_fixtures),
                         str(large_fixture), str(repeated_fixture)], check=True)
+
+        file_executable = temp_dir / "ir_file_fault_test"
+        subprocess.run([
+            "cc", "-std=c11", "-O1", "-g", "-flto", "-Wall", "-Wextra",
+            "-fsanitize=address,undefined", "-fno-sanitize-recover=all", "-fno-omit-frame-pointer",
+            "-I", str(temp_dir), "-I", str(TEST_DIR.parent / "pogobios"),
+            "-I", str(TEST_DIR.parent / "pogolib"),
+            str(TEST_DIR / "ir_file_fault_test.c"),
+            *(str(p) for p in sorted((TEST_DIR.parent / "pogolib/pffs").glob("flash_*.c"))),
+            "-o", str(file_executable),
+        ], check=True)
+        subprocess.run([str(file_executable)], check=True, timeout=120,
+                       stdout=subprocess.DEVNULL)
+        print("IR PFFS file sender/receiver/NOR fault injection: PASS", flush=True)
 
         # Exercise the actual remote switch: legacy LOAD must never reach IR,
         # while v2 forwarding, cancellation, and serial-only JUMP still work.

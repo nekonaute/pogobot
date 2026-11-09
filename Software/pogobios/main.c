@@ -29,6 +29,7 @@
 
 #include <pogobot.h>
 #include "pffs.h"
+#include "ir_file.h"
 #include "console_input.h"
 
 #define QUOTE(str) #str
@@ -258,13 +259,20 @@ int main(void) {
             while ( pogobot_infrared_message_available() ) {
                 message_t msg;
                 pogobot_infrared_recover_next_message( &msg );
-                /* Drain incoming IR while file operations own SPI/cache, but
-                 * require a later upload retry after the file session ends. */
+                /* A CRC-checked START enters reception directly. Pending IR
+                 * files allow their matching START to resume after timeout;
+                 * other filesystem sessions defer all incoming uploads. */
+                if ((!bios_pffs_busy() || ir_file_busy()) &&
+                    ir_boot_try_v2_start(&msg)) continue;
                 if (bios_pffs_busy()) continue;
-                // A valid v2 START also enters upload mode if the remote's
-                // earlier ir_flash command was lost over infrared.
-                if (ir_boot_try_v2_start(&msg))
-                    continue;
+                /* Late ENDs and data for a refused file are protocol traffic,
+                 * not application text to dump into the interactive console. */
+                if (msg.header._packet_type == ir_t_user && msg.header.payload_length >= 4u) {
+                    struct sfl_frame *f = (struct sfl_frame *)msg.payload;
+                    if (f->cmd >= IR_FILE_START && f->cmd <= IR_FILE_PARITY &&
+                        f->payload_length == msg.header.payload_length - 4u &&
+                        check_crc(f)) continue;
+                }
                 if (msg.header.payload_length < strlen(str_magic) ||
                     memcmp(msg.payload, str_magic, strlen(str_magic)) != 0) {
                     printf("Message received : Destination on IR %d, sender %d on IR %d, length %d ",
