@@ -12,8 +12,12 @@ def main():
     lib = tests.parent / "pogolib"
     with tempfile.TemporaryDirectory(prefix="pogobios-pffs-test-") as name:
         temp = Path(name)
-        for header in ("pogobot.h", "spi.h", "uart.h"):
-            (temp / header).write_text(f'#include "{tests / "pffs_test_platform.h"}"\n')
+        for header in ("pogobot.h", "spi.h", "uart.h", "sfl.h",
+                       "generated/mem.h", "generated/soc.h", "generated/csr.h",
+                       "libbase/spiflash.h"):
+            path = temp / header
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(f'#include "{tests / "pffs_test_platform.h"}"\n')
         (temp / "complete.h").write_text("int complete(char *, char **);\n")
         # Production BIOS retains the same pointer table through its linker script.
         linker = temp / "commands.ld"
@@ -33,6 +37,7 @@ def main():
             config = ["-DTERM_MINI", "-DTERM_NO_HIST", "-DTERM_NO_COMPLETE"] if mini else []
             sources = [str(tests / "pffs_console_test.c"), str(bios / "cmd_pffs.c"),
                        str(bios / "console_input.c"), str(bios / "pffs/transfer.c"),
+                       str(bios / "pffs/load.c"),
                        str(bios / ("readline_simple.c" if mini else "readline.c"))]
             subprocess.run([*flags, *config, *sources, *core, "-Wl,-T," + str(linker),
                             "-o", str(binary)], check=True)

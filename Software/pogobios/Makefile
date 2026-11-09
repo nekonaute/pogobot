@@ -29,6 +29,7 @@ OBJECTS = \
 		$(PB_BD)/spiflash.o					\
 		$(PB_BD)/console_input.o                 \
 		$(PB_BD)/cmd_pffs.o                      \
+		$(PB_BD)/load.o                          \
 		$(PB_BD)/transfer.o                      \
 		$(PB_BD)/main.o	
 

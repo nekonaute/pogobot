@@ -6,11 +6,15 @@
 #include "pffs/flash_file.h"
 #include "pffs/flash_log.h"
 #include "pffs/transfer.h"
+#include "pffs/load.h"
 #include <pogobot.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef REMOCON
+#include <generated/csr.h>
+#endif
 
 static struct {
     pogo_flash_log_t log; /* One shared page cache, including UART transfers. */
@@ -443,10 +447,41 @@ static void shell_execute(char **words, unsigned count) {
         return;
     }
     const char *command = words[0];
+#ifndef REMOCON
+    if (strcmp(command, "load_run") == 0) {
+        pogo_flash_file_info_t info;
+        if (count != 2u || !bios_pffs_controller_name_valid(words[1])) {
+            puts("Usage: load_run <name> (1..32 printable bytes, no spaces)");
+        } else {
+            /* Name-only lookup avoids silently selecting numeric file IDs.
+             * A failed lookup/load must never boot a previously valid image. */
+            pogo_flash_file_status_t status =
+                pogo_flash_file_find_by_name(words[1], &info);
+            if (status == POGO_FLASH_FILE_OK) {
+                if (bios_pffs_load_controller(info.id, state.log.page)) {
+                    reboot_ctrl_write(0xad); /* Same user image as run 1. */
+                    return;
+                }
+            } else {
+                printf("load_run: %s: %s\n", words[1],
+                       pogo_flash_file_status_string(status));
+            }
+        }
+        /* Show red immediately and retain red for subsequent idle blinks,
+         * including when a UART connection has disabled the idle animator. */
+        rgb_blink_set_color(50, 0, 0);
+        pogobot_led_setColor(50, 0, 0);
+        return;
+    }
+#endif
     if (strcmp(command, "help") == 0 && count == 1u) {
         puts("help | ls | df | stat <id|name> | cat <id|name> | rm <id|name>");
         puts("touch <id> <name|-> [bytes] | mv <id|name> <new_name|->");
         puts("write <id|name> <offset> <hexbytes> | format YES");
+#ifndef REMOCON
+        puts("load <id|name>: install raw controller; then execute run");
+        puts("load_run <name>: install/start named controller (UART or IR)");
+#endif
         puts("UART upload/download: Software/pffs_transfer.py (put/get, CRC, "
              "ACK)");
         puts("abort <session_hex> cancels a transfer; interrupted replacement "
@@ -509,6 +544,19 @@ static void shell_execute(char **words, unsigned count) {
         }
         return;
     }
+#ifndef REMOCON
+    /* Like serialboot, installation replaces the normal application image
+     * but leaves the prompt and PFFS source available until run is requested. */
+    if (strcmp(command, "load") == 0 && count == 2u) {
+        pogo_flash_file_info_t info;
+        pogo_flash_file_status_t status = resolve_file(words[1], &info);
+        if (status != POGO_FLASH_FILE_OK)
+            printf("load: %s\n", pogo_flash_file_status_string(status));
+        else
+            bios_pffs_load_controller(info.id, state.log.page);
+        return;
+    }
+#endif
     if (strcmp(command, "mv") == 0 && count == 3u) {
         pogo_flash_file_info_t info;
         pogo_flash_file_status_t status = resolve_file(words[1], &info);
@@ -611,6 +659,11 @@ PFFS_COMMAND(ls, "List PFFS files and validate CRCs");
 PFFS_COMMAND(df, "PFFS sector and file capacity");
 PFFS_COMMAND(stat, "stat <id|name>");
 PFFS_COMMAND(cat, "cat <id|name> (hex file / escaped log)");
+#ifndef REMOCON
+PFFS_COMMAND(load, "load <id|name> (install raw controller; then run)");
+static void load_run_handler(int n, char **p) { pffs_command("load_run", n, p); }
+define_command(load_run, load_run_handler, "Load/run named PFFS controller; red on failure", BOOT_CMDS);
+#endif
 PFFS_COMMAND(touch, "touch <id> <name|-> [bytes]");
 PFFS_COMMAND(write, "write <id|name> <offset> <hexbytes> (one page)");
 PFFS_COMMAND(mv, "mv <id|name> <new_name|->");

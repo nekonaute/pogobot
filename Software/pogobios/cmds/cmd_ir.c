@@ -31,6 +31,7 @@
 #ifdef REMOCON
 #include <boot.h>
 #include <sfl.h>
+#include "pffs/load.h"
 #endif
 #include <ir_boot.h>
 
@@ -1167,6 +1168,20 @@ rc_start_handler( int nb_params, char **params )
 
 define_command( rc_start, rc_start_handler,
                 "Start all pogobots available through infrared", POGO_CMDS );
+
+/* Keep rc_start's repeated broadcast/cancellation behavior. The receiver
+ * resolves this exact name locally and boots only after verified installation. */
+static void rc_load_run_handler(int nb_params, char **params)
+{
+    if (nb_params != 1 || !bios_pffs_controller_name_valid(params[0])) {
+        puts("Usage: rc_load_run <name> (1..32 printable bytes, no spaces)");
+        return;
+    }
+    char *request[] = {"load_run", params[0]};
+    send_command(2, request, 1, 200);
+}
+define_command(rc_load_run, rc_load_run_handler,
+               "Load/run named PFFS controller on robots; repeat until key", POGO_CMDS);
 
 
 /**

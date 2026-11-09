@@ -5,7 +5,11 @@
 #include "pffs.h"
 #include "pffs/flash_file.h"
 #include "pffs/flash_log.h"
+#include "pffs/load.h"
+#include "pffs/transfer.h"
 #include "pogobot.h"
+#include "boot.h"
+#include "ir_boot.h"
 #include "readline.h"
 #include <assert.h>
 #include <stdbool.h>
@@ -19,6 +23,63 @@ static unsigned programs, erases, dangerous_calls;
 static bool torn;
 static uint32_t now_us;
 static const char *input;
+static unsigned controller_starts;
+static uint8_t led_color[3], blink_color[3];
+void reboot_ctrl_write(uint32_t value) {
+    assert(value == 0xadu && check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET));
+    ++controller_starts;
+}
+
+/* NOR faults exercise the real controller installer, not a duplicate copy of
+ * its state machine. All source/user pages remain guarded separately below. */
+static unsigned controller_erases, controller_programs, marker_erases, ir_resets;
+static bool marker_erase_fails, controller_erase_fails, late_corruption;
+static uint32_t failed_program_address = UINT32_MAX;
+static uint32_t corrupt_source_address = UINT32_MAX;
+
+uint8_t pffs_test_flash_read(uint32_t address) {
+    assert(address < sizeof(flash));
+    return flash[address];
+}
+uint8_t check_flash_state(const char *text, uint32_t address) {
+    assert(address + strlen(text) <= sizeof(flash));
+    return memcmp(flash + address, text, strlen(text)) == 0;
+}
+uint8_t flash_invalidate_user_image(void) {
+    if (marker_erase_fails)
+        return 0;
+    ++marker_erases;
+    memset(flash + FLASH_OK_OFFSET, 0xff, 4096u);
+    return 1;
+}
+void ir_boot_reset_v2_upload(void) { ++ir_resets; }
+void erase_flash_sector(unsigned address) {
+    assert(address >= POGOBIOS_CONTROLLER_OFFSET &&
+           address + SPIFLASH_SECTOR_SIZE <=
+               POGOBIOS_CONTROLLER_OFFSET + POGOBIOS_CONTROLLER_SIZE);
+    assert(address % SPIFLASH_SECTOR_SIZE == 0u);
+    ++controller_erases;
+    if (!controller_erase_fails)
+        memset(flash + address, 0xff, SPIFLASH_SECTOR_SIZE);
+    if (corrupt_source_address != UINT32_MAX) {
+        flash[corrupt_source_address] ^= 1u;
+        corrupt_source_address = UINT32_MAX;
+    }
+}
+void write_to_flash(unsigned address, const unsigned char *data, unsigned length) {
+    bool controller = address >= POGOBIOS_CONTROLLER_OFFSET &&
+        address + length <= POGOBIOS_CONTROLLER_OFFSET + POGOBIOS_CONTROLLER_SIZE;
+    assert(controller || (address >= FLASH_OK_OFFSET &&
+                           address + length <= FLASH_V2_PARTIAL_OFFSET + 10u));
+    if (controller)
+        ++controller_programs;
+    for (unsigned i = 0u; i < length; ++i) {
+        if (address + i != failed_program_address)
+            flash[address + i] &= data[i];
+    }
+    if (late_corruption && address == POGOBIOS_CONTROLLER_OFFSET + 256u)
+        flash[POGOBIOS_CONTROLLER_OFFSET + 16u] ^= 1u;
+}
 
 void erase_write_section_flash(void) {
     memset(flash + POGOBOT_USER_FLASH_START_OFFSET, 0xff,
@@ -47,9 +108,10 @@ void read_page_flash(uint16_t page, char *data) {
 }
 uint16_t pogobot_helper_getid(void) { return 42; }
 void pogobot_led_setColor(uint8_t r, uint8_t g, uint8_t b) {
-    (void)r;
-    (void)g;
-    (void)b;
+    led_color[0] = r; led_color[1] = g; led_color[2] = b;
+}
+void rgb_blink_set_color(uint8_t r, uint8_t g, uint8_t b) {
+    blink_color[0] = r; blink_color[1] = g; blink_color[2] = b;
 }
 void rgb_blink(void) {}
 void pogobot_stopwatch_reset(time_reference_t *t) { t->origin = now_us; }
@@ -100,6 +162,203 @@ static int edited(const char *line, char output[160]) {
     input = line;
     return readline(output, 160);
 }
+
+static uint8_t controller_image[POGOBIOS_CONTROLLER_SIZE + 256u];
+static uint8_t saved_flash[sizeof(flash)];
+
+static void seed_old_controller(void) {
+    memset(flash + POGOBIOS_CONTROLLER_OFFSET, 0xa5, POGOBIOS_CONTROLLER_SIZE);
+    memset(flash + FLASH_OK_OFFSET, 0xff, 4096u);
+    memcpy(flash + FLASH_OK_OFFSET, FLASH_IS_OK, strlen(FLASH_IS_OK));
+}
+
+/* Precondition/console rejections must not even invalidate the prior image or
+ * discard its cached IR progress. Whole-flash comparison also guards PFFS. */
+static void expect_load_rejected(const char *line, bool serial) {
+    memcpy(saved_flash, flash, sizeof(flash));
+    unsigned before = ir_resets;
+    unsigned erased = controller_erases + marker_erases;
+    unsigned written = controller_programs;
+    command(line, serial);
+    assert(memcmp(saved_flash, flash, sizeof(flash)) == 0);
+    assert(ir_resets == before && controller_programs == written &&
+           controller_erases + marker_erases == erased);
+}
+
+static void controller_selftest(void) {
+    memset(flash, 0xa5, sizeof(flash));
+    erase_write_section_flash();
+    bios_pffs_init();
+    seed_old_controller();
+    expect_load_rejected("load 20", true); /* Virgin filesystem. */
+    assert(pogo_flash_file_format() == POGO_FLASH_FILE_OK);
+    expect_load_rejected("load missing", true);
+    expect_load_rejected("load 0", true);
+    expect_load_rejected("load", true);
+    expect_load_rejected("load 20 extra", true);
+    for (unsigned i = 0u; i < sizeof(controller_image); ++i)
+        controller_image[i] = (uint8_t)(i * 29u + i / 256u);
+    controller_image[0] = 0x6f; /* Raw RISC-V JAL entry, not a file envelope. */
+    const unsigned sizes[] = {4u, 255u, 256u, 257u, 65536u, 65537u,
+                              POGOBIOS_CONTROLLER_SIZE};
+    for (unsigned i = 0u; i < sizeof(sizes) / sizeof(sizes[0]); ++i) {
+        unsigned length = sizes[i];
+        assert(pogo_flash_file_create_bytes(20, "controller", length, 1,
+                                           controller_image) == POGO_FLASH_FILE_OK);
+        seed_old_controller();
+        memcpy(saved_flash, flash, sizeof(flash));
+        unsigned erased = controller_erases, written = controller_programs;
+        unsigned reset = ir_resets;
+        command(i & 1u ? "load 20" : "load controller", true);
+        unsigned extent = (length + 255u) & ~255u;
+        assert(controller_programs == written + extent / 256u);
+        assert(controller_erases == erased +
+               (extent + SPIFLASH_SECTOR_SIZE - 1u) / SPIFLASH_SECTOR_SIZE);
+        assert(ir_resets == reset + 1u);
+        assert(check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET));
+        assert(memcmp(flash + POGOBIOS_CONTROLLER_OFFSET, controller_image,
+                      length) == 0);
+        for (unsigned byte = length; byte < extent; ++byte)
+            assert(flash[POGOBIOS_CONTROLLER_OFFSET + byte] == 0xffu);
+        assert(memcmp(flash, saved_flash, POGOBIOS_CONTROLLER_OFFSET) == 0);
+        assert(memcmp(flash + USRPRG_CRC, saved_flash + USRPRG_CRC,
+                      FLASH_OK_OFFSET - USRPRG_CRC) == 0);
+        assert(memcmp(flash + FLASH_OK_OFFSET + 4096u,
+                      saved_flash + FLASH_OK_OFFSET + 4096u,
+                      sizeof(flash) - FLASH_OK_OFFSET - 4096u) == 0);
+        assert(pogo_flash_file_delete(20) == POGO_FLASH_FILE_OK);
+    }
+    const unsigned bad_sizes[] = {0u, 1u, 3u, POGOBIOS_CONTROLLER_SIZE + 1u};
+    for (unsigned i = 0; i < sizeof(bad_sizes) / sizeof(bad_sizes[0]); ++i) {
+        assert(pogo_flash_file_create_bytes(20, "controller", bad_sizes[i], 1,
+                                           controller_image) == POGO_FLASH_FILE_OK);
+        expect_load_rejected("load controller", true);
+        assert(pogo_flash_file_delete(20) == POGO_FLASH_FILE_OK);
+    }
+    assert(pogo_flash_file_create_bytes(20, "controller", 513u, 1,
+                                       controller_image) == POGO_FLASH_FILE_OK);
+    expect_load_rejected("load controller", false); /* UART-only, like files. */
+    command("put deadbeef 21 pending 48 00000000 raw", true);
+    assert(bios_pffs_busy());
+    expect_load_rejected("load controller", true);
+    command("abort deadbeef", true);
+    assert(!bios_pffs_busy());
+
+    pogo_flash_file_info_t info;
+    assert(pogo_flash_file_find(20, &info) == POGO_FLASH_FILE_OK);
+    uint32_t source = POGOBOT_USER_FLASH_START_OFFSET + info.first_page * 256u;
+    flash[source + 42u] ^= 1u;
+    expect_load_rejected("load 20", true); /* Source CRC. */
+    flash[source + 42u] ^= 1u;
+    uint32_t catalog_crc = POGOBOT_USER_FLASH_START_OFFSET +
+        ((20u - 1u) / 5u) * 4096u + 252u;
+    flash[catalog_crc] ^= 1u;
+    expect_load_rejected("load 20", true); /* Catalog CRC. */
+    flash[catalog_crc] ^= 1u;
+
+    for (unsigned fault = 0; fault < 7u; ++fault) {
+        seed_old_controller();
+        unsigned written = controller_programs, reset = ir_resets;
+        marker_erase_fails = fault == 0;
+        controller_erase_fails = fault == 2;
+        late_corruption = fault == 4;
+        failed_program_address = fault == 1 ? FLASH_V2_PARTIAL_OFFSET :
+            fault == 3 ? POGOBIOS_CONTROLLER_OFFSET :
+            fault == 6 ? FLASH_OK_OFFSET : UINT32_MAX;
+        if (fault == 5)
+            corrupt_source_address = source + 256u + 8u;
+        command("load controller", true);
+        assert(check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET) == (fault == 0));
+        assert(ir_resets == reset + (fault != 0));
+        if (fault <= 1u) {
+            assert(controller_programs == written);
+            assert(flash[POGOBIOS_CONTROLLER_OFFSET] == 0xa5);
+        } else {
+            assert(check_flash_state(FLASH_IS_PARTIAL, FLASH_V2_PARTIAL_OFFSET));
+        }
+        if (fault == 5)
+            flash[source + 256u + 8u] ^= 1u;
+        marker_erase_fails = controller_erase_fails = late_corruption = false;
+        failed_program_address = UINT32_MAX;
+    }
+    /* Retry after a failed completion marker installs and commits normally. */
+    command("load controller", true);
+    assert(check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET));
+    assert(pogo_flash_file_delete(20) == POGO_FLASH_FILE_OK);
+    const char *bad_magic[] = {"\x7f" "ELF", "PFT1"};
+    for (unsigned i = 0u; i < 2u; ++i) {
+        memcpy(controller_image, bad_magic[i], 4u);
+        assert(pogo_flash_file_create_bytes(20, "controller", 513u, 1,
+                                           controller_image) == POGO_FLASH_FILE_OK);
+        expect_load_rejected("load 20", true);
+        assert(pogo_flash_file_delete(20) == POGO_FLASH_FILE_OK);
+    }
+    assert(pogo_flash_file_create_bytes(20, "controller", 513u, PFT_FORMAT,
+                                       controller_image) == POGO_FLASH_FILE_OK);
+    expect_load_rejected("load 20", true);
+    assert(pogo_flash_file_delete(20) == POGO_FLASH_FILE_OK);
+    pogo_flash_log_t log;
+    assert(pogo_flash_log_initialize(&log, 20, "events", 1, false, NULL) ==
+           POGO_FLASH_LOG_OK);
+    expect_load_rejected("load events", true);
+    puts("PFFS controller install/fault injection: PASS");
+}
+
+static void expect_start_failed(const char *line) {
+    unsigned starts = controller_starts;
+    expect_load_rejected(line, false);
+    assert(controller_starts == starts);
+    assert(led_color[0] == 50 && led_color[1] == 0 && led_color[2] == 0);
+    assert(memcmp(led_color, blink_color, sizeof(led_color)) == 0);
+}
+
+/* Exercise the actual IR-enabled dispatcher and loader together, including
+ * exact name lookup and refusal to boot an older image after a failure. */
+static void controller_start_selftest(void) {
+    char longest[POGO_FLASH_FILE_MAX_NAME + 1u];
+    memset(longest, 'x', sizeof(longest) - 1u);
+    longest[sizeof(longest) - 1u] = '\0';
+    assert(bios_pffs_controller_name_valid(longest));
+    assert(!bios_pffs_controller_name_valid(NULL));
+    assert(!bios_pffs_controller_name_valid(""));
+    assert(!bios_pffs_controller_name_valid("two words"));
+    assert(!bios_pffs_controller_name_valid("line\nbreak"));
+    assert(pogo_flash_file_format() == POGO_FLASH_FILE_OK);
+    bios_pffs_init();
+    seed_old_controller();
+    controller_image[0] = 0x6f;
+    assert(pogo_flash_file_create_bytes(7, "controller", 513u, 1u,
+                                       controller_image) == POGO_FLASH_FILE_OK);
+    expect_start_failed("load_run missing");
+    expect_start_failed("load_run 7"); /* ID 7 exists, but this name does not. */
+    expect_start_failed("load_run");
+    expect_start_failed("load_run controller extra");
+    expect_start_failed("load_run abcdefghijklmnopqrstuvwxyz1234567");
+    command("load_run controller", false);
+    assert(controller_starts == 1u);
+    assert(memcmp(flash + POGOBIOS_CONTROLLER_OFFSET, controller_image, 513u) == 0);
+    /* A numeric name must select its named file, not the different ID 7. */
+    assert(pogo_flash_file_create_bytes(8, "7", 257u, 1u,
+                                       controller_image) == POGO_FLASH_FILE_OK);
+    unsigned written = controller_programs;
+    command("load_run 7", false);
+    assert(controller_starts == 2u && controller_programs == written + 2u);
+    pogo_flash_file_info_t info;
+    assert(pogo_flash_file_find(7, &info) == POGO_FLASH_FILE_OK);
+    uint32_t source = POGOBOT_USER_FLASH_START_OFFSET + info.first_page * 256u;
+    flash[source + 3u] ^= 1u;
+    expect_start_failed("load_run controller");
+    flash[source + 3u] ^= 1u;
+    failed_program_address = POGOBIOS_CONTROLLER_OFFSET;
+    command("load_run controller", false);
+    assert(controller_starts == 2u && !check_flash_state(FLASH_IS_OK, FLASH_OK_OFFSET));
+    assert(led_color[0] == 50u && blink_color[0] == 50u);
+    failed_program_address = UINT32_MAX;
+    command("load_run controller", false);
+    assert(controller_starts == 3u);
+    puts("PFFS named IR controller start/fault injection: PASS");
+}
+
 static void selftest(void) {
     uint8_t page[256];
     pogo_flash_file_info_t info;
@@ -212,6 +471,8 @@ static void selftest(void) {
     assert(!bios_pffs_busy());
     for (unsigned i = 0; i < POGOBOT_USER_FLASH_START_OFFSET; ++i)
         assert(flash[i] == 0xa5);
+    controller_selftest();
+    controller_start_selftest();
     puts("PFFS BIOS console/NOR integration: PASS");
 }
 

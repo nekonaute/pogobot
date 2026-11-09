@@ -238,7 +238,10 @@ int main(void) {
 				nb_params = bios_console_parse(buffer, &command, params);
 				cmd = bios_console_dispatch(command, nb_params, params, true);
 				if (cmd) {
-                    if (!bios_pffs_busy()) update_led_status();
+                    /* load_run owns its failure LED; marker colors would
+                     * hide a missing/corrupt file behind an older image. */
+                    if (!bios_pffs_busy() && strcmp(cmd->name, "load_run") != 0)
+                        update_led_status();
                 } else {
                     printf("Command not found\n");
                 }
@@ -283,9 +286,9 @@ int main(void) {
                     nb_params = bios_console_parse(buffer, &command, params);
                     printf("Command : %s\n", command);
                     cmd = bios_console_dispatch(command, nb_params, params, false);
-                    if (cmd) {
+                    if (cmd && strcmp(cmd->name, "load_run") != 0) {
                         update_led_status();
-                    } else {
+                    } else if (!cmd) {
                         printf("Command not found\n");
                     }
                 }

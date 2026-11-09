@@ -2,7 +2,8 @@
 #define POGOBIOS_PFFS_H
 #include <stdbool.h>
 
-/* Private BIOS services: no PFFS state or APIs are added to libpogobot.a. */
+/* Private console services; transfer state and controller installation stay
+ * inside the BIOS while the shared file/log APIs are provided by pogolib. */
 void bios_pffs_init(void);
 void bios_pffs_service(void);
 bool bios_pffs_busy(void);
