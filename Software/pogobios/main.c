@@ -248,6 +248,10 @@ int main(void) {
             while ( pogobot_infrared_message_available() ) {
                 message_t msg;
                 pogobot_infrared_recover_next_message( &msg );
+                // A valid v2 START also enters upload mode if the remote's
+                // earlier ir_flash command was lost over infrared.
+                if (ir_boot_try_v2_start(&msg))
+                    continue;
                 for( i=0; i<strlen(str_magic); i++) {
                     if ( i <= msg.header.payload_length ) {
                         if(msg.payload[i] != str_magic[i]) break;
