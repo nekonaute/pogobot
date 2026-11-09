@@ -1133,6 +1133,6 @@ uint8_t magn_init(void);
 // Returns :
 // - 1 if successfull else 0
 // *****
-uint8_t magn_select_odr(uint8_t odr)
+uint8_t magn_select_odr(uint8_t odr);
 
 #endif /* __POGOBOT_H__ */
