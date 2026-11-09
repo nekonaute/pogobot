@@ -25,7 +25,7 @@ in order to upload the code. The robot reboot on the remote control code.
 
 Connect the remote from the folder where the usercode was compiled.
 
-    make connect (TTY=/dev/ttyUSBX) (tty of the remote)
+    make connect TTY=/dev/ttyUSBX
 
 When a remote starts, it exposes the standard pogobot bios. You need to start the remote bios by typing : 
 
@@ -49,3 +49,51 @@ Reboot the robot. The robots blink slowly green if a program is available. (if i
 The command "rc_flash_robot" send to the robots a special command to switch to listen mode. Robots blink blue rapidily. <br>
 When the programmation is done, the robots blink green slowly. <br>
 If the robots blink orange, the programmation is partiel. Change the distance or angle of the remote and start again the "rc_flash_robot" command.
+
+### Reliable IR firmware upload
+
+Install matching current Pogobios builds on the remote and robots, and update
+the SDK tools used by the example Makefile so they include the current
+`litex_term.py` and `ir_upload_v2.py`. For a firmware image, use the normal
+command in the example directory:
+
+    make connect TTY=/dev/ttyUSBX
+
+After starting the remote with `run`, enter `rc_flash_robot` at its prompt.
+The updated remote announces versioned IR support before requesting the image,
+and the updated terminal selects that mode automatically for the single firmware
+image in the example Makefile. `--ir-v2` remains an optional manual override;
+it is not needed for this command. IR programming requires versioned frames;
+legacy LOAD/JUMP/ABORT broadcasts are rejected. Direct cable uploads use the
+existing serial protocol. Use a two-entry `images.json` over a cable, or upload
+each image separately for versioned IR transfers.
+
+The current version accepts one image per transfer in the gateware slot
+(`0x240000`) or firmware slot (`0x260000`), up to 128 KiB. The PC sends a versioned
+START, numbered 64-byte DATA chunks, four Reed–Solomon parity frames per group
+of 16 data chunks, and two END messages per pass. Four groups are interleaved
+to spread short bursts of lost frames. Up to four missing frames among a
+group's 20 data and parity frames can be recovered. The normal command uses
+one coded pass. For additional full passes, use for example:
+
+    POGOBOT_IR_COPIES=2 make connect TTY=/dev/ttyUSBX
+
+Valid copy counts are 1–5. `POGOBOT_IR_FEC=0 make connect TTY=/dev/ttyUSBX`
+disables parity for comparison and defaults to three uncoded passes. Full
+passes use the same transfer ID and retain accepted chunks. The robot erases
+the destination at the first START, skips duplicate chunks, reads every write
+back, and checks a CRC-32 over the exact image before writing `FlashIsOK`.
+A robot that still misses chunks keeps the image invalid. A new transfer ID
+restarts and erases the image; repeated START with the same ID and metadata
+preserves progress in RAM until reboot.
+
+The remote still pauses 200 ms after each data or parity frame and three
+seconds after START for flash erase. At 60 KiB, 960 data plus 240 parity frames
+make those pauses about four minutes for one coded pass, before other overhead.
+The terminal prints time and remote acknowledgement per pass. Robot logs
+report recovered chunks, decoder time, flash erase/write time, and drop
+counters; use hardware trials to determine whether pacing can safely change.
+
+Serial acknowledgements confirm processing by the remote, not successful
+reception or completion by each robot. Check each robot's status before running
+the new image.
