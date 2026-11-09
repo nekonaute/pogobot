@@ -491,3 +491,17 @@ Run `python3 Software/tests/run_api_fault_test.py` to exercise production IR
 send bounds and FIFO backpressure, full security-register writes, and signed
 timer conversions under address/undefined-behavior sanitizers. These checks
 use simulated hardware; target timing and peripherals need robot validation.
+
+
+## Program and user-data flash capacity on v3
+
+The linker allowance for normal and bootloader Pogobios, and generated SDK
+programs, is 96 KiB. The combined bootloader reserves that complete allowance
+at offset 0x20000. The physical firmware upload slot remains 128 KiB.
+
+The separate user-data region spans physical 0x90000..0x1fffff: 5888 pages of
+256 bytes on a v3 head with 2 MiB flash. Page APIs accept uint16_t and reject
+IDs outside 0..5887. Gateware, application firmware, CRC metadata and validity
+markers remain outside this region. Rebuild applications against the updated
+SDK declarations. The flash-page example checks boundaries including pages
+255, 256 and 5887; erasing the user region removes all data stored there.
