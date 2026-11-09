@@ -27,6 +27,9 @@ OBJECTS = \
 		$(PB_BD)/crc32.o					\
 		$(PB_BD)/system.o					\
 		$(PB_BD)/spiflash.o					\
+		$(PB_BD)/console_input.o                 \
+		$(PB_BD)/cmd_pffs.o                      \
+		$(PB_BD)/transfer.o                      \
 		$(PB_BD)/main.o	
 
 ifneq "$(or $(TERM_NO_COMPLETE),$(TERM_MINI))" ""
@@ -58,6 +61,9 @@ all: $(PB_BD)/pogobios.bin
 
 # Compiler-option changes in this Makefile must rebuild existing objects.
 $(OBJECTS): Makefile
+
+# LiteX completion must use the same enlarged line size as our local editor.
+$(PB_BD)/complete.o: CFLAGS += -include $(POGOBIOS_DIR)/readline.h
 
 pogolib.a:
 	$(MAKE) -C $(POGOLIB_DIR) TARGET=$(TARGET) LTO=$(LTO)
@@ -95,6 +101,9 @@ $(PB_BD)/%.o: $(POGOBIOS_DIR)/%.c
 	$(compile)
 
 $(PB_BD)/%.o: $(POGOBIOS_DIR)/cmds/%.c
+	$(compile)
+
+$(PB_BD)/%.o: $(POGOBIOS_DIR)/pffs/%.c
 	$(compile)
 
 $(PB_BD)/%.o: $(BIOS_DIRECTORY)/%.c

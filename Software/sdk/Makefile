@@ -55,6 +55,7 @@ sdk: $(POGOLIB_BUILDDIR)/libpogobot.a
 	cp $(POGOBIOS_DIR)/linker.ld $(BUILD_SDK_DIR)/tools
 	cp ../litex_term.py $(BUILD_SDK_DIR)/tools
 	cp ../ir_upload_v2.py $(BUILD_SDK_DIR)/tools
+	cp ../pffs_transfer.py $(BUILD_SDK_DIR)/tools
 	cp $(POGOLIB_BUILDDIR)/libpogobot.a $(BUILD_SDK_DIR)/libs
 	cp $(BUILD_POGO_DIR)/software/libcompiler_rt/libcompiler_rt.a $(BUILD_SDK_DIR)/libs
 	cp $(BUILD_POGO_DIR)/software/libc/libc.a $(BUILD_SDK_DIR)/libs
