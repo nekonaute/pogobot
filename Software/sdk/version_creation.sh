@@ -13,7 +13,11 @@ else
     echo "PATH used : " $1
 fi
 
-DEPEN_DIR=../../dependencies
+# Use local dependencies for native builds and the image copy in Apptainer.
+DEPEN_DIR=${DEPEN_DIR:-../../dependencies}
+if [ ! -d "$DEPEN_DIR" ] && [ -d /pogobot/dependencies ]; then
+    DEPEN_DIR=/pogobot/dependencies
+fi
 
 if [ -d ${DEPEN_DIR} ]
 then
@@ -42,4 +46,3 @@ MYVAR=`riscv64-unknown-elf-gcc --version | head -n 1`
 echo "#define GCC_VERSION " ${MYVAR##* } >> ${DEST}
 
 echo "\n\n#endif\n" >> ${DEST}
-

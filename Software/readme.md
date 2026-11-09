@@ -479,3 +479,15 @@ Note : Egg-link : fill used by setuptools when a Python package is installed and
 
 Suppress egg-info files using (on Ubuntu):
 rm -f ~/.local/lib/python*/site-packages/*-link .
+
+## Build and library verification
+
+Pogobios and pogolib enable LTO and function/data sections by default. Use
+`LTO=0` in both builds after cleaning to compare without LTO. Fat objects keep
+native code in `libpogobot.a` for applications that link without LTO. Changing
+LTO mode requires a clean rebuild or `make -B`.
+
+Run `python3 Software/tests/run_api_fault_test.py` to exercise production IR
+send bounds and FIFO backpressure, full security-register writes, and signed
+timer conversions under address/undefined-behavior sanitizers. These checks
+use simulated hardware; target timing and peripherals need robot validation.
