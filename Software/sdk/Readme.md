@@ -27,6 +27,28 @@ We designed a robot with motors, SoC (system-on-chip) inside a
 iCE40LP8K FPGA chip including a softcore processor, motors, sensors, LED, IR communication.
 This SDK allows you to compile and upload code on the robot.
 
+The updated v2.7.1 library checks IR payload lengths before copying and waits
+for FIFO space before each transmitted byte. It also corrects full
+security-register writes and signed timer conversions. Rebuild applications
+with this SDK to include these fixes. Public function signatures are unchanged.
+
+PFFS v4 file and append-log APIs are now included in `libpogobot.a` and
+exposed by `<pogobot.h>`, `<pffs/flash_file.h>` and `<pffs/flash_log.h>`.
+Existing functions and the v4 flash format are unchanged. Applications no longer
+need to compile PFFS sources from pogo-utils. The final link removes unused
+functions, so applications that do not use PFFS retain their usual footprint.
+
+Native Pogosim consumers compile the SDK's `src/pffs/flash_*.c` sources with
+`POGOBOT_PFFS_SIMULATOR` defined and compatible Pogosim headers. Hardware builds
+link the archive with the real SPI erase backend. The SDK's
+`tools/pffs_transfer.py` manages files over a direct BIOS UART connection.
+
+PFFS shares the 5,888-page user-flash region. Catalogs reserve the first 64 KiB;
+files use the remaining 1,408 KiB. Raw page writes can overwrite files. Creation
+can format unformatted/corrupt catalogs: check `pogo_flash_file_check()` first
+when preserving data. Operations require serialized access; writes and defrag
+are not power-failure atomic. BIOS commands require explicit `format YES`.
+
 Please visit : https://github.com/nekonaute/pogobot-sdk or https://github.com/nekonaute/pogobot
 
 Requirements

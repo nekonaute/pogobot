@@ -24,6 +24,11 @@ OBJECTS = $(POGOLIB_BUILDDIR)/adc.o					\
 
 OBJECTS += $(POGOLIB_BUILDDIR)/crt0.o
 
+# Keep the complete PFFS API in the archive; final links discard unused pieces.
+PFFS_OBJECTS = $(addprefix $(POGOLIB_BUILDDIR)/,flash_file_read.o flash_file_secure.o \
+    flash_file_name.o flash_file_write.o flash_file_status.o flash_log.o)
+OBJECTS += $(PFFS_OBJECTS)
+
 all: $(POGOLIB_BUILDDIR)/libpogobot.a
 
 # Retain every API in the archive, with native code for non-LTO application links.
@@ -52,6 +57,10 @@ $(POGOLIB_BUILDDIR)/%.o: $(POGOBIOS_DIR)/%.c
 	$(compile)
 
 $(POGOLIB_BUILDDIR)/%.o: $(POGOLIB_DIR)/%.c
+	@mkdir -p $(@D)
+	$(compile)
+
+$(POGOLIB_BUILDDIR)/%.o: $(POGOLIB_DIR)/pffs/%.c
 	@mkdir -p $(@D)
 	$(compile)
 

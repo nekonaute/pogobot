@@ -1136,6 +1136,12 @@ int magn_read_XYZ(int16_t* x, int16_t* y, int16_t* z, uint16_t timeout_ms);
 **/
 uint8_t magn_init(void);
 
+
+/* PFFS file/log APIs are also available through their standalone public headers.
+ * Including declarations adds no flash/RAM cost when applications do not use them. */
+#include "pffs/flash_file.h"
+#include "pffs/flash_log.h"
+
 // *****
 // Changes the magnetometer output data rate (has an effect on the low pass filter bandwidth) 
 // Args : 
