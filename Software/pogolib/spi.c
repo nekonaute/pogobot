@@ -45,22 +45,22 @@ void IMUADCEnd(void)
 
 void spi_single_tx(uint8_t out) {
 	int bit;
-	int in;
+	// Preserve the existing MISO reads without shifting an unused accumulator.
 	for (bit = 7; bit >= 0; bit--) {    // Get MSB first (7 bits only)
 		if (out & (1 << bit)) {
 			spiflash_bitbang_write((0 << PIN_CLK) | (1 << PIN_MOSI));
-			in = (in << 1) | spiflash_miso_read();
+			(void)spiflash_miso_read();
 			spiflash_bitbang_write((1 << PIN_CLK) | (1 << PIN_MOSI));
-			in = (in << 1) | spiflash_miso_read();
+			(void)spiflash_miso_read();
 			spiflash_bitbang_write((0 << PIN_CLK) | (1 << PIN_MOSI));
-			in = (in << 1) | spiflash_miso_read();
+			(void)spiflash_miso_read();
 		} else {
 			spiflash_bitbang_write((0 << PIN_CLK) | (0 << PIN_MOSI));
-			in = (in << 1) | spiflash_miso_read();
+			(void)spiflash_miso_read();
 			spiflash_bitbang_write((1 << PIN_CLK) | (0 << PIN_MOSI));
-			in = (in << 1) | spiflash_miso_read();
+			(void)spiflash_miso_read();
 			spiflash_bitbang_write((0 << PIN_CLK) | (0 << PIN_MOSI));
-			in = (in << 1) | spiflash_miso_read();
+			(void)spiflash_miso_read();
 		}
 	}
 }
@@ -224,7 +224,7 @@ int8_t getMotorPowerMem(uint16_t *data) {
 
 void spiEraseSecurityRegister(uint8_t reg) {
     /* reg is 1, 2 or 3 to chose the corresponding register to be erased */
-    if(reg > 3) {
+    if(reg < 1 || reg > 3) {
         return;
     }
 	spiflash_bitbang_en_write(1);       // Enable bit-bang mode
@@ -249,8 +249,9 @@ int8_t spiWriteSecurityRegister(uint8_t reg, uint8_t addr, uint8_t *data, uint32
      * data are the bytes to put in the security register
      * size is the number of bytes to copy */
 
-    uint8_t i;
-    if( (reg > 3) | (addr+size > 256) ) {
+    // The supported 256-byte write needs a counter that cannot wrap at 255.
+    uint32_t i;
+    if (reg < 1 || reg > 3 || size > 256u - (uint32_t)addr) {
         return -1;
     }
 	spiflash_bitbang_en_write(1);       // Enable bit-bang mode
@@ -282,7 +283,8 @@ int8_t spiReadSecurityRegister(uint8_t reg, uint8_t addr, uint32_t size, uint8_t
      *    spiReadSecurityRegister(3, 0, 256);                         */
     
     uint32_t i;
-    if( (reg > 3) | (addr+size > 256) ) {
+    // Subtraction checks the range without overflowing addr + size.
+    if (reg < 1 || reg > 3 || size > 256u - (uint32_t)addr) {
         return -1;
     }
 	spiflash_bitbang_en_write(1);       // Enable bit-bang mode

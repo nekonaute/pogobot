@@ -31,6 +31,7 @@
 static char rx_buf[IR_NUMBER][UART_RINGBUFFER_SIZE_RX];
 static volatile unsigned int rx_produce[IR_NUMBER];
 static unsigned int rx_consume[IR_NUMBER];
+static volatile uint32_t rx_drop_count[IR_NUMBER];
 
 #define UART_RINGBUFFER_SIZE_TX 512
 #define UART_RINGBUFFER_MASK_TX (UART_RINGBUFFER_SIZE_TX-1)
@@ -66,7 +67,11 @@ void ir_uart_rx_isr(void)
                 }*/ /* end reboot block */
 				rx_produce[0] = rx_produce_next[0];
 
-			}
+			} else {
+                // Drain a full software ring so this interrupt cannot loop on one FIFO byte.
+                (void)ir_rx0_rx_read();
+                rx_drop_count[0]++;
+            }
 			ir_rx0_ev_pending_write(UART_EV_RX);
 		}
 	}
@@ -88,7 +93,10 @@ void ir_uart_rx_isr(void)
                     reboot_ptr[1] = 0;
                 }*/ /* end reboot block */
 				rx_produce[1] = rx_produce_next[1];
-			}
+			} else {
+                (void)ir_rx1_rx_read();
+                rx_drop_count[1]++;
+            }
 			ir_rx1_ev_pending_write(UART_EV_RX);
 		}
 	}
@@ -111,7 +119,10 @@ void ir_uart_rx_isr(void)
                     reboot_ptr[2] = 0;
                 }*/ /* end reboot block */
 				rx_produce[2] = rx_produce_next[2];
-			}
+			} else {
+                (void)ir_rx2_rx_read();
+                rx_drop_count[2]++;
+            }
 			ir_rx2_ev_pending_write(UART_EV_RX);
 		}
 	}
@@ -134,7 +145,10 @@ void ir_uart_rx_isr(void)
                     reboot_ptr[3] = 0;
                 }*/ /* end reboot block */
 				rx_produce[3] = rx_produce_next[3];
-			}
+			} else {
+                (void)ir_rx3_rx_read();
+                rx_drop_count[3]++;
+            }
 			ir_rx3_ev_pending_write(UART_EV_RX);
 		}
 	}
@@ -159,7 +173,7 @@ void ir_uart_rx_isr(void)
 char ir_uart_read(uint8_t channel)
 {
 	char c;
-    if(channel > IR_NUMBER)
+    if(channel >= IR_NUMBER)
 	{
         return 0;
 	}
@@ -177,13 +191,18 @@ char ir_uart_read(uint8_t channel)
 
 int ir_uart_read_nonblock(uint8_t channel)
 {
-    if(channel > IR_NUMBER)
+    if(channel >= IR_NUMBER)
 	{
         return 0;
 	} else {
 		return (rx_consume[channel] != rx_produce[channel]);
 	}
 	
+}
+
+uint32_t ir_uart_rx_drop_count(uint8_t channel)
+{
+    return channel < IR_NUMBER ? rx_drop_count[channel] : 0;
 }
 
 /*void ir_uart_write(char c)
@@ -214,6 +233,7 @@ void ir_uart_init(void)
     {
         rx_produce[i] = 0;
         rx_consume[i] = 0;
+        rx_drop_count[i] = 0;
         //reboot_ptr[i] = 0;
     }
 	//tx_produce = 0;
@@ -264,6 +284,12 @@ int ir_uart_read_nonblock(uint8_t channel)
 	return (IRn_rx_rxempty_read(channel) == 0);
 }
 
+uint32_t ir_uart_rx_drop_count(uint8_t channel)
+{
+    (void)channel;
+    return 0;
+}
+
 void ir_uart_init(void)
 {
 #ifdef CSR_IR_RX0_BASE
@@ -291,4 +317,3 @@ void ir_uart_sync(void)
 
 #endif // UART_POLLING
 #endif // CSR_IR_TX_BASE
-
