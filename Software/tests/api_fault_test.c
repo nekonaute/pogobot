@@ -14,6 +14,9 @@
 #define MAX_PAYLOAD_SIZE_BYTES 382
 #define MAX_NUMBER_OF_WORD 20
 #define NUMEL 20
+#define POGOBOT_USER_FLASH_START_OFFSET 0x90000u
+#define POGOBOT_USER_FLASH_PAGE_COUNT 5888u
+#define POGOBOT_USER_FLASH_PAGE_SIZE 256u
 #define pogobot_infrared_emitter_width_bits 2
 #define pogobot_infrared_emitter_power_oneThird 1
 #define pogobot_infrared_emitter_power_max 3
@@ -41,6 +44,8 @@ static uint32_t mock_ticks;
 static unsigned int spi_previous = 1u << PIN_CS, spi_bits, spi_count;
 static uint8_t spi_byte, spi_frame[512], spi_program[512];
 static unsigned int spi_program_count, spi_transactions;
+static uint32_t page_writes[4], page_reads[4], sector_erases[23];
+static unsigned page_write_count, page_read_count, sector_erase_count;
 
 static uint16_t pogobot_helper_getid(void) { return 0x1234; }
 static uint8_t pogobot_infrared_emitting_power_list(int a, int b, int c, int d)
@@ -90,6 +95,17 @@ static void spiflash_bitbang_write(unsigned int value)
     }
     if (!(spi_previous & cs) && (value & cs)) {
         spi_transactions++;
+        if (spi_count >= 4 && (spi_frame[0] == 0x02 || spi_frame[0] == 0x03 || spi_frame[0] == 0xd8)) {
+            uint32_t address = (uint32_t)spi_frame[1] << 16 |
+                               (uint32_t)spi_frame[2] << 8 | spi_frame[3];
+            if (spi_frame[0] == 0x02) {
+                assert(page_write_count < 4); page_writes[page_write_count++] = address;
+            } else if (spi_frame[0] == 0x03) {
+                assert(page_read_count < 4); page_reads[page_read_count++] = address;
+            } else {
+                assert(sector_erase_count < 23); sector_erases[sector_erase_count++] = address;
+            }
+        }
         if (spi_count && spi_frame[0] == 0x42) {
             memcpy(spi_program, spi_frame, spi_count);
             spi_program_count = spi_count;
@@ -180,11 +196,35 @@ static void test_signed_timers_and_counter_wrap(void)
     assert(ticks_to_microseconds(INT32_MAX) == 102261126);
 }
 
+/* Check address bytes emitted by the real driver at old/new page boundaries
+ * and ensure invalid IDs never touch SPI or an output buffer. */
+static void test_v3_user_flash_page_bounds(void)
+{
+    const uint16_t pages[] = {0, 255, 256, 5887};
+    uint8_t data[256] = {0}, output[256];
+    for (unsigned i = 0; i < 4; ++i) {
+        write_page_flash(pages[i], data);
+        read_page_flash(pages[i], (char *)output);
+        uint32_t address = 0x90000u + (uint32_t)pages[i] * 256u;
+        assert(page_writes[i] == address && page_reads[i] == address);
+    }
+    unsigned before = spi_transactions;
+    memset(output, 0x5a, sizeof(output));
+    write_page_flash(5888, data); write_page_flash(UINT16_MAX, data);
+    read_page_flash(5888, (char *)output); read_page_flash(UINT16_MAX, (char *)output);
+    assert(spi_transactions == before);
+    for (unsigned i = 0; i < sizeof(output); ++i) assert(output[i] == 0x5a);
+    erase_write_section_flash();
+    assert(sector_erase_count == 23);
+    for (unsigned i = 0; i < 23; ++i) assert(sector_erases[i] == 0x90000u + i * 0x10000u);
+}
+
 int main(void)
 {
     test_send_bounds_and_fifo_backpressure();
     test_security_register_bounds_and_full_write();
     test_signed_timers_and_counter_wrap();
+    test_v3_user_flash_page_bounds();
     puts("Library API fault injection: PASS");
     return 0;
 }

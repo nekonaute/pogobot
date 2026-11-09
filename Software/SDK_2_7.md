@@ -28,6 +28,10 @@ New functions spi.c :
 - write_page_flash          : Writes 256 bytes to a page in the user-writable section.
 - read_page_flash           : Reads 256 bytes to a page in the user-writable section.
 
+The current v3 page API extends this region to physical flash offsets `0x90000`
+through `0x1FFFFF` (1472 KiB, 5888 pages) and accepts a `uint16_t` page number.
+The original 64 KiB description above records the SDK 2.7 release behavior.
+
 ### Clear IR flags (prevents IR receiver saturation)
 
 This code snippet allows the user to clear IR RX interrupt flags manually.

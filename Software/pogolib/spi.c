@@ -425,47 +425,44 @@ void spiUnhold(void) {
 	spiEnd();
 }
 
-/* NEW PART : WRITE IN FLASH */
-/* Write authorized section in flash */
-/* writable by pages of 256 bytes */
-/* section size : 64kB */
-
-const int START_WRITE_SECTION = 0x290000;
-const int SIZE_WRITE_SECTION  = 0x10000;
+/* Keep the existing mapped-address symbols for callers that use them. */
+/* Raw SPI commands below use the physical offset after boot images and marker. */
+const int START_WRITE_SECTION = SPIFLASH_BASE + POGOBOT_USER_FLASH_START_OFFSET;
+const int SIZE_WRITE_SECTION  = POGOBOT_USER_FLASH_PAGE_COUNT * POGOBOT_USER_FLASH_PAGE_SIZE;
 const int END_WRITE_SECTION   = START_WRITE_SECTION + SIZE_WRITE_SECTION;
-const int PAGE_SIZE           = 256;
+const int PAGE_SIZE           = POGOBOT_USER_FLASH_PAGE_SIZE;
 
-/* 
-Erase the whole section (64 kB)
-Write 0xFF. 
-*/
+/* Erase all 23 64 KiB sectors before reusing the v3 user region. */
 void erase_write_section_flash(void) {
-	spiBeginErase64(START_WRITE_SECTION);
+	for (uint32_t addr = POGOBOT_USER_FLASH_START_OFFSET;
+	     addr < POGOBOT_USER_FLASH_START_OFFSET + SIZE_WRITE_SECTION;
+	     addr += 0x10000u)
+		spiBeginErase64(addr);
 }
 
-/* 
-Write 256 bytes .
-Args :
-  page : uint8_t : in 0-255 range : page to write in
-  data : pointer to array of data 
-*/
-void write_page_flash(uint8_t page, const void *data)
+/* A uint16_t can name more pages than are allocated; reject those IDs. */
+void write_page_flash(uint16_t page, const void *data)
 {
+	if (page >= POGOBOT_USER_FLASH_PAGE_COUNT) {
+		printf("write_page_flash: page %u out of range\n", (unsigned int)page);
+		return;
+	}
 	spiflash_bitbang_en_write(1);       // Enable bit-bang mode
-	spiBeginWrite(START_WRITE_SECTION + 256*page, data, PAGE_SIZE);
+	spiBeginWrite(POGOBOT_USER_FLASH_START_OFFSET +
+	              POGOBOT_USER_FLASH_PAGE_SIZE * (uint32_t)page, data, PAGE_SIZE);
 	wait_for_device_ready();
 	spiflash_bitbang_en_write(0);       // Enable memory-mapped mode
 }
 
-/* 
-Read 256 bytes.
-Args :
-  page : uint8_t : in 0-256 range : select page to write in
-  data : char* 
-*/
-void read_page_flash(uint8_t page, char *buf)
+/* Read only within the dedicated physical flash region. */
+void read_page_flash(uint16_t page, char *buf)
 {
-	int addr = START_WRITE_SECTION + 256*page;
+	if (page >= POGOBOT_USER_FLASH_PAGE_COUNT) {
+		printf("read_page_flash: page %u out of range\n", (unsigned int)page);
+		return;
+	}
+	uint32_t addr = POGOBOT_USER_FLASH_START_OFFSET +
+	                POGOBOT_USER_FLASH_PAGE_SIZE * (uint32_t)page;
 
 	spiflash_bitbang_en_write(1);       // Enable bit-bang mode
 	spiBegin();
@@ -474,7 +471,7 @@ void read_page_flash(uint8_t page, char *buf)
 	spi_single_tx(addr >> 8);
 	spi_single_tx(addr >> 0);
 	// No dummy byte
-	for(int i=0; i<256; i++) {
+	for (unsigned int i = 0; i < POGOBOT_USER_FLASH_PAGE_SIZE; i++) {
 		buf[i] = spi_single_rx();
 	}
 	spiEnd();

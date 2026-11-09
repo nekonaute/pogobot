@@ -1029,12 +1029,16 @@ void pogobot_timer_offset_origin_microseconds( time_reference_t *timer, int32_t 
  *
  * Those functions allow the user to store data in the flash memory.
  *
- * The section is 64kB long and is writable by pages of 256 bytes.
- * It starts at 0x290000 and is 0x10000 long.
+ * On v3 robots, the user section occupies physical flash offsets 0x90000
+ * through 0x1fffff: 5888 pages of 256 bytes (1472 KiB). Earlier flash holds
+ * gateware, firmware, and the upload validity marker.
 */
+#define POGOBOT_USER_FLASH_START_OFFSET 0x90000u
+#define POGOBOT_USER_FLASH_PAGE_SIZE 256u
+#define POGOBOT_USER_FLASH_PAGE_COUNT 5888u
 
 /** (erase_write_section_flash)
- * Erase the whole user writable section (64 kB).
+ * Erase the whole user writable section (1472 KiB, 23 64 KiB sectors).
  * It fills the section with 0xFF values.
  *
  * # Parameters
@@ -1049,25 +1053,25 @@ void erase_write_section_flash(void);
  * Writes 256 bytes on a page in the user writable section.
  *
  * # Parameters
- * - 'page' - page number
+ * - 'page' - page number, from 0 to 5887; other values are rejected.
  * - 'data' - pointer to an array containing data to write in the page.
  *
  * # Return 
  * - none
 **/
-void write_page_flash(uint8_t page, const void *data);
+void write_page_flash(uint16_t page, const void *data);
 
 /** (read_page_flash)
  * Reads 256 bytes on a page in the user writable section.
  *
  * # Parameters
- * - 'page' - page number
+ * - 'page' - page number, from 0 to 5887; other values are rejected.
  * - 'data' - pointer to an array to fill with flash page data.
  *
  * # Return 
  * - none
 **/
-void read_page_flash(uint8_t page, char *buf);
+void read_page_flash(uint16_t page, char *buf);
 
 /**
  * ## MAGNETOMETER API 
