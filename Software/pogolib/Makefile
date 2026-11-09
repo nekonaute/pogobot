@@ -26,8 +26,16 @@ OBJECTS += $(POGOLIB_BUILDDIR)/crt0.o
 
 all: $(POGOLIB_BUILDDIR)/libpogobot.a
 
-CFLAGS+=-ffat-lto-objects
-#CFLAGS+=-flto
+# Retain every API in the archive, with native code for non-LTO application links.
+# Only each final executable decides which functions survive garbage collection.
+LTO ?= 1
+CFLAGS += -ffunction-sections -fdata-sections -ffat-lto-objects
+ifeq ($(LTO),1)
+CFLAGS += -flto
+endif
+
+# Rebuild objects when the compiler options above change.
+$(OBJECTS): Makefile
 
 INCLUDES+=-I$(POGOBIOS_DIR) -I$(BIOS_DIRECTORY) -I$(POGOLIB_DIR)
 
@@ -35,9 +43,8 @@ INCLUDES+=-I$(POGOBIOS_DIR) -I$(BIOS_DIRECTORY) -I$(POGOLIB_DIR)
 -include $(OBJECTS:.o=.d)
 
 $(POGOLIB_BUILDDIR)/libpogobot.a: $(OBJECTS)
-	#$(AR) --plugin /home/fabien/prog/litex/riscv64-unknown-elf-gcc-8.3.0-2019.08.0-x86_64-linux-ubuntu14/libexec/gcc/riscv64-unknown-elf/8.3.0/liblto_plugin.so -rc $@ $(OBJECTS)
-	#$(AR) -rc $@ $(OBJECTS)
-	ar -rc $@ $(OBJECTS)
+	# The compiler's archiver records LTO symbols using its matching plugin.
+	$(AR) -rc $@ $(OBJECTS)
 $(info TARGET_PREFIX : $(TARGET_PREFIX))
 
 $(POGOLIB_BUILDDIR)/%.o: $(POGOBIOS_DIR)/%.c
