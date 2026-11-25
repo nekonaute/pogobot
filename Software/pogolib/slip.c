@@ -196,7 +196,8 @@ slip_decode_received_byte( slip_receive_state_s *slip, uint8_t byte )
         switch ( byte )
         {
         case SLIP_SPECIAL_BYTE_END:
-            if ( slip->size >= 2 )
+            // Four bytes are needed for the appended CRC before subtracting it.
+            if ( slip->size >= 4 )
             {
                 if ( slip->crc == 0 )
                 {

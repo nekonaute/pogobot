@@ -44,14 +44,18 @@ sdk: $(POGOLIB_BUILDDIR)/libpogobot.a
 	cp -r $(LIBBASE_DIRECTORY)/* $(BUILD_SDK_DIR)/tools/include/litex/soc/software/libbase
 	find $(BUILD_SDK_DIR)/tools/include/ -type f ! \( -name "*.h" -or -name "*.ld" \) -delete
 	find $(BUILD_SDK_DIR)/tools/include/ -type d -empty -delete
-	find $(SOC_DIRECTORY)/cores/cpu/* -type d ! -name "vexriscv" -exec rm -rf {} +
+	#find $(SOC_DIRECTORY)/cores/cpu/* -type d ! -name "vexriscv" -exec rm -rf {} +
+	# Keep only the VexRiscv headers in the packaged SDK.
+	find $(BUILD_SDK_DIR)/tools/include/litex/soc/cores/cpu -mindepth 1 -maxdepth 1 -type d ! -name vexriscv -exec rm -rf {} +
 	cp $(POGOLIB_DIR)/*.h $(BUILD_SDK_DIR)/includes
 	cp $(POGOBIOS_DIR)/linker.ld $(BUILD_SDK_DIR)/tools
 	cp ../litex_term.py $(BUILD_SDK_DIR)/tools
 	cp $(POGOLIB_BUILDDIR)/libpogobot.a $(BUILD_SDK_DIR)/libs
 	cp $(BUILD_POGO_DIR)/software/libcompiler_rt/libcompiler_rt.a $(BUILD_SDK_DIR)/libs
 	cp $(BUILD_POGO_DIR)/software/libc/libc.a $(BUILD_SDK_DIR)/libs
-	cp -r ../example $(BUILD_SDK_DIR)/examples
+	# Copy contents so repeated SDK generation does not nest examples/example.
+	mkdir -p $(BUILD_SDK_DIR)/examples
+	cp -r ../example/. $(BUILD_SDK_DIR)/examples/
 	find $(BUILD_SDK_DIR)/examples -maxdepth 1 -mindepth 1 -type d -exec sed -i 's/POGO_SDK=..\/..\/sdk\/build_sdk/POGO_SDK=..\/../g' {}/Makefile \;
 	find $(BUILD_SDK_DIR)/examples -maxdepth 1 -mindepth 1 -type d -exec sed -i 's/POGO_VAR=..*/POGO_VAR=$$(POGO_SDK_TOOLS)/g' {}/Makefile \;
 	make -C $(BUILD_SDK_DIR)/examples/ clean

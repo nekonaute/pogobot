@@ -28,15 +28,20 @@ pli_timer_sleep_stopwatch_init( void )
 }
 
 /* ******************************** ********************************
- * Helper conversion macros
+ * Time unit conversions
  * ******************************** ********************************/
 
-/* Since the result can vary covering the full 32bit range, we need a
- * 64bit operation. */
-#define microseconds_to_ticks( microseconds )                                  \
-    ( ( (uint64_t)microseconds * (uint64_t)CONFIG_CLOCK_FREQUENCY ) / 1000000L )
-#define ticks_to_microseconds( ticks )                                         \
-    ( ( (uint64_t)time_ticks * 1000000L ) / (uint64_t)CONFIG_CLOCK_FREQUENCY )
+/* Preserve negative offsets and elapsed times. Products fit in signed 64 bits
+ * at the supported clock rate; no floating-point arithmetic is needed. */
+static int64_t microseconds_to_ticks(int32_t microseconds)
+{
+    return (int64_t)microseconds * (int64_t)CONFIG_CLOCK_FREQUENCY / 1000000;
+}
+
+static int32_t ticks_to_microseconds(int32_t ticks)
+{
+    return (int64_t)ticks * 1000000 / (int64_t)CONFIG_CLOCK_FREQUENCY;
+}
 
 /* ******************************** ********************************
  * Stopwatch implementation
@@ -80,7 +85,7 @@ void
 pogobot_stopwatch_offset_origin_microseconds( time_reference_t *stopwatch,
                                               int32_t microseconds_offset )
 {
-    int32_t ticks_offset = microseconds_to_ticks( microseconds_offset );
+    uint32_t ticks_offset = (uint32_t)microseconds_to_ticks( microseconds_offset );
     stopwatch->hardware_value_at_time_origin -= ticks_offset;
 }
 
@@ -136,6 +141,6 @@ void
 pogobot_timer_offset_origin_microseconds( time_reference_t *timer,
                                           int32_t microseconds_offset )
 {
-    int32_t ticks_offset = microseconds_to_ticks( microseconds_offset );
+    uint32_t ticks_offset = (uint32_t)microseconds_to_ticks( microseconds_offset );
     timer->hardware_value_at_time_origin -= ticks_offset;
 }

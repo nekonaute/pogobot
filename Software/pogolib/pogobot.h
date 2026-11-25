@@ -488,6 +488,12 @@ uint32_t pogobot_infrared_sendShortMessage_omni( uint8_t *message, uint16_t mess
  */
 void pogobot_infrared_get_receiver_error_counter( slip_error_counter_s *error_counter, uint8_t ir_index );
 
+/** Number of complete IR messages discarded because the receive queue was full. */
+uint32_t pogobot_infrared_get_queue_drop_count( void );
+
+/** Number of CRC-valid IR messages rejected because their lengths were invalid. */
+uint32_t pogobot_infrared_get_malformed_count( void );
+
 /** (pogobot_infrared_reset_receiver_error_counter)
  * Reset all reveiver error counter
  *
@@ -1133,6 +1139,6 @@ uint8_t magn_init(void);
 // Returns :
 // - 1 if successfull else 0
 // *****
-uint8_t magn_select_odr(uint8_t odr)
+uint8_t magn_select_odr(uint8_t odr);
 
 #endif /* __POGOBOT_H__ */

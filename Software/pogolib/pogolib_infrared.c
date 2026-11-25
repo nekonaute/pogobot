@@ -49,6 +49,8 @@ const slip_send_descriptor_s slip_send_descriptor = {
 static message_t bufmem_mes[NUMEL];
 Messagefifo my_mes_fifo;
 Messagefifo *my_mes_fifo_p = &my_mes_fifo;
+static uint32_t queue_drop_count;
+static uint32_t malformed_message_count;
 
 /* ******************************** ******************************** */
 
@@ -59,6 +61,8 @@ pogobot_infrared_ll_init( void )
     _master_mute = 0;
 
     FifoBuffer_init( my_mes_fifo_p, NUMEL, message_t, bufmem_mes );
+    queue_drop_count = 0;
+    malformed_message_count = 0;
 
     slip_send_init( &slip_send_descriptor );
 
@@ -101,6 +105,18 @@ void
 pogobot_infrared_clear_message_queue( void )
 {
     FifoBuffer_flush( my_mes_fifo_p );
+}
+
+uint32_t
+pogobot_infrared_get_queue_drop_count( void )
+{
+    return queue_drop_count;
+}
+
+uint32_t
+pogobot_infrared_get_malformed_count( void )
+{
+    return malformed_message_count;
 }
 
 /**
@@ -225,6 +241,9 @@ pogobot_infrared_sendLongMessage_uniSpe( ir_direction dir,
                                          uint8_t *message,
                                          uint16_t message_size )
 {
+    // Reject oversized payloads before copying into the stack message.
+    if (message_size > MAX_PAYLOAD_SIZE_BYTES)
+        return 1;
 
     message_t m;
     m.header._emitting_power_list =
@@ -240,6 +259,8 @@ uint32_t
 pogobot_infrared_sendLongMessage_omniGen( uint8_t *message,
                                           uint16_t message_size )
 {
+    if (message_size > MAX_PAYLOAD_SIZE_BYTES)
+        return 1;
 
     message_t m;
     m.header._emitting_power_list =
@@ -255,6 +276,8 @@ uint32_t
 pogobot_infrared_sendLongMessage_omniSpe( uint8_t *message,
                                           uint16_t message_size )
 {
+    if (message_size > MAX_PAYLOAD_SIZE_BYTES)
+        return 1;
 
     int i = 0;
     int error = 0;
@@ -278,6 +301,8 @@ pogobot_infrared_sendShortMessage_uni( ir_direction dir,
                                        uint8_t *message,
                                        uint16_t message_size )
 {
+    if (message_size > MAX_PAYLOAD_SIZE_BYTES)
+        return 1;
 
     short_message_t m;
     m.header.payload_length = message_size;
@@ -290,6 +315,8 @@ uint32_t
 pogobot_infrared_sendShortMessage_omni( uint8_t *message,
                                         uint16_t message_size )
 {
+    if (message_size > MAX_PAYLOAD_SIZE_BYTES)
+        return 1;
 
     short_message_t m;
     m.header.payload_length = message_size;
@@ -328,9 +355,10 @@ write_byte_via_a_four_byte_word_channel( uint8_t byte )
         // time, less access to wishbone, better performance.
         //ir_tx_tx_write( send );
         
-        while( ir_tx_txfull_read() == 1 );  // Wait until FIFO is not full
         for(int i=0; i<sizeof(uint32_t); i++)
         {
+            // One free FIFO slot permits one byte, not the whole four-byte batch.
+            while (ir_tx_txfull_read() == 1);
             ir_tx_tx_write(((uint8_t *)&send)[i]);     // Direct
         }
         ir_tx_conf_tx_trig_write(1);
@@ -352,6 +380,12 @@ void
 on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
                                         void *tag )
 {
+    // The decoder has removed the CRC-32; two trailing bytes encode payload size.
+    if (size < sizeof(message_short_header_t) + 2) {
+        malformed_message_count++;
+        return;
+    }
+
     // double verification of payload size
     // the double is placed inside the 2 last bytes of the received data 
     uint16_t d_payload_size = 0;
@@ -373,8 +407,9 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
 
         //printf("payload_size = %d\n", m.header.payload_length);
 
-        if (ms->header.payload_length <= MAX_PAYLOAD_SIZE_BYTES && ms->header.payload_length == d_payload_size)
-        {
+        if (ms->header.payload_length <= MAX_PAYLOAD_SIZE_BYTES &&
+            ms->header.payload_length == d_payload_size &&
+            size == sizeof(message_short_header_t) + ms->header.payload_length + 2) {
             //printf("double verif ok \n");
             memcpy( m.payload, ms->payload, m.header.payload_length);
 
@@ -382,16 +417,32 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
             if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
             {
                 FifoBuffer_write( my_mes_fifo_p, m );
+            } else {
+                queue_drop_count++;
             }
+        } else {
+            malformed_message_count++;
         }
 
     } else {
+        if (size < sizeof(message_header_t) + 2) {
+            malformed_message_count++;
+            return;
+        }
+
         message_t *m = (message_t *)( data );
         m->header._receiver_ir_index = (int)tag;
         // printf("new message from %d \n", m->header._receiver_ir_index);
 
-        // filter mesage from type ir_t_cmd (command message)
-        if ( m->header._packet_type == ir_t_cmd)
+        if (m->header.payload_length > MAX_PAYLOAD_SIZE_BYTES ||
+            m->header.payload_length != d_payload_size ||
+            size != sizeof(message_header_t) + m->header.payload_length + 2) {
+            malformed_message_count++;
+            return;
+        }
+
+        // A command may change robot state only after its full payload is validated.
+        if ( m->header._packet_type == ir_t_cmd && m->header.payload_length >= 8)
         {
             //if stop message reboot on pogobios
             int ret = strncmp("DEADBEEF", (char*)(m->payload), 8);
@@ -419,14 +470,12 @@ on_complete_valid_slip_packet_received( uint8_t *data, uint32_t size,
 
         //printf("payload_size = %d\n", m->header.payload_length);
 
-        if (m->header.payload_length == d_payload_size)
+        /* when a message arrives, it is put into the FIFO */
+        if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
         {
-            //printf("double verif ok \n");
-            /* when a message arrives, it is put into the FIFO */
-            if ( !FifoBuffer_is_full( my_mes_fifo_p ) )
-            {
-                FifoBuffer_write( my_mes_fifo_p, *m );
-            }
+            FifoBuffer_write( my_mes_fifo_p, *m );
+        } else {
+            queue_drop_count++;
         }
         
     }

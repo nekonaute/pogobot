@@ -4,12 +4,18 @@ From: ubuntu:20.04
 
 %labels
     Author leo.cazenille@gmail.com
-    Version 0.1.0
+    Version 0.2.0
+
+%files
+    litex_version.txt /litex_version.txt
 
 %environment
     export LC_ALL=C.UTF-8
     export LANG=C.UTF-8
-    export PATH=$PATH:/pogobot/dependencies/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin
+    # Do not let packages from the host user's bind-mounted home shadow the
+    # toolchain installed system-wide in the image.
+    export PYTHONNOUSERSITE=1
+    export PATH=$PATH:/pogobot/dependencies/litex/riscv64-unknown-elf-gcc-10.1.0-2020.08.2-x86_64-linux-ubuntu14/bin
 
 %post
     export DEBIAN_FRONTEND=noninteractive
@@ -25,13 +31,33 @@ From: ubuntu:20.04
     cd /pogobot
     mkdir -p dependencies
 
-    # gcc and toolchain
-    cd dependencies
-    git clone https://github.com/enjoy-digital/litex.git
-    cd litex
-    git checkout 3ab7eaa5f7afb4d432b5641d7761813d3274d25f
+    # LiteX, Migen, LiteScope, CPU data and software data. Keep the directory
+    # layout used by Software/readme.md: dependencies/litex is a container for
+    # the ecosystem repositories, including a nested litex repository.
+    mkdir -p /pogobot/dependencies/litex
+    cd /pogobot/dependencies/litex
+    wget -O litex_setup.py https://raw.githubusercontent.com/enjoy-digital/litex/3ab7eaa5f7afb4d432b5641d7761813d3274d25f/litex_setup.py
     chmod +x litex_setup.py
+
+    # --dev prevents this pinned setup script from replacing itself with the
+    # latest upstream version. In this LiteX revision it also selects SSH clone
+    # URLs, so rewrite those URLs to HTTPS for unattended container builds.
+    git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+    # Clone the standard LiteX ecosystem (including Migen and LiteScope), then
+    # move every repository to the revision recorded next to this definition.
+    ./litex_setup.py --dev --init --config standard
+    cd /pogobot/dependencies/litex
+    awk '{ if(!system("test -d " $1)) {system("git -C " $1 " checkout " $3)}}' /litex_version.txt
+
+    # Install into the image's system site-packages. Do not use --user here:
+    # Apptainer bind-mounts the invoking user's home at runtime, hiding root's
+    # user site-packages and causing imports such as `import migen` to fail.
+    cd /pogobot/dependencies/litex
+    ./litex_setup.py --dev --install --config standard
     ./litex_setup.py --dev --gcc riscv
+
+    python3 -c "import migen, litex, litescope"
 
     # icestorm
     cd /pogobot/dependencies
@@ -64,43 +90,8 @@ From: ubuntu:20.04
     echo "Nothing there yet..."
 
 %apprun install_dep
-#    git clone https://github.com/nekonaute/pogobot.git
-#    cd pogobot
-    mkdir -p dependencies
-
-    cd dependencies
-    git clone https://github.com/enjoy-digital/litex.git
-    cd litex
-    git checkout 3ab7eaa5f7afb4d432b5641d7761813d3274d25f
-    chmod +x litex_setup.py
-
-    ./litex_setup.py --dev init
-    ./litex_setup.py --dev install
-    ln -s ../migen
-    cd ..
-    cat ../litex_version.txt | awk '{ if(!system("test -d " $1)) {system("git -C " $1 " checkout " $3)}}'
-
-    # icestorm
-    git clone https://github.com/cliffordwolf/icestorm.git icestorm
-    cd icestorm
-    git checkout 2bc541743ada3542c6da36a50e66303b9cbd2059
-    make -j${NPROC} 
-    cd ..
-
-    # yosys
-    git clone https://github.com/YosysHQ/yosys
-    cd yosys
-    git checkout tags/yosys-0.18
-    make -j${NPROC}
-    cd ..
-
-    # nextpnr
-    git clone https://github.com/YosysHQ/nextpnr
-    cd nextpnr
-    git checkout 8d063d38b148b1e7095a032ffc9cf957c2407f32
-    cmake . -DARCH=ice40
-    make -j${NPROC}
-    cd ..
+    echo "Build dependencies are already installed in the container image."
+    python3 -c "import migen, litex, litescope"
 
 
 %apprun compile_sdk
@@ -112,8 +103,9 @@ From: ubuntu:20.04
 
 
 %apprun test_install
-    python3 -m litex.soc.integration.soc_core && echo "LITEX: SUCCESS"
-    echo "from migen import *" | python3 && echo "MIGEN: SUCCESS"
+    python3 -c "import litex" && echo "LITEX: SUCCESS"
+    python3 -c "import migen" && echo "MIGEN: SUCCESS"
+    python3 -c "import litescope" && echo "LITESCOPE: SUCCESS"
     echo | yosys > /dev/null && echo "YOSYS: SUCCESS"
     icebox_diff > /dev/null && echo "ICESTORM: SUCCESS"
     nextpnr-ice40 --version 2> /dev/null && echo "NEXTPNR: SUCCESS"
@@ -128,3 +120,9 @@ From: ubuntu:20.04
 %apprun bash
     exec bash
 
+%test
+    python3 -c "import migen, litex, litescope"
+    command -v yosys
+    command -v icebox_diff
+    command -v nextpnr-ice40
+    command -v riscv64-unknown-elf-gcc

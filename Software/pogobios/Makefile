@@ -46,13 +46,21 @@ else
 	OBJECTS += $(PB_BD)/readline.o
 endif
 
-#CFLAGS+=-flto
-CFLAGS+=-ffat-lto-objects
+# LTO removes unused code across files; separate sections also help non-LTO links.
+# Use LTO=0 with a clean rebuild to compare against section collection alone.
+LTO ?= 1
+CFLAGS += -ffunction-sections -fdata-sections -ffat-lto-objects
+ifeq ($(LTO),1)
+CFLAGS += -flto
+endif
 
 all: $(PB_BD)/pogobios.bin
 
+# Compiler-option changes in this Makefile must rebuild existing objects.
+$(OBJECTS): Makefile
+
 pogolib.a:
-	cd $(POGOLIB_DIR) && $(MAKE)
+	$(MAKE) -C $(POGOLIB_DIR) TARGET=$(TARGET) LTO=$(LTO)
 
 INCLUDES+=-Iinclude -I$(POGOBIOS_DIR) -I$(BIOS_DIRECTORY) -I$(POGOLIB_DIR)
 
@@ -70,6 +78,7 @@ $(PB_BD)/pogobios.elf: $(OBJECTS) pogolib.a
 		$(OBJECTS) \
 		-Wl,--whole-archive \
 		-Wl,--gc-sections \
+		-Wl,-Map,$(@:.elf=.map) \
 	   	-L$(BUILD_DIR)/software/libcompiler_rt -lcompiler_rt \
 		-L$(BUILD_DIR)/software/libc -lc \
 		-L$(BUILD_DIR)/software/pogolib -lpogobot
