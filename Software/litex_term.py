@@ -20,6 +20,16 @@ import argparse
 import json
 import socket
 
+from ir_upload_v2 import (image_frames, abort_payload, transfer_id_for_image,
+                          CMD_START, CMD_END,
+                          CMD_ABORT, CAPABILITY_BANNER, DEFAULT_COPIES,
+                          DEFAULT_FEC_COPIES, MAX_COPIES, CHUNK_SIZE,
+                          FEC_DATA_COUNT, FEC_PARITY_COUNT)
+
+
+class IRUploadCancelled(Exception):
+    """The console requested cancellation between versioned frames."""
+
 # Console ------------------------------------------------------------------------------------------
 
 if sys.platform == "win32":
@@ -285,7 +295,7 @@ def crc16(l):
 # LiteXTerm ----------------------------------------------------------------------------------------
 
 class LiteXTerm:
-    def __init__(self, serial_boot, kernel_image, kernel_address, json_images, safe, debug, delay, IR):
+    def __init__(self, serial_boot, kernel_image, kernel_address, json_images, safe, debug, delay, IR, ir_v2=False):
         self.serial_boot = serial_boot
         assert not (kernel_image is not None and json_images is not None)
         self.mem_regions = {}
@@ -300,11 +310,16 @@ class LiteXTerm:
             self.boot_address = self.mem_regions[list(self.mem_regions.keys())[-1]]
             f.close()
 
+        if ir_v2 and len(self.mem_regions) != 1:
+            raise ValueError("--ir-v2 requires exactly one --kernel or --images entry")
+
         self.reader_alive = False
         self.writer_alive = False
 
         self.prompt_detect_buffer = bytes(len(sfl_prompt_req))
         self.magic_detect_buffer  = bytes(len(sfl_magic_req))
+        self.ir_v2_detect_buffer = bytes(len(CAPABILITY_BANNER))
+        self.ir_v2_advertised = False
 
         self.console = Console()
 
@@ -319,6 +334,28 @@ class LiteXTerm:
         self.debug = debug
         self.delay = delay
         self.IR    = IR
+        self.ir_v2_requested = ir_v2
+        self.ir_v2 = ir_v2
+        self.ir_v2_uploading = False
+        self.ir_v2_cancel_requested = False
+        self.ir_fec = False
+        # The matching remote uses the existing v2 announcement; this switch
+        # permits parity-free comparison trials without changing Makefiles.
+        fec_setting = os.environ.get("POGOBOT_IR_FEC", "1")
+        if fec_setting not in ("0", "1"):
+            raise ValueError("POGOBOT_IR_FEC must be 0 or 1")
+        self.ir_fec_enabled = fec_setting == "1"
+        # The example Makefiles remain unchanged; the environment selects how
+        # many complete broadcasts the remote receives for each IR upload.
+        copies_setting = os.environ.get("POGOBOT_IR_COPIES")
+        try:
+            self.ir_v2_copies_override = (int(copies_setting)
+                                          if copies_setting is not None else None)
+        except ValueError as exc:
+            raise ValueError("POGOBOT_IR_COPIES must be an integer from 1 to 5") from exc
+        if self.ir_v2_copies_override is not None and not 1 <= self.ir_v2_copies_override <= MAX_COPIES:
+            raise ValueError("POGOBOT_IR_COPIES must be an integer from 1 to 5")
+        self.ir_v2_copies = self.ir_v2_copies_override or DEFAULT_COPIES
 
     def open(self, port, baudrate):
         if hasattr(self, "port"):
@@ -518,8 +555,96 @@ class LiteXTerm:
         f.close()
         return length
 
+    def upload_v2(self, filename, address):
+        # A single in-memory image gives START and final CRC identical bytes.
+        with open(filename, "rb") as source:
+            image = source.read()
+        chunks = (len(image) + CHUNK_SIZE - 1) // CHUNK_SIZE
+        parity_frames = ((chunks + FEC_DATA_COUNT - 1) // FEC_DATA_COUNT
+                         * FEC_PARITY_COUNT if self.ir_fec else 0)
+        # Count START and both END frames so 100% means the remote acknowledged
+        # the complete pass, including its finalization request.
+        frames_per_pass = chunks + parity_frames + 3
+        # A later rc_flash_robot command must identify the same image so the
+        # robot can keep chunks already verified during an earlier attempt.
+        transfer_id = transfer_id_for_image(image)
+        print(f"[LXTERM] IR v2 transfer {transfer_id:08x}: {filename}, "
+              f"{len(image)} bytes, {self.ir_v2_copies} passes, "
+              f"16+4 parity {'on' if self.ir_fec else 'off'}")
+        print("[LXTERM] Press Q to cancel this IR upload; robots keep verified chunks for retry.")
+        started = False
+        last_percent = -1
+        self.ir_v2_cancel_requested = False
+        self.ir_v2_uploading = True
+        try:
+            for pass_number in range(1, self.ir_v2_copies + 1):
+                pass_start = time.monotonic()
+                acknowledged = 0
+                last_percent = -1
+
+                def show_progress():
+                    nonlocal last_percent
+                    percent = 100 * acknowledged // frames_per_pass
+                    if percent != last_percent:
+                        filled = 20 * percent // 100
+                        sys.stdout.write(f"\r[LXTERM] Remote pass {pass_number}/{self.ir_v2_copies} "
+                                         f"|{'=' * filled}>{' ' * (20 - filled)}| {percent}%")
+                        sys.stdout.flush()
+                        last_percent = percent
+
+                show_progress()
+                # START, all DATA, and END are repeated with one transfer ID;
+                # receivers keep accepted chunks and skip duplicate writes.
+                for command, payload in image_frames(image, address, transfer_id,
+                                                     fec=self.ir_fec):
+                    if self.ir_v2_cancel_requested:
+                        raise IRUploadCancelled()
+                    frame = SFLFrame()
+                    frame.cmd, frame.payload = command, payload
+                    if not self.send_frame(frame):
+                        raise IOError("remote rejected IR v2 frame")
+                    acknowledged += 1
+                    show_progress()
+                    if command == CMD_START:
+                        started = True
+                    if command == CMD_END:
+                        completion_frame = frame
+                # A second END gives a receiver another chance to finalize if
+                # the first completion message was lost over infrared.
+                if self.ir_v2_cancel_requested:
+                    raise IRUploadCancelled()
+                if not self.send_frame(completion_frame):
+                    raise IOError("remote rejected repeated IR v2 END frame")
+                acknowledged += 1
+                show_progress()
+                print()
+                elapsed = time.monotonic() - pass_start
+                print(f"[LXTERM] Remote acknowledged pass {pass_number}/{self.ir_v2_copies} "
+                      f"in {elapsed:.1f}s; robot completion unconfirmed.")
+        except IRUploadCancelled:
+            if 0 <= last_percent < 100:
+                print()
+            if started:
+                abort = SFLFrame()
+                abort.cmd, abort.payload = CMD_ABORT, abort_payload(transfer_id)
+                self.send_frame(abort)
+            print("[LXTERM] IR v2 upload cancelled.")
+            return False
+        except Exception:
+            if 0 <= last_percent < 100:
+                print()
+            if started:
+                abort = SFLFrame()
+                abort.cmd, abort.payload = CMD_ABORT, abort_payload(transfer_id)
+                self.send_frame(abort)
+            raise
+        finally:
+            self.ir_v2_uploading = False
+        print("[LXTERM] All passes acknowledged by remote; check each robot's status.")
+        return len(image)
+
     def boot(self):
-        print("[LXTERM] Booting the device.")
+        print("[LXTERM] Closing remote transfer." if self.ir_v2 else "[LXTERM] Booting the device.")
         frame = SFLFrame()
         frame.cmd = sfl_cmd_jump
         frame.payload = int(self.boot_address, 16).to_bytes(4, "big")
@@ -543,12 +668,32 @@ class LiteXTerm:
         else:
             return False
 
+    def detect_ir_v2(self, data):
+        if len(data):
+            self.ir_v2_detect_buffer = self.ir_v2_detect_buffer[1:] + data
+            if self.ir_v2_detect_buffer == CAPABILITY_BANNER:
+                self.ir_v2_advertised = True
+
     def answer_magic(self):
         print("[LXTERM] Received firmware download request from the device.")
+        # The matching remote advertises v2 before SFL magic; direct cable
+        # boots continue to use the legacy transfer.
+        self.ir_v2 = self.ir_v2_requested or (self.ir_v2_advertised and len(self.mem_regions) == 1)
+        self.ir_fec = self.ir_v2 and self.ir_v2_advertised and self.ir_fec_enabled
+        self.ir_v2_copies = (self.ir_v2_copies_override if self.ir_v2_copies_override is not None
+                             else DEFAULT_FEC_COPIES if self.ir_fec else DEFAULT_COPIES)
+        self.ir_v2_advertised = False
+        if self.ir_v2 and not self.ir_v2_requested:
+            print("[LXTERM] Remote advertised versioned IR upload.")
         if(len(self.mem_regions)):
             self.port.write(sfl_magic_ack)
         for filename, base in self.mem_regions.items():
-            self.upload(filename, int(base, 16))
+            if self.ir_v2:
+                if self.upload_v2(filename, int(base, 16)) is False:
+                    # ABORT already closed the remote command; do not send JUMP.
+                    return
+            else:
+                self.upload(filename, int(base, 16))
         self.boot()
         print("[LXTERM] Done.")
 
@@ -561,6 +706,7 @@ class LiteXTerm:
                 if len(self.mem_regions):
                     if self.serial_boot and self.detect_prompt(c):
                         self.answer_prompt()
+                    self.detect_ir_v2(c)
                     if self.detect_magic(c):
                         self.answer_magic()
 
@@ -583,7 +729,11 @@ class LiteXTerm:
         try:
             while self.writer_alive:
                 b = self.console.getkey()
-                if b == b"\x03":
+                if self.ir_v2_uploading and b in (b"q", b"Q"):
+                    # Q belongs to the local uploader while a transfer is
+                    # active; forwarding it would corrupt the remote SFL stream.
+                    self.ir_v2_cancel_requested = True
+                elif b == b"\x03":
                     self.stop()
                 elif b == b"\n":
                     self.port.write(b"\x0a")
@@ -630,6 +780,7 @@ def _get_args():
     parser.add_argument("--serial-boot",  default=False, action='store_true', help="Automatically initiate serial boot")
     parser.add_argument("--debug",        default=False, action='store_true', help="Hexdump serial boot frames sent")
     parser.add_argument("--IR",           default=False, action='store_true', help="Set timings for Infrared")
+    parser.add_argument("--ir-v2",        default=False, action='store_true', help="Use versioned IR image verification through a matching remote and robot")
     parser.add_argument("--delay",        default="0",                        help="Delay between each frame during serialboot")
     parser.add_argument("--kernel",       default=None,                       help="Kernel image")
     parser.add_argument("--kernel-adr",   default="0x40000000",               help="Kernel address")
@@ -649,7 +800,7 @@ def main():
     args = _get_args()
     delay = None if args.delay is None else float(args.delay)
     IR=args.IR
-    term = LiteXTerm(args.serial_boot, args.kernel, args.kernel_adr, args.images, args.safe, args.debug, delay, IR)
+    term = LiteXTerm(args.serial_boot, args.kernel, args.kernel_adr, args.images, args.safe, args.debug, delay, IR, args.ir_v2)
 
     if sys.platform == "win32":
         if args.port in ["bridge", "jtag"]:

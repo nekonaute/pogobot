@@ -12,12 +12,20 @@
 
 #define FLASH_OK_OFFSET 0x88000
 #define USRPRG_CRC      0x80000
+/* Both validity strings fit in ten bytes. Verify erasure before changing code. */
+#define FLASH_ERASED_MARKER "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff"
+#ifndef POGOBIOS_FLASH_READ
+#define POGOBIOS_FLASH_READ(offset) \
+    (*(volatile const uint8_t *)(uintptr_t)(SPIFLASH_BASE + (offset)))
+#endif
 //#define SLF_CMD_CHECK   0x03
 
 void __attribute__((noreturn)) boot(unsigned long r1, unsigned long r2, unsigned long r3, unsigned long addr);
 int serialboot(void);
 void update_led_status(void);
 uint8_t check_flash_state(const char * data, uint32_t address_in_flash);
+/* Internal Pogobios helper; succeeds only after the validity sector is erased. */
+uint8_t flash_invalidate_user_image(void);
 uint32_t get_uint32(unsigned char* data);
 int flash_robot(void);
 #endif /* __BOOT_H */
