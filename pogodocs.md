@@ -969,17 +969,18 @@ offsets the origin of the timer by the specified number of microseconds.
 
 Those functions allow the user to store data in the flash memory.
 
-The section is 64kB long and is writable by pages of 256 bytes.
-It starts at 0x290000 and is 0x10000 long.
+On v3 robots, the user section occupies physical flash offsets 0x90000
+through 0x1fffff: 5888 pages of 256 bytes (1472 KiB). Earlier flash holds
+gateware, firmware, and the upload validity marker.
 
 <a name="line-1030"></a><a name="erase_write_section_flash"></a>
 ### :arrow_right: erase_write_section_flash
 
 ```cpp
-void erase_write_section_flash(void) /* line 1040 */
+void erase_write_section_flash(void) /* line 1050 */
 ```
 
-Erase the whole user writable section (64 kB).
+Erase the whole user writable section (1472 KiB, 23 64 KiB sectors).
 It fills the section with 0xFF values.
 
 #### Parameters
@@ -992,13 +993,13 @@ It fills the section with 0xFF values.
 ### :arrow_right: write_page_flash
 
 ```cpp
-void write_page_flash(uint8_t page, const void *data) /* line 1052 */
+void write_page_flash(uint16_t page, const void *data) /* line 1062 */
 ```
 
 Writes 256 bytes on a page in the user writable section.
 
 #### Parameters
-- 'page' - page number
+- 'page' - page number, from 0 to 5887; other values are rejected.
 - 'data' - pointer to an array containing data to write in the page.
 
 #### Return
@@ -1008,13 +1009,13 @@ Writes 256 bytes on a page in the user writable section.
 ### :arrow_right: read_page_flash
 
 ```cpp
-void read_page_flash(uint8_t page, char *buf) /* line 1064 */
+void read_page_flash(uint16_t page, char *buf) /* line 1074 */
 ```
 
 Reads 256 bytes on a page in the user writable section.
 
 #### Parameters
-- 'page' - page number
+- 'page' - page number, from 0 to 5887; other values are rejected.
 - 'data' - pointer to an array to fill with flash page data.
 
 #### Return

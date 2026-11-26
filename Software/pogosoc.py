@@ -44,6 +44,8 @@ from math import ceil
 kB = 1024
 mB = 1024*kB
 
+ROM_LINKER_SIZE = 96*kB
+
 class GPIO(Module, AutoCSR):
     def __init__(self):
         self.gpo = CSRStorage(3, fields=[
@@ -169,7 +171,7 @@ class BaseSoC(SoCCore, AutoCSR):
         # Add ROM linker region --------------------------------------------------------------------
         self.bus.add_region("rom", SoCRegion(
             origin = self.bus.regions["spiflash"].origin + bios_flash_offset,
-            size   = 64*kB,
+            size   = ROM_LINKER_SIZE,
             linker = True)
         )
         self.cpu.set_reset_address(self.bus.regions["rom"].origin)
@@ -536,7 +538,7 @@ def flash(firmware, target=None, bootloader=False, flashsize=0, spiflash_base=0)
         else:
             image.write(b)
     # Copy bios 0x00020000
-    for i in range(0x00000000, 0x00010000):
+    for i in range(ROM_LINKER_SIZE):
         b = ice40_firmware.read(1)
         if not b:
             image.write(0xff.to_bytes(1, "big"))
