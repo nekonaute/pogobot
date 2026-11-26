@@ -34,6 +34,7 @@
 #define SFL_CMD_ABORT 0
 #define ir_t_cmd 1
 #define ir_t_flash 2
+#define ir_t_user 16
 #define IR_UPLOAD_FLASH_READ(offset) flash_bytes[offset]
 #define POGOBIOS_FLASH_READ(offset) flash_bytes[offset]
 #define SERIAL_BOOT_RAM_WRITE(address, data, length) memcpy(ram_bytes + (address), data, length)
@@ -91,6 +92,7 @@ void ir_rx0_ev_enable_write(unsigned int value);
 unsigned int irq_getie(void);
 unsigned int irq_getmask(void);
 void irq_setmask(unsigned int value);
+uint16_t pogobot_helper_getid(void);
 
 #include "../pogolib/ir_uart.c"
 #include "../pogolib/slip.c"
@@ -111,6 +113,9 @@ static uint32_t message_release_us;
 static unsigned int sector_erases[SPIFLASH_SIZE / SPIFLASH_SECTOR_SIZE];
 static unsigned int chunk_writes[SPIFLASH_SIZE / 64];
 static uint32_t failed_program_address = UINT32_MAX;
+static uint32_t failed_erase_address = UINT32_MAX;
+static uint16_t device_id = 1u;
+static unsigned all_programs, all_erase4;
 static uint32_t clock_us;
 static int marker_erase_fails;
 static uint8_t serial_input[0x40000], serial_output[8192];
@@ -149,9 +154,29 @@ uint16_t crc16(const unsigned char *data, unsigned int length)
 int spiBeginErase4(uint32_t address)
 {
     CHECK(address + 4096 <= SPIFLASH_SIZE);
+    if (address == failed_erase_address) return -1;
+    ++all_erase4;
     if (!marker_erase_fails)
         memset(&flash_bytes[address], 0xff, 4096);
     return 0;
+}
+
+/* Canonical PFFS uses the same strict NOR device as firmware reception. */
+uint16_t pogobot_helper_getid(void) { return device_id; }
+void read_page_flash(uint16_t page, char *out) {
+    CHECK(page < 5888u);
+    memcpy(out, flash_bytes + 0x90000u + (uint32_t)page * 256u, 256u);
+}
+void write_page_flash(uint16_t page, const void *in) {
+    ++all_programs;
+    CHECK(page < 5888u);
+    uint32_t address = 0x90000u + (uint32_t)page * 256u;
+    for (unsigned i = 0; i < 256u; ++i)
+        if (address + i != failed_program_address)
+            flash_bytes[address + i] &= ((const uint8_t *)in)[i];
+}
+void erase_write_section_flash(void) {
+    memset(flash_bytes + 0x90000u, 0xff, sizeof(flash_bytes) - 0x90000u);
 }
 
 void erase_flash_sector(uint32_t address)
@@ -164,6 +189,7 @@ void erase_flash_sector(uint32_t address)
 
 void write_to_flash(uint32_t address, unsigned char *data, uint32_t length)
 {
+    ++all_programs;
     CHECK(address + length <= SPIFLASH_SIZE);
     for (uint32_t i = 0; i < length; i++)
         if (address + i != failed_program_address)
@@ -248,14 +274,17 @@ static void reset_device(void)
     memset(flash_bytes, 0xff, sizeof(flash_bytes));
     memset(sector_erases, 0, sizeof(sector_erases));
     memset(chunk_writes, 0, sizeof(chunk_writes));
+    memset(&upload_stats, 0, sizeof(upload_stats));
     reset_messages();
     message_release_us = 0;
     clock_us = 0;
     failed_program_address = UINT32_MAX;
+    all_programs = all_erase4 = 0u;
     marker_erase_fails = release_marker_failure_on_error = 0;
     serial_count = serial_read = serial_written = 0;
     memset(ram_bytes, 0, sizeof(ram_bytes));
-    memset(&v2_upload, 0, sizeof(v2_upload));
+    ir_boot_reset_v2_upload();
+    failed_erase_address = UINT32_MAX;
     led_r = led_g = led_b = blink_fast = 0;
     ir_uart_init();
 }
@@ -665,7 +694,7 @@ static void test_serial_invalidates_ir_cache(void)
     append_v2_end(id);
     ir_boot_loop();
     CHECK(v2_upload.complete && upload_stats.accepted == 2);
-    CHECK(v2_flash_crc32(0x60000u, length) == generated_image_crc(length));
+    CHECK(ir_flash_crc32(0x60000u, length) == generated_image_crc(length));
 }
 
 static void test_serial_cross_sector_and_marker_retry(void)

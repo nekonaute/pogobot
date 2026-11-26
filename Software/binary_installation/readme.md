@@ -47,3 +47,10 @@ On the robot, execute:
 ```
 serialboot
 ```
+
+
+To package builds from source, set `Software/pogolib/release.h`, build the
+bootloader, normal robot and remote variants, then run
+`tools/create_new_version.sh -v <version>`. The packager checks the version and
+all five binaries before creating a directory, and records SHA-256 checksums.
+Installer templates use physical flash offsets and propagate programmer errors.

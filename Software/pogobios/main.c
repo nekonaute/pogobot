@@ -28,6 +28,9 @@
 #include <spiflash.h>
 
 #include <pogobot.h>
+#include "pffs.h"
+#include "ir_file.h"
+#include "console_input.h"
 
 #define QUOTE(str) #str
 #define EXPAND_AND_QUOTE(str) QUOTE(str)
@@ -61,6 +64,7 @@ int main(void) {
     extern uint64_t unique_id, serial_number;
 
     pogobot_init(); // Needed for printf() (interrupts), slip, ...
+    bios_pffs_init(); /* Never formats flash; filesystem lookup is lazy. */
 
     printf("\n");
     printf("\e[1m     ____                   _           _         \e[0m\n");
@@ -120,7 +124,6 @@ int main(void) {
     uint8_t wheelpos = 0;
 
 #ifndef REMOCON
-    uint8_t i;
     static const char str_magic[] = IR_MAGIC_REQ;
     //standby timer
     time_reference_t my_standby_timer;
@@ -144,8 +147,12 @@ int main(void) {
 
     // main loop
     while(1) {
+        bios_pffs_service();
+        if (bios_pffs_input_reset()) printf("\n%s", POGOPROMPT);
 
 #ifndef REMOCON
+        /* Background diagnostics and sleep cannot interrupt a file session. */
+        if (!bios_pffs_busy()) {
         // standby control
         if (standby_status > 0)
         {
@@ -214,6 +221,7 @@ int main(void) {
         } else {
             if( debug_mode == 0 ) rgb_blink(); // Blink when not debugging 
         }
+        }
         
         
 #endif
@@ -228,10 +236,13 @@ int main(void) {
 			color_wheel(wheelpos);
 			if (buffer[0] != 0) {
 				printf("\n");
-				nb_params = get_param(buffer, &command, params);
-				cmd = command_dispatcher(command, nb_params, params);
+				nb_params = bios_console_parse(buffer, &command, params);
+				cmd = bios_console_dispatch(command, nb_params, params, true);
 				if (cmd) {
-                    update_led_status();
+                    /* load_run owns its failure LED; marker colors would
+                     * hide a missing/corrupt file behind an older image. */
+                    if (!bios_pffs_busy() && strcmp(cmd->name, "load_run") != 0)
+                        update_led_status();
                 } else {
                     printf("Command not found\n");
                 }
@@ -248,31 +259,44 @@ int main(void) {
             while ( pogobot_infrared_message_available() ) {
                 message_t msg;
                 pogobot_infrared_recover_next_message( &msg );
-                // A valid v2 START also enters upload mode if the remote's
-                // earlier ir_flash command was lost over infrared.
-                if (ir_boot_try_v2_start(&msg))
-                    continue;
-                for( i=0; i<strlen(str_magic); i++) {
-                    if ( i <= msg.header.payload_length ) {
-                        if(msg.payload[i] != str_magic[i]) break;
-                    }
+                /* A CRC-checked START enters reception directly. Pending IR
+                 * files allow their matching START to resume after timeout;
+                 * other filesystem sessions defer all incoming uploads. */
+                if ((!bios_pffs_busy() || ir_file_busy()) &&
+                    ir_boot_try_v2_start(&msg)) continue;
+                if (bios_pffs_busy()) continue;
+                /* Late ENDs and data for a refused file are protocol traffic,
+                 * not application text to dump into the interactive console. */
+                if (msg.header._packet_type == ir_t_user && msg.header.payload_length >= 4u) {
+                    struct sfl_frame *f = (struct sfl_frame *)msg.payload;
+                    if (f->cmd >= IR_FILE_START && f->cmd <= IR_FILE_PARITY &&
+                        f->payload_length == msg.header.payload_length - 4u &&
+                        check_crc(f)) continue;
                 }
-                if( i != (strlen(str_magic)) ) { // Not a recognized special header, print msg
+                if (msg.header.payload_length < strlen(str_magic) ||
+                    memcmp(msg.payload, str_magic, strlen(str_magic)) != 0) {
                     printf("Message received : Destination on IR %d, sender %d on IR %d, length %d ",
                             msg.header._receiver_ir_index,
                             msg.header._sender_id, msg.header._sender_ir_index,
                             msg.header.payload_length);
-                    for( i=0; i< msg.header.payload_length; i++) {
-                        printf("%c", isprint(msg.payload[i])?msg.payload[i]:'_');
+                    for(uint16_t byte=0; byte<msg.header.payload_length; byte++) {
+                        printf("%c", isprint(msg.payload[byte])?msg.payload[byte]:'_');
                     }
                     printf("\n");
                 } else {
-                    nb_params = get_param((char*)(msg.payload+strlen(str_magic)), &command, params);
+                    /* Tokenize a terminated, bounded copy; IR payloads do not
+                     * have to contain the UART parser's trailing NUL. */
+                    size_t prefix = strlen(str_magic);
+                    size_t length = msg.header.payload_length - prefix;
+                    if (length >= sizeof(buffer)) continue;
+                    memcpy(buffer, msg.payload + prefix, length);
+                    buffer[length] = '\0';
+                    nb_params = bios_console_parse(buffer, &command, params);
                     printf("Command : %s\n", command);
-                    cmd = command_dispatcher(command, nb_params, params);
-                    if (cmd) {
+                    cmd = bios_console_dispatch(command, nb_params, params, false);
+                    if (cmd && strcmp(cmd->name, "load_run") != 0) {
                         update_led_status();
-                    } else {
+                    } else if (!cmd) {
                         printf("Command not found\n");
                     }
                 }

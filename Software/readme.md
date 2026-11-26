@@ -361,6 +361,8 @@ This table shows addresses in flash memory. The flash memory itself is mapped in
 | 0x20000          | Size of pogobios (usually <64KB) | 0x20000   | Pogobios         |
 | 0x40000          | 0x1969a                          | 0x20000   | User gateware    |
 | 0x60000          | Size of user code                | 0x20000   | User software    |
+| 0x80000          | Reserved; validity marker at 0x88000 | 0x10000 | Upload state, excluded from user erases |
+| 0x90000          | 5888 pages of 256 bytes          | 0x170000  | User-writable data on v3, through 0x1FFFFF |
 
 
 ### <a name='install-on-linux-distributions-other-than-ubuntu-by-using-singularity-containers'></a>Install on Linux distributions other than Ubuntu by using Singularity Containers
@@ -479,6 +481,195 @@ Note : Egg-link : fill used by setuptools when a Python package is installed and
 
 Suppress egg-info files using (on Ubuntu):
 rm -f ~/.local/lib/python*/site-packages/*-link .
+## PFFS file commands
+
+Pogobios on v3 robots includes PFFS v4 file management at both `Pogoboot>`
+and `Pogobot>`. The remote console also supports these UART commands. Run
+`pffs` for filesystem help, or `help` for the complete BIOS command list.
+The filesystem is never formatted automatically by booting or by these commands.
+File management commands act on the UART-connected device. Connecting to a Pogoshower manages
+the controller's own files; robot file transfers require the robot's UART and
+are not forwarded over IR.
+
+| Command | Action |
+| --- | --- |
+| `ls` | List files and validate catalog, ordinary-file and log CRCs. |
+| `df` | Show allocated sectors, free capacity and file-ID usage. |
+| `stat <id\|name>` | Display metadata and log committed length. |
+| `cat <id\|name>` | Hex-dump an ordinary file; display a log with binary bytes escaped. |
+| `load <id\|name>` | On robots, install a raw controller binary in the application slot; then use `run`. |
+| `load_run <name>` | On robots, install and start a named controller; accepts UART or IR, red on failure. |
+| `touch <id> <name\|-> [bytes]` | Create an ordinary file; default length is zero. |
+| `write <id\|name> <offset> <hexbytes>` | Edit a one-page ordinary file, extending its length if needed. |
+| `mv <id\|name> <new_name\|->` | Change the optional name without changing the ID. |
+| `rm <id\|name>` | Remove the catalog entry. |
+| `format YES` | Explicitly delete all PFFS files, including calibration files. |
+
+For example, on an already formatted filesystem:
+
+```text
+touch 42 notes
+write notes 0 4869
+cat notes
+stat 42
+```
+
+IDs are 1–80; names are case-sensitive and up to 32 bytes without spaces.
+The existing 5888-page user-flash region is unchanged. PFFS reserves 64 KiB
+at physical `0x90000–0x9FFFF` for catalogs and uses the following 1408 KiB
+at `0xA0000–0x1FFFFF` for file extents. Raw page writes by an application can
+still overwrite this filesystem; applications sharing it must use the same
+PFFS v4 layout. The SDK exposes the file and log APIs through `<pogobot.h>`
+(or `<pffs/flash_file.h>` and `<pffs/flash_log.h>`) and links them from
+`libpogobot.a`. Pogobios uses that same implementation; applications still
+link their own executable and do not call into BIOS runtime services.
+Existing `pogo-utils/flash_file.h` and `flash_log.h` includes forward to the SDK.
+See [library integration](pogolib/pffs/README.md) for backend and formatting policy.
+
+Compaction is a maintenance operation available as `defrag YES` in the
+`pogo-utils/examples/flash_file` application. Pogobios omits that command;
+the shared library retains its defragmentation API. After deletions, a large
+file may need compaction to obtain a contiguous extent even when `df` reports
+enough total free space.
+
+Close the serial terminal before using the host transfer tool, then run these
+commands from `Software/`. The robot must be at its Pogobios prompt:
+
+```sh
+python3 pffs_transfer.py --port /dev/ttyUSB0 upload record.bin --id 10 --name record
+python3 pffs_transfer.py --port /dev/ttyUSB0 download record received.bin
+```
+
+The same commands work with `pogo-utils/tools/pffs_transfer.py`. Raw upload
+is the default and catalogs retain the exact file length. `--envelope` adds
+an optional PFT1 header. Replacing an existing file requires `--replace`, a
+matching ID/name/type and an unchanged allocated page count. The protocol uses
+48-byte chunks with CRCs, acknowledgements and retries. A disconnected session
+expires after 30 seconds, even with an unfinished console line. The BIOS
+accepts up to 159 input characters and rejects an overlong command in full.
+
+UART transfers own the filesystem until completion or timeout.
+Other console commands are rejected during those transfers; IR messages are
+drained without entering a firmware upload. Start or retry `rc_flash_robot`
+after the file operation finishes. File management commands themselves are UART-only.
+Console history and completion remain available in the full terminal build.
+
+To start a controller already stored on neighboring robots, the remote command
+`rc_load_run <name>` repeats the bounded robot boot action `load_run <name>`
+every 200 ms until a key is pressed. It resolves an exact filename, verifies
+and installs the controller, and reboots only on success. A missing/invalid
+file or failed install shows a red LED/idle blink; it never starts an older
+image as a fallback. Receiving robots must be idle at the BIOS prompt. The
+remote needs no copy of the file. See the [remote guide](../readme-irRemote.md#start-a-controller-stored-in-pffs).
+
+To keep several controllers in PFFS and select one later, first upload the
+SDK-built `firmware.bin` as an ordinary raw file. From `Software/`, with the
+robot at its BIOS prompt and the serial terminal closed:
+
+```sh
+python3 pffs_transfer.py --port /dev/ttyUSB0 upload path/to/firmware.bin --id 20 --name controller_a
+```
+
+Reconnect the terminal and select the controller by name or numeric ID:
+
+```text
+load controller_a
+run
+```
+
+`load` behaves like a completed `serialboot`: it installs persistently at
+physical `0x60000` (CPU address `0x260000`) and leaves the prompt available.
+It does not reboot automatically. The saved PFFS file remains intact. Return to
+`Pogoboot>` before selecting another controller: `run 0` works from a BIOS
+console, or power-cycle a running application. Use raw `.bin` images linked for
+that address; ELF files, PFT1 envelopes
+and logs are rejected. Files must be 4–131,072 bytes and fit the existing
+128 KiB application slot; this does not enlarge the SDK linker or SRAM limits.
+The command is UART-only on robots and is absent from the remote console.
+
+The loader validates the stored file before erasing the current image, then
+checks programmed bytes and the whole installed CRC before committing the
+validity marker. It does not erase gateware, the bootloader or PFFS. Installation
+replaces the previous controller: interruption after erasure can leave a partial
+image, which must be installed again from `Pogoboot>`. The saved source remains
+available for that retry. Loading is synchronous and blocks other console work
+until it succeeds or reports a flash error.
+
+### Broadcast a saved file over IR
+
+Store a named ordinary file in the sender's PFFS, then use one of these commands
+at its BIOS prompt (the optional pass count defaults to one):
+
+```text
+ir_send_file controller_a 3
+```
+
+On a Pogowall/Pogoshower controller, use the remote variant:
+
+```text
+rc_send_file controller_a 3 --replace
+```
+
+The sender reads its own flash, so the PC is not involved in transmission. Both
+variants broadcast through all IR emitters at full power, using 64-byte chunks,
+16+4 Reed–Solomon parity and four-group interleaving. Only one transmitter should
+broadcast at a time. `Q` or Escape stops it; progress describes sent chunks,
+and the final message explicitly leaves receiver completion unconfirmed. There
+are no acknowledgements to the sender and no automatic multi-hop relaying.
+
+Receiving robots need this updated BIOS and an idle `Pogoboot>` or `Pogobot>`
+console. A valid START enters reception automatically. The file keeps its name,
+payload format and exact length; each receiver chooses a free local ID. Files
+may contain 0..1,441,792 bytes (1,408 KiB). Names must be 1..32 printable ASCII
+bytes without spaces. Append-log containers are unsupported; ordinary files,
+including raw controllers and optional PFT1 envelopes, retain their bytes.
+
+By default, an existing different file with the same name is refused. An already
+verified identical copy is skipped. `--replace` permits overwriting that name,
+preserves its ID and requires the same payload format and allocated page count.
+The exact byte length may change within that allocation. A missing name is
+created even with `--replace`. Replacement is in place and an interruption may
+damage the old file; it is not rollback or a resizing operation.
+
+A new file remains unpublished until all chunks, programmed bytes and the final
+CRC are verified. Lost chunks can be repaired by later passes or by repeating
+the same command/flags while the receiver stays powered. STARTs are bound to
+sender, content CRC, length, name, format and replacement policy. Transfer IDs
+are stable hashes of that metadata. Receiver logs report success and the local
+ID, or an incomplete/error state. A successful file transfer leaves firmware
+and boot-validity markers unchanged. Execute `load <name>` and `run` separately
+to install a received controller.
+
+An incomplete reception retains its extent and RAM bitmap after timeout or
+network cancellation. Until it completes, the receiver locks other file/flash
+commands to protect that unpublished allocation. After reception stops, discard
+it explicitly at the receiver's UART console with:
+
+```text
+ir_file_abort
+```
+
+This releases the reservation, and does not undo replacement writes. Reboot also
+loses the RAM bitmap/reservation; an unpublished new file will be received from
+the beginning. A different pending file needs an abort first. No radio command
+implicitly formats a missing, corrupt or older catalog.
+
+The sender allows 500 ms per allocated 4 KiB sector plus 3 s for preparation,
+with repeated START keepalives; DATA/parity pacing is 200 ms per frame. Thus
+large files can take a long time. These conservative defaults and IR range,
+loss recovery and stack margins still need hardware measurement.
+
+Catalog changes and replacements are not power-loss atomic. Keep power
+connected and back up important data before those operations. The maintenance
+application's overlapping defrag moves have the same limitation.
+`format YES` invalidates catalogs rather than securely wiping payload bytes.
+Corrupt or older catalogs are rejected without automatic migration or erasure.
+
+Host verification runs `python3 tests/run_pffs_test.py` from `Software/`.
+It uses production code with strict NOR flash and UART test doubles, fatal
+address/undefined-behavior sanitizers and LTO. Hardware upload timing and peak
+stack use need validation on a robot.
+
 
 ## Build and library verification
 

@@ -28,7 +28,8 @@
 #define LITESDCARD_CMDS	7
 #define LITESATA_CMDS	8
 #define POGO_CMDS	    9
-#define NB_OF_GROUPS   10
+#define PFFS_CMDS       10
+#define NB_OF_GROUPS   11
 
 typedef void (*cmd_handler)(int nb_params, char **params);
 

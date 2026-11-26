@@ -35,6 +35,7 @@ A remote can't execute the command "run" and the command "serialboot" has a diff
 Once started different new commands are avaible :
 
 - rc_start : start the user code on the robot (continious).
+- `rc_load_run <name>`: repeatedly ask robots to install and start that named PFFS controller; red LED on failure.
 - rc_stop  : stop the user code and restart inside the pogobot bios (continious).
 - rc_erase : erase the user code on the robot (continious).
 - rc_send_bios_cmd <cmd> <args> : send the pogobios command by IR (once). 
@@ -49,6 +50,30 @@ Reboot the robot. The robots blink slowly green if a program is available. (if i
 The command "rc_flash_robot" send to the robots a special command to switch to listen mode. Robots blink blue rapidily. <br>
 When the programmation is done, the robots blink green slowly. <br>
 If the robots blink orange, the programmation is partiel. Change the distance or angle of the remote and start again the "rc_flash_robot" command.
+
+### Start a controller stored in PFFS
+
+With the updated BIOS on both remote and receiving robots, use:
+
+```text
+rc_load_run controller_a
+```
+
+Like `rc_start`, this sends a command every 200 ms until a key is pressed.
+The file must already be stored on each receiving robot; the remote does not
+need a copy. Robots must be waiting at `Pogoboot>` or `Pogobot>`. Each resolves
+the exact name, verifies and installs the raw controller binary, then reboots
+to the user image. Numeric labels are treated as names, not file IDs.
+Names must be 1..32 printable ASCII bytes without spaces.
+
+A missing file, incompatible controller, CRC failure or installation failure
+leaves the robot in its BIOS with a red LED/idle blink. It never falls back to
+starting the previously installed program. Another BIOS command can restore
+the ordinary marker-based LED status. Active UART transfers or pending IR file
+reception block this request; finish or abort those first. There are no robot
+acknowledgements. A robot can also execute `load_run <name>` locally over UART;
+the existing `load <id|name>` command still installs without starting and is
+UART-only. This feature still needs hardware validation.
 
 ### Reliable IR firmware upload
 

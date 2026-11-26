@@ -48,9 +48,14 @@ sdk: $(POGOLIB_BUILDDIR)/libpogobot.a
 	# Keep only the VexRiscv headers in the packaged SDK.
 	find $(BUILD_SDK_DIR)/tools/include/litex/soc/cores/cpu -mindepth 1 -maxdepth 1 -type d ! -name vexriscv -exec rm -rf {} +
 	cp $(POGOLIB_DIR)/*.h $(BUILD_SDK_DIR)/includes
+	# Native simulators compile the same core; hardware apps link libpogobot.a.
+	mkdir -p $(BUILD_SDK_DIR)/includes/pffs $(BUILD_SDK_DIR)/src
+	cp $(POGOLIB_DIR)/pffs/flash_file.h $(POGOLIB_DIR)/pffs/flash_log.h $(BUILD_SDK_DIR)/includes/pffs/
+	cp -r $(POGOLIB_DIR)/pffs $(BUILD_SDK_DIR)/src/
 	cp $(POGOBIOS_DIR)/linker.ld $(BUILD_SDK_DIR)/tools
 	cp ../litex_term.py $(BUILD_SDK_DIR)/tools
 	cp ../ir_upload_v2.py $(BUILD_SDK_DIR)/tools
+	cp ../pffs_transfer.py $(BUILD_SDK_DIR)/tools
 	cp $(POGOLIB_BUILDDIR)/libpogobot.a $(BUILD_SDK_DIR)/libs
 	cp $(BUILD_POGO_DIR)/software/libcompiler_rt/libcompiler_rt.a $(BUILD_SDK_DIR)/libs
 	cp $(BUILD_POGO_DIR)/software/libc/libc.a $(BUILD_SDK_DIR)/libs
